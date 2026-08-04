@@ -1,0 +1,42 @@
+services:
+  web:
+    build:
+      context: .
+      target: app
+    command: python backend/manage.py runserver 0.0.0.0:8000
+    environment: &app_environment
+      NFX_PROCESS: web
+      NFX_PROFILE: development
+      NFX_SECRET_KEY: ${NFX_SECRET_KEY:?NFX_SECRET_KEY must be set outside version control}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-nfx_inov}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-nfx_inov}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET:-nfx-documentos}
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on: &app_dependencies
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+  worker:
+    build:
+      context: .
+      target: app
+    command: python backend/manage.py worker
+    environment:
+      <<: *app_environment
+      NFX_PROCESS: worker
+    depends_on: *app_dependencies
+  scheduler:
+    build:
+      context: .
+      target: app
+    command: python backend/manage.py scheduler
+    environment:
+      <<: *app_environment
+      NFX_PROCESS: scheduler
+    depends_on: *app_dependencies
