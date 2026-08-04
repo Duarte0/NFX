@@ -1,15 +1,16 @@
-# Graph Report - /workspace  (2026-08-04)
+# Graph Report - workspace  (2026-08-04)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 93 files · ~45,395 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 682 nodes · 722 edges · 77 communities (55 shown, 22 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.61)
+- 757 nodes · 901 edges · 76 communities (54 shown, 22 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 40 edges (avg confidence: 0.54)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a418e580`
+- Built from commit: `65e82d37`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -47,7 +48,7 @@
 - Dashboard e saúde operacional
 - Exclusão definitiva controlada
 - Runtime interno e HTTPS
-- 19. Jornadas principais
+- ArtifactStorageService
 - Renderização de DANFE e DANFSe
 - Backup e restauração comprovada
 - Hardening, ameaças e testes de falha
@@ -55,7 +56,7 @@
 - Índice de implementação das specs
 - graphify reference: query, path, explain
 - Fundação P0
-- 7. Usuários e papéis
+- Migration
 - 10. Arquitetura de componentes
 - graphify reference: add a URL and watch a folder
 - graphify reference: commit hook and native CLAUDE.md integration
@@ -81,36 +82,35 @@
 - retention/__init__.py
 - extraction-spec.md
 - main.tsx
-- 12. Autenticação e autorização
 
 ## God Nodes (most connected - your core abstractions)
 1. `Arquitetura técnica — NFX INOV` - 47 edges
 2. `PRD — NFX INOV` - 28 edges
 3. `Plano de implementação — NFX INOV` - 26 edges
-4. `load_settings()` - 20 edges
-5. `compilerOptions` - 16 edges
-6. `schema_status()` - 14 edges
-7. `9. Requisitos funcionais e regras de negócio` - 13 edges
-8. `What You Must Do When Invoked` - 12 edges
-9. `10. Fases detalhadas e backlog estável` - 11 edges
-10. `dependencies_from_environment()` - 11 edges
+4. `ArtifactStorageService` - 21 edges
+5. `MemoryObjectStore` - 21 edges
+6. `Artifact` - 20 edges
+7. `load_settings()` - 20 edges
+8. `compilerOptions` - 16 edges
+9. `dependencies_from_environment()` - 14 edges
+10. `schema_status()` - 14 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `test_dependency_check_is_injectable_and_reports_only_service_names()` --calls--> `ServiceDependencies`  [EXTRACTED]
-  tests/unit/test_dependencies.py → backend/nfx/infrastructure/dependencies.py
-- `test_schema_incompatibility_makes_readiness_fail_without_details()` --calls--> `ServiceDependencies`  [EXTRACTED]
-  tests/unit/test_dependencies.py → backend/nfx/infrastructure/dependencies.py
-- `test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads()` --calls--> `redact()`  [EXTRACTED]
-  tests/unit/test_safe_configuration.py → backend/nfx/infrastructure/redaction.py
-- `test_postgres_and_minio_are_reachable_in_an_isolated_run()` --calls--> `schema_status()`  [EXTRACTED]
-  tests/integration/test_services.py → backend/nfx/infrastructure/schema.py
-- `test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue()` --calls--> `Migration`  [INFERRED]
-  tests/integration/test_migrations.py → backend/nfx/migrations/0001_schema_contract.py
+- `test_minio_adapter_writes_and_verifies_synthetic_bytes()` --calls--> `dependencies_from_environment()`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/infrastructure/dependencies.py
+- `MemoryObjectStore` --uses--> `ArtifactState`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
+- `MemoryObjectStore` --uses--> `Artifact`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
+- `MemoryObjectStore` --uses--> `ArtifactNotReadable`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/storage.py
+- `MemoryObjectStore` --uses--> `ArtifactTooLarge`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/storage.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (77 total, 22 thin omitted)
+## Communities (76 total, 22 thin omitted)
 
 ### Community 0 - "Arquitetura técnica — NFX INOV"
 Cohesion: 0.04
@@ -125,8 +125,8 @@ Cohesion: 0.05
 Nodes (37): 10. Fases detalhadas e backlog estável, 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs (+29 more)
 
 ### Community 3 - "schema_status"
-Cohesion: 0.10
-Nodes (25): _migration_names(), MigrationOutcome, RuntimeError, Schema compatibility and serialized migration support. This module deliberately…, Raised when the database cannot safely serve this application version., Compare the installed NFX migration graph with its persisted history., Run Django migrations once at a time and report only safe metadata., schema_status() (+17 more)
+Cohesion: 0.11
+Nodes (23): _migration_names(), MigrationOutcome, RuntimeError, Schema compatibility and serialized migration support. This module deliberately…, Raised when the database cannot safely serve this application version., Compare the installed NFX migration graph with its persisted history., Run Django migrations once at a time and report only safe metadata., schema_status() (+15 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.06
@@ -145,8 +145,8 @@ Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
 ### Community 8 - "PRD — NFX INOV"
-Cohesion: 0.08
-Nodes (24): 10. Ciclo de vida de empresa, 11. Ciclo de vida de certificado, 13. Retenção e exclusão, 14. Auditoria, 15. Backup e recuperação, 16. Requisitos operacionais e observabilidade, 17. Requisitos não funcionais, 18. Estados de erro, vazio, bloqueio e degradação (+16 more)
+Cohesion: 0.05
+Nodes (39): 10. Ciclo de vida de empresa, 11. Ciclo de vida de certificado, 12. Autenticação e autorização, 13. Retenção e exclusão, 14. Auditoria, 15. Backup e recuperação, 16. Requisitos operacionais e observabilidade, 17. Requisitos não funcionais (+31 more)
 
 ### Community 9 - "compilerOptions"
 Cohesion: 0.09
@@ -174,11 +174,11 @@ Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Contratos, comportament
 
 ### Community 15 - "Armazenamento de objetos e integridade"
 Cohesion: 0.20
-Nodes (9): Aceite e DoD, Armazenamento de objetos e integridade, Baseline, escopo e não escopo, Estado e schema Proposed, Interfaces e responsabilidades, Metadados, Propósito e resultado, Segurança, observabilidade e falhas (+1 more)
+Nodes (9): Aceite e DoD, Armazenamento de objetos e integridade, Baseline, escopo e não escopo, Decisões de implementação, Interfaces e responsabilidades implementadas, Metadados, Migração, testes e evidência, Propósito e resultado (+1 more)
 
 ### Community 16 - "Persistência relacional e migrações"
-Cohesion: 0.20
-Nodes (9): Aceite e DoD, Baseline e escopo, Contratos e operação, Decisões e Proposed, Falha, recuperação e compatibilidade, Metadados, Persistência relacional e migrações, Propósito e resultado (+1 more)
+Cohesion: 0.17
+Nodes (11): Aceite e DoD, Baseline e escopo, Contratos e operação, Decisões de implementação, Decisões e Proposed, Falha, recuperação e compatibilidade, Implementação e evidências, Metadados (+3 more)
 
 ### Community 17 - "Certificados A1 e criptografia por envelope"
 Cohesion: 0.20
@@ -244,9 +244,9 @@ Nodes (8): Aceite e DoD, Baseline, escopo e gate local, Estado e contrato Propos
 Cohesion: 0.22
 Nodes (8): Aceite e DoD, Baseline, escopo e não escopo, Decisões e configuração Proposed, Metadados, Propósito e resultado, Runtime interno e HTTPS, Segurança, observabilidade e falhas, Testes, rollback e evidência
 
-### Community 33 - "19. Jornadas principais"
-Cohesion: 0.25
-Nodes (8): 19. Jornadas principais, J1 — Primeiro acesso, J2 — Cadastro e coleta inicial, J3 — Operação recorrente, J4 — Consulta fiscal, J5 — Exportação em lote, J6 — Administração e auditoria, J7 — Exclusão após retenção
+### Community 33 - "ArtifactStorageService"
+Cohesion: 0.07
+Nodes (45): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+37 more)
 
 ### Community 34 - "Renderização de DANFE e DANFSe"
 Cohesion: 0.25
@@ -273,12 +273,8 @@ Cohesion: 0.33
 Nodes (5): For /graphify explain, For /graphify path, graphify reference: query, path, explain, Step 0 — Constrained query expansion (REQUIRED before traversal), Step 1 — Traversal
 
 ### Community 40 - "Fundação P0"
-Cohesion: 0.33
-Nodes (5): Configuração segura e isolamento fiscal (P0-02/P0-04), Contratos dos comandos, Decisões Proposed adotadas, Fundação P0, Scope boundary
-
-### Community 41 - "7. Usuários e papéis"
-Cohesion: 0.40
-Nodes (5): 7.1 Administrador, 7.2 Operador, 7.3 Visualizador, 7.4 Regra global, 7. Usuários e papéis
+Cohesion: 0.29
+Nodes (6): Configuração segura e isolamento fiscal (P0-02/P0-04), Contratos dos comandos, Decisões Proposed adotadas, Fundação P0, Persistência e migrações (P1-01), Scope boundary
 
 ### Community 42 - "10. Arquitetura de componentes"
 Cohesion: 0.50
@@ -297,24 +293,24 @@ Cohesion: 0.50
 Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphify reference: incremental update and cluster-only
 
 ## Knowledge Gaps
-- **403 isolated node(s):** `Usage`, `What graphify is for`, `Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)`, `Step 1 - Ensure graphify is installed`, `Step 2 - Detect files` (+398 more)
+- **408 isolated node(s):** `Meta`, `Migration`, `name`, `private`, `version` (+403 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `dependencies_from_environment()` connect `dependencies.py` to `ArtifactStorageService`, `load_settings`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Why does `load_settings()` connect `load_settings` to `dependencies.py`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `schema_status()` connect `schema_status` to `dependencies.py`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `Arquitetura técnica — NFX INOV` connect `Arquitetura técnica — NFX INOV` to `10. Arquitetura de componentes`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **What connects `Usage`, `What graphify is for`, `Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)` to the rest of the system?**
-  _403 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Are the 3 inferred relationships involving `ArtifactStorageService` (e.g. with `Artifact` and `ArtifactState`) actually correct?**
+  _`ArtifactStorageService` has 3 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 8 inferred relationships involving `MemoryObjectStore` (e.g. with `Artifact` and `ArtifactState`) actually correct?**
+  _`MemoryObjectStore` has 8 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Meta`, `Migration`, `name` to the rest of the system?**
+  _408 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Arquitetura técnica — NFX INOV` be split into smaller, more focused modules?**
   _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
-- **Should `load_settings` be split into smaller, more focused modules?**
-  _Cohesion score 0.10853658536585366 - nodes in this community are weakly interconnected._
-- **Should `Plano de implementação — NFX INOV` be split into smaller, more focused modules?**
-  _Cohesion score 0.05263157894736842 - nodes in this community are weakly interconnected._

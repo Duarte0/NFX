@@ -134,7 +134,7 @@ flowchart LR
 | P1-03 | RBAC server-side para HTTP, jobs e downloads | P1-02 | SEC-005, NFR-006, regras de papéis | Matriz de permissão e acesso direto negado | Falhar fechado |
 | P1-04 | Administração de usuários: lista, criação, edição, papel, reset, ativação/desativação, revogação e UI | P1-02, P1-03, P1-05 | FR-AUTH-002, FR-AUTH-003, FR-AUTH-004, BR-AUTH-002, SEC-004 | Browser, RBAC, sessões revogadas e auditoria | Usuário desativado não autentica |
 | P1-05 | Auditoria append-only, motivos, hash chain e redaction | P1-01, P1-03 | AUD-001, AUD-002, AUD-003, AUD-004, AUD-005, AUD-006, AUD-007, AUD-008, AUD-009, AUD-010, SEC-007 | Imutabilidade, redaction e eventos críticos | Eventos nunca apagados |
-| P1-06 | Abstração MinIO, hash e estado pendente/finalizado | P0-03, P1-01 | ADR-004, BR-INT-003, BR-INT-005 | Integração, objeto ausente e reconciliação | Não finalizar referência |
+| P1-06 | Abstração MinIO, SHA-256 e estados pendente/finalizado/ausente/divergente — **implementado** (`nfx.artifacts.models`, `nfx.artifacts.storage`, `nfx.0002_artifact`) | P0-03, P1-01 | ADR-004, BR-INT-003, BR-INT-005 | `tests/integration/test_artifact_storage.py`: MinIO Compose, hash/tamanho, falhas, ausência/divergência, reconciliação, retry e concorrência | Não finalizar referência |
 | P1-07 | Login, navegação por papel e shell desktop | P1-02, P1-03 | NFR-001, NFR-002, AC-023 | Browser e localização | UI não é controle de segurança |
 
 **Specs futuras:** p1-persistence-and-migrations.md; p1-object-storage-and-integrity.md; p1-authentication-sessions-and-rbac.md; p1-user-administration.md; p1-audit-foundation.md.
@@ -283,6 +283,8 @@ Invariantes obrigatórias: cursor/NSU pós-durabilidade; zero perda silenciosa; 
 P1 introduz tooling, baseline, banco de teste e estratégia de upgrade/forward recovery. Toda migração inclui constraints, índices necessários, teste de instalação limpa, teste de upgrade e recuperação segura. Mudança irreversível exige backup e correção progressiva, não rollback destrutivo.
 
 **Decisão Proposed aceita em P1-01:** o baseline físico é `nfx.0001_schema_contract`, um único metadado operacional sem entidades de MVP; sua chave singleton, constraints e índice são verificados em integração. `nfx_migrate` serializa com advisory lock PostgreSQL e `schema_status`/readiness recusam schema NFX ausente ou adiantado incompatível sem divulgar credenciais. As decisões de ID/timestamps das entidades de domínio ficam com as respectivas specs.
+
+**Decisões Proposed aceitas em P1-06:** `Artifact` usa UUID interno, chave física opaca `artifacts/<uuid>/v1`, SHA-256 registrado por objeto, limite inicial de 50 MiB e spool de 1 MiB. PostgreSQL tem uma constraint parcial de uma referência finalizada por chave lógica; retry com bytes idênticos é idempotente e bytes distintos conflitam. A reconciliação só sinaliza pendências, ausências, divergências e órfãos — não remove objetos nem corrige hash.
 
 P4 introduz identidade, hash, cursores, transações e unicidade antes de qualquer adaptador. Não há migração legada. O bootstrap cria somente o primeiro Administrador por segredo externo e dados mínimos de política.
 
