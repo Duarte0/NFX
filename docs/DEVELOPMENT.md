@@ -32,6 +32,27 @@ non-zero and says only which dependency is unavailable; it never prints connecti
 credentials. `/health/live` is independent of services and `/health/ready` returns 503 until both
 dependencies are reachable.
 
+## Persistência e migrações (P1-01)
+
+PostgreSQL é a autoridade relacional. O único schema desta fase é
+`nfx_schema_contract`, metadado operacional sem estado de domínio. Sua chave singleton e os
+constraints impedem mais de um contrato; o índice de `updated_at` sustenta a consulta operacional
+de verificação mais recente. Entidades fiscais, usuários, jobs, empresas e certificados continuam
+fora desta migration e serão adicionados exclusivamente por suas specs proprietárias.
+
+Para uma instalação vazia, inicie os serviços de desenvolvimento e execute
+`python backend/manage.py nfx_migrate`. O comando obtém um advisory lock PostgreSQL, aplica o
+grafo Django e informa apenas nomes de migrations e resultado. `python backend/manage.py
+schema_status` mostra a versão NFX esperada e falha quando ela está ausente ou quando o banco está
+adiantado para uma versão incompatível. `python backend/manage.py showmigrations nfx` mostra o
+grafo e pendências. A readiness também falha com resposta genérica quando o schema não for
+compatível; não inclui URL ou senha.
+
+Cada migration futura deve declarar dependências, constraints e índices que atendam uma consulta
+identificada, além de testes de instalação limpa, upgrade, falha e recovery. Mudanças aditivas são
+preferidas até P9. Mudanças irreversíveis exigem backup/restore aplicável e uma migration corretiva
+ou backfill reiniciável; rollback nunca deve apagar dados para “consertar” schema.
+
 ## Scope boundary
 
 ## Configuração segura e isolamento fiscal (P0-02/P0-04)

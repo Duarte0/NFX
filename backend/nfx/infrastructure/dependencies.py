@@ -8,6 +8,7 @@ import boto3
 import psycopg
 
 from nfx.infrastructure.configuration import load_settings
+from nfx.infrastructure.schema import schema_status
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,7 @@ class ServiceDependencies:
     minio_bucket: str
     postgres_probe: Callable[[str], None]
     object_probe: Callable[[str, str, str, str], None]
+    schema_probe: Callable[[], None]
 
     def check(self) -> DependencyCheck:
         unavailable: list[str] = []
@@ -32,6 +34,11 @@ class ServiceDependencies:
             self.postgres_probe(self.database_url)
         except Exception:
             unavailable.append("postgres")
+        else:
+            try:
+                self.schema_probe()
+            except Exception:
+                unavailable.append("schema")
         try:
             self.object_probe(
                 self.minio_endpoint,
@@ -61,6 +68,10 @@ def _object_probe(endpoint: str, access_key: str, secret_key: str, bucket: str) 
     client.head_bucket(Bucket=bucket)
 
 
+def _schema_probe() -> None:
+    schema_status().require_compatible()
+
+
 def dependencies_from_environment() -> ServiceDependencies:
     settings = load_settings()
     return ServiceDependencies(
@@ -71,4 +82,5 @@ def dependencies_from_environment() -> ServiceDependencies:
         minio_bucket=os.getenv("MINIO_BUCKET", "nfx-documentos"),
         postgres_probe=_postgres_probe,
         object_probe=_object_probe,
+        schema_probe=_schema_probe,
     )

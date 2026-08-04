@@ -129,7 +129,7 @@ flowchart LR
 
 | ID | Resultado e mudanças | Dependências | PRD/arquitetura | Testes e evidência | Falha/rollback |
 |---|---|---|---|---|---|
-| P1-01 | Ferramenta de migração, baseline relacional, constraints, índices e forward recovery | P0-03 | ADR-003, arquitetura 15/16 | Migração limpa, upgrade e banco de teste | Backup e migração corretiva |
+| P1-01 | Ferramenta de migração, baseline relacional, constraints, índices e forward recovery — **implementado** (`nfx_schema_contract`, `SchemaMigrator`, `nfx_migrate`, `schema_status`) | P0-03 | ADR-003, arquitetura 15/16 | Instalação/rerun, falha transacional/correção, concorrência e banco Compose exclusivo: `tests/integration/test_migrations.py` | Backup e migração corretiva |
 | P1-02 | Primeiro Administrador, Argon2id, login, rate limit e sessão por inatividade | P0-02, P1-01 | FR-AUTH-001, FR-AUTH-005, FR-AUTH-006, FR-AUTH-007, BR-AUTH-001, SEC-001, SEC-002, SEC-003 | Brute force, enumeração, timeout | Desativar sessões; senha nunca em claro |
 | P1-03 | RBAC server-side para HTTP, jobs e downloads | P1-02 | SEC-005, NFR-006, regras de papéis | Matriz de permissão e acesso direto negado | Falhar fechado |
 | P1-04 | Administração de usuários: lista, criação, edição, papel, reset, ativação/desativação, revogação e UI | P1-02, P1-03, P1-05 | FR-AUTH-002, FR-AUTH-003, FR-AUTH-004, BR-AUTH-002, SEC-004 | Browser, RBAC, sessões revogadas e auditoria | Usuário desativado não autentica |
@@ -281,6 +281,8 @@ Invariantes obrigatórias: cursor/NSU pós-durabilidade; zero perda silenciosa; 
 ## 14. Banco e migrações
 
 P1 introduz tooling, baseline, banco de teste e estratégia de upgrade/forward recovery. Toda migração inclui constraints, índices necessários, teste de instalação limpa, teste de upgrade e recuperação segura. Mudança irreversível exige backup e correção progressiva, não rollback destrutivo.
+
+**Decisão Proposed aceita em P1-01:** o baseline físico é `nfx.0001_schema_contract`, um único metadado operacional sem entidades de MVP; sua chave singleton, constraints e índice são verificados em integração. `nfx_migrate` serializa com advisory lock PostgreSQL e `schema_status`/readiness recusam schema NFX ausente ou adiantado incompatível sem divulgar credenciais. As decisões de ID/timestamps das entidades de domínio ficam com as respectivas specs.
 
 P4 introduz identidade, hash, cursores, transações e unicidade antes de qualquer adaptador. Não há migração legada. O bootstrap cria somente o primeiro Administrador por segredo externo e dados mínimos de política.
 

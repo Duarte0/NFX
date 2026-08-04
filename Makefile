@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 PYTHON ?= python
 
-.PHONY: help install build lint test-unit test-integration smoke check-services web worker scheduler validate
+.PHONY: help install build lint test-unit test-integration smoke check-services nfx-migrate schema-status web worker scheduler validate
 help:
-	@printf '%s\n' 'install build lint test-unit test-integration smoke validate web worker scheduler check-services'
+	@printf '%s\n' 'install build lint test-unit test-integration smoke validate web worker scheduler check-services nfx-migrate schema-status'
 install:
 	$(PYTHON) --version | grep -E 'Python 3\.12\.'
 	node --version | grep -E '^v(20|22)\.'
@@ -24,6 +24,10 @@ smoke:
 	./scripts/smoke.sh
 check-services:
 	$(PYTHON) backend/manage.py check_services
+nfx-migrate:
+	$(PYTHON) backend/manage.py nfx_migrate
+schema-status:
+	$(PYTHON) backend/manage.py schema_status
 web:
 	NFX_PROCESS=web $(PYTHON) backend/manage.py runserver 0.0.0.0:8000
 worker:
