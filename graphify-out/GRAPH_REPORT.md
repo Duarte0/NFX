@@ -1,16 +1,16 @@
 # Graph Report - workspace  (2026-08-04)
 
 ## Corpus Check
-- 93 files · ~45,395 words
+- 100 files · ~47,736 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 757 nodes · 901 edges · 76 communities (54 shown, 22 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 40 edges (avg confidence: 0.54)
+- 821 nodes · 1042 edges · 79 communities (57 shown, 22 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 43 edges (avg confidence: 0.55)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `65e82d37`
+- Built from commit: `f0689288`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -74,7 +74,7 @@
 - companies/__init__.py
 - documents/__init__.py
 - exports/__init__.py
-- identity/__init__.py
+- services.py
 - infrastructure/__init__.py
 - nfx/__init__.py
 - migrations/__init__.py
@@ -82,6 +82,9 @@
 - retention/__init__.py
 - extraction-spec.md
 - main.tsx
+- 19. Jornadas principais
+- 7. Usuários e papéis
+- 12. Autenticação e autorização
 
 ## God Nodes (most connected - your core abstractions)
 1. `Arquitetura técnica — NFX INOV` - 47 edges
@@ -110,7 +113,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (76 total, 22 thin omitted)
+## Communities (79 total, 22 thin omitted)
 
 ### Community 0 - "Arquitetura técnica — NFX INOV"
 Cohesion: 0.04
@@ -137,16 +140,16 @@ Cohesion: 0.11
 Nodes (16): Any, configure_logging(), CorrelationIdMiddleware, JsonFormatter, HttpRequest, HttpResponse, One redaction boundary for logs, audit payloads and error rendering., redact() (+8 more)
 
 ### Community 6 - "dependencies.py"
-Cohesion: 0.13
-Nodes (18): dependencies_from_environment(), DependencyCheck, _object_probe(), _postgres_probe(), _schema_probe(), ServiceDependencies, Command, BaseCommand (+10 more)
+Cohesion: 0.12
+Nodes (19): Identity boundary (no domain implementation in P0)., dependencies_from_environment(), DependencyCheck, _object_probe(), _postgres_probe(), _schema_probe(), ServiceDependencies, Command (+11 more)
 
 ### Community 7 - "What You Must Do When Invoked"
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
 ### Community 8 - "PRD — NFX INOV"
-Cohesion: 0.05
-Nodes (39): 10. Ciclo de vida de empresa, 11. Ciclo de vida de certificado, 12. Autenticação e autorização, 13. Retenção e exclusão, 14. Auditoria, 15. Backup e recuperação, 16. Requisitos operacionais e observabilidade, 17. Requisitos não funcionais (+31 more)
+Cohesion: 0.08
+Nodes (24): 10. Ciclo de vida de empresa, 11. Ciclo de vida de certificado, 13. Retenção e exclusão, 14. Auditoria, 15. Backup e recuperação, 16. Requisitos operacionais e observabilidade, 17. Requisitos não funcionais, 18. Estados de erro, vazio, bloqueio e degradação (+16 more)
 
 ### Community 9 - "compilerOptions"
 Cohesion: 0.09
@@ -209,8 +212,8 @@ Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
 
 ### Community 24 - "Autenticação, sessões, RBAC e shell web"
-Cohesion: 0.22
-Nodes (8): Autenticação, sessões, RBAC e shell web, Baseline, escopo e não escopo, Estado e contratos Proposed, Metadados, Propósito e resultado, Regras, UI e autorização, Segurança, auditoria e observabilidade, Testes, sequência e aceite
+Cohesion: 0.18
+Nodes (10): Aceite e DoD, Autenticação, sessões, RBAC e shell web, Baseline, escopo e não escopo, Decisões de implementação e evidências, Estado e contratos Proposed, Metadados, Propósito e resultado, Regras, UI e autorização (+2 more)
 
 ### Community 25 - "Administração de usuários"
 Cohesion: 0.22
@@ -246,7 +249,7 @@ Nodes (8): Aceite e DoD, Baseline, escopo e não escopo, Decisões e configuraç
 
 ### Community 33 - "ArtifactStorageService"
 Cohesion: 0.07
-Nodes (45): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+37 more)
+Nodes (44): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+36 more)
 
 ### Community 34 - "Renderização de DANFE e DANFSe"
 Cohesion: 0.25
@@ -292,8 +295,20 @@ Nodes (3): For git commit hook, For native CLAUDE.md integration, graphify refer
 Cohesion: 0.50
 Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphify reference: incremental update and cluster-only
 
+### Community 61 - "services.py"
+Cohesion: 0.07
+Nodes (52): IdentitySession, LoginThrottle, Meta, A keyed subject digest avoids retaining an account identifier on failed logins., Role, User, Action, authorize() (+44 more)
+
+### Community 69 - "19. Jornadas principais"
+Cohesion: 0.25
+Nodes (8): 19. Jornadas principais, J1 — Primeiro acesso, J2 — Cadastro e coleta inicial, J3 — Operação recorrente, J4 — Consulta fiscal, J5 — Exportação em lote, J6 — Administração e auditoria, J7 — Exclusão após retenção
+
+### Community 77 - "7. Usuários e papéis"
+Cohesion: 0.40
+Nodes (5): 7.1 Administrador, 7.2 Operador, 7.3 Visualizador, 7.4 Regra global, 7. Usuários e papéis
+
 ## Knowledge Gaps
-- **408 isolated node(s):** `Meta`, `Migration`, `name`, `private`, `version` (+403 more)
+- **412 isolated node(s):** `Meta`, `Migration`, `Migration`, `name`, `private` (+407 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -301,16 +316,16 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `dependencies_from_environment()` connect `dependencies.py` to `ArtifactStorageService`, `load_settings`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Why does `load_settings()` connect `load_settings` to `dependencies.py`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **Why does `schema_status()` connect `schema_status` to `dependencies.py`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `ArtifactStorageService` (e.g. with `Artifact` and `ArtifactState`) actually correct?**
   _`ArtifactStorageService` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 8 inferred relationships involving `MemoryObjectStore` (e.g. with `Artifact` and `ArtifactState`) actually correct?**
   _`MemoryObjectStore` has 8 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Meta`, `Migration`, `name` to the rest of the system?**
-  _408 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Meta`, `Migration`, `Migration` to the rest of the system?**
+  _412 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Arquitetura técnica — NFX INOV` be split into smaller, more focused modules?**
   _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._

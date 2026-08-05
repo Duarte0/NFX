@@ -20,13 +20,20 @@ INSTALLED_APPS = [
     "rest_framework",
     "nfx",
 ]
-MIDDLEWARE = ["nfx.infrastructure.http.CorrelationIdMiddleware"]
+MIDDLEWARE = [
+    "nfx.infrastructure.http.CorrelationIdMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+]
 TEMPLATES: list[dict[str, object]] = []
 USE_TZ = True
 TIME_ZONE = "America/Sao_Paulo"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+PASSWORD_HASHERS = ["django.contrib.auth.hashers.Argon2PasswordHasher"]
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_HTTPONLY = False
 
 
 def _database_from_url(value: str) -> dict[str, object]:

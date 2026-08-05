@@ -36,7 +36,11 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
 
     second = SchemaMigrator().migrate()
 
-    assert first.applied == ("nfx.0001_schema_contract", "nfx.0002_artifact")
+    assert first.applied == (
+        "nfx.0001_schema_contract",
+        "nfx.0002_artifact",
+        "nfx.0003_identity",
+    )
     assert second.applied == ()
     assert constraints == (
         "nfx_schema_contract_minimum_version_ck",
@@ -74,7 +78,11 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
 
     correction = SchemaMigrator().migrate()
 
-    assert correction.applied == ("nfx.0001_schema_contract", "nfx.0002_artifact")
+    assert correction.applied == (
+        "nfx.0001_schema_contract",
+        "nfx.0002_artifact",
+        "nfx.0003_identity",
+    )
     assert schema_status().compatible
 
 
@@ -103,7 +111,10 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
     second.join()
 
     assert not failures
-    assert sorted(outcomes) == [(), ("nfx.0001_schema_contract", "nfx.0002_artifact")]
+    assert sorted(outcomes) == [
+        (),
+        ("nfx.0001_schema_contract", "nfx.0002_artifact", "nfx.0003_identity"),
+    ]
     assert schema_status().compatible
 
 
