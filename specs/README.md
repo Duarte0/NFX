@@ -15,7 +15,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 3 | [x] | `p1-persistence-and-migrations.md` | P1 | P1-01 | P0-03 |
 | 4 | [x] | `p1-object-storage-and-integrity.md` | P1 | P1-06 | P0-03, P1-01 |
 | 5 | [x] | `p1-authentication-sessions-and-rbac.md` | P1 | P1-02, P1-03, P1-07 | P0-02, P1-01 |
-| 6 | [ ] | `p1-audit-foundation.md` | P1 | P1-05 | P1-01, P1-03 |
+| 6 | [x] | `p1-audit-foundation.md` | P1 | P1-05 | P1-01, P1-03 |
 | 7 | [ ] | `p1-user-administration.md` | P1 | P1-04 | P1-02, P1-03, P1-05 |
 | 8 | [ ] | `p2-company-lifecycle-and-public-enrichment.md` | P2 | P2-01, P2-02, P2-04 (empresa/UI) | P0-04, P1-03, P1-05 |
 | 9 | [ ] | `p2-certificate-lifecycle-and-envelope-encryption.md` | P2 | P2-03, P2-04 (certificado/UI) | P1-05, P1-06, P2-01 |
@@ -59,6 +59,6 @@ Fases: P0 tem 2 specs; P1, 5; P2, 2; P3, 3; P4, 1; P5, 1; P6, 1; P7, 2; P8, 3; P
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01, P1-02/P1-03/P1-07 e P1-06 estão concluídos; a próxima implementável é `p1-audit-foundation.md` (P1-05).
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01, P1-02/P1-03/P1-05/P1-06/P1-07 estão concluídos; a próxima implementável é `p1-user-administration.md` (P1-04).
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.

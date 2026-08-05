@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
 
+from nfx.audit import views as audit_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 
@@ -27,4 +28,5 @@ urlpatterns = [
     path("api/auth/login", identity_views.login),
     path("api/auth/logout", identity_views.logout),
     path("api/auth/session", identity_views.session),
+    path("api/audit/events", audit_views.events),
 ]

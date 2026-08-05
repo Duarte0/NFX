@@ -133,11 +133,13 @@ flowchart LR
 | P1-02 | Primeiro Administrador, Argon2id, login, rate limit e sessão por inatividade — **implementado** (`nfx.identity`, `0003_identity`, `bootstrap_admin`, testes de segurança) | P0-02, P1-01 | FR-AUTH-001, FR-AUTH-005, FR-AUTH-006, FR-AUTH-007, BR-AUTH-001, SEC-001, SEC-002, SEC-003 | Brute force, enumeração, timeout | Desativar sessões; senha nunca em claro |
 | P1-03 | RBAC server-side para HTTP, jobs e downloads — **implementado** (`nfx.identity.policy.authorize`, decorator HTTP fail-closed e matriz testada) | P1-02 | SEC-005, NFR-006, regras de papéis | Matriz de permissão e acesso direto negado | Falhar fechado |
 | P1-04 | Administração de usuários: lista, criação, edição, papel, reset, ativação/desativação, revogação e UI | P1-02, P1-03, P1-05 | FR-AUTH-002, FR-AUTH-003, FR-AUTH-004, BR-AUTH-002, SEC-004 | Browser, RBAC, sessões revogadas e auditoria | Usuário desativado não autentica |
-| P1-05 | Auditoria append-only, motivos, hash chain e redaction | P1-01, P1-03 | AUD-001, AUD-002, AUD-003, AUD-004, AUD-005, AUD-006, AUD-007, AUD-008, AUD-009, AUD-010, SEC-007 | Imutabilidade, redaction e eventos críticos | Eventos nunca apagados |
+| P1-05 | Auditoria append-only, motivos, hash chain e redaction — **implementado** (`nfx.audit`, `0004_audit_foundation`, `/api/audit/events`, shell React) | P1-01, P1-03 | AUD-001, AUD-002, AUD-003, AUD-004, AUD-005, AUD-006, AUD-007, AUD-008, AUD-009, AUD-010, SEC-007 | `tests/integration/test_audit.py`: imutabilidade DB, redaction, motivo, cadeia, concorrência, RBAC e paginação; integração isolada verde | Eventos nunca apagados |
 | P1-06 | Abstração MinIO, SHA-256 e estados pendente/finalizado/ausente/divergente — **implementado** (`nfx.artifacts.models`, `nfx.artifacts.storage`, `nfx.0002_artifact`) | P0-03, P1-01 | ADR-004, BR-INT-003, BR-INT-005 | `tests/integration/test_artifact_storage.py`: MinIO Compose, hash/tamanho, falhas, ausência/divergência, reconciliação, retry e concorrência | Não finalizar referência |
 | P1-07 | Login, navegação por papel e shell desktop — **implementado** (`frontend/src/main.tsx`, pt-BR, CSRF/session API) | P1-02, P1-03 | NFR-001, NFR-002, AC-023 | Browser e localização | UI não é controle de segurança |
 
 **Specs futuras:** p1-persistence-and-migrations.md; p1-object-storage-and-integrity.md; p1-authentication-sessions-and-rbac.md; p1-user-administration.md; p1-audit-foundation.md.
+
+**Decisões Proposed aceitas em P1-05:** há uma cadeia global inicialmente (não particionada), serializada por linha `nfx_audit_chain`; `audit-v1` é SHA-256 sobre JSON canônico contendo hash anterior e os campos persistidos. Trigger PostgreSQL bloqueia alteração/remoção, e a porta redige o contexto antes de persistir. A verificação é exposta na consulta administrativa; métricas/health operacionais detalhados permanecem trabalho de P3/P8.
 
 ### P2 — Empresas, cobertura e certificados
 

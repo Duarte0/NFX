@@ -23,7 +23,7 @@ def _json_body(request: HttpRequest) -> dict[str, object] | None:
 
 
 def _request_ip(request: HttpRequest) -> str:
-    return request.META.get("REMOTE_ADDR", "")
+    return str(request.META.get("REMOTE_ADDR", ""))
 
 
 @require_GET

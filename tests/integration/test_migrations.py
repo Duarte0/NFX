@@ -8,7 +8,6 @@ from django.db.migrations import Migration
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.operations.special import RunSQL
 from django.db.migrations.recorder import MigrationRecorder
-
 from nfx.infrastructure.schema import SchemaMigrator, schema_status
 
 
@@ -40,6 +39,7 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx.0001_schema_contract",
         "nfx.0002_artifact",
         "nfx.0003_identity",
+        "nfx.0004_audit_foundation",
     )
     assert second.applied == ()
     assert constraints == (
@@ -82,6 +82,7 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
         "nfx.0001_schema_contract",
         "nfx.0002_artifact",
         "nfx.0003_identity",
+        "nfx.0004_audit_foundation",
     )
     assert schema_status().compatible
 
@@ -113,7 +114,12 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
     assert not failures
     assert sorted(outcomes) == [
         (),
-        ("nfx.0001_schema_contract", "nfx.0002_artifact", "nfx.0003_identity"),
+        (
+            "nfx.0001_schema_contract",
+            "nfx.0002_artifact",
+            "nfx.0003_identity",
+            "nfx.0004_audit_foundation",
+        ),
     ]
     assert schema_status().compatible
 
