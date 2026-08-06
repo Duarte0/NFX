@@ -176,7 +176,7 @@ para handoff da coleta inicial sem transporte inline.
 
 | ID | Resultado e mudanças | Dependências | PRD/arquitetura | Testes e evidência | Falha/rollback |
 |---|---|---|---|---|---|
-| P3-01 | Job, scheduler, worker, lease, renovação e reclaim | P1-01, P1-05 | ADR-005; OPS-001, OPS-003, OPS-005 | Concorrência, morte de worker, lease e restart | Reprocessar idempotentemente |
+| P3-01 | Job, scheduler, worker, lease, renovação e reclaim — **implementado** (`nfx.jobs`, `0008_durable_jobs`, comandos e testes) | P1-01, P1-05 | ADR-005; OPS-001, OPS-003, OPS-005 | Concorrência PostgreSQL, morte de worker, lease, restart e payload referencial seguro | Reprocessar idempotentemente; retry/backoff seguem P3-02 |
 | P3-02 | Políticas externas, retry, backoff, jitter, cooldown e bloqueio | P3-01 | BR-COLL-002/007; OPS-006 | Relógio controlado e falha permanente | Suspender bloqueado |
 | P3-03 | Simuladores e fixtures NF-e/ADN com transporte substituível | P0-04, P3-01 | arquitetura 38 | Vazio, duplicata, conflito e timeout | Sem endpoint produção |
 | P3-04 | Logs, métricas de job e health inicial | P3-01 | OPS-002/004 | Métricas e redaction | Estado degradado explícito |

@@ -1,22 +1,22 @@
 # Graph Report - workspace  (2026-08-06)
 
 ## Corpus Check
-- 120 files · ~59,812 words
+- 134 files · ~69,962 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1188 nodes · 2187 edges · 102 communities (67 shown, 35 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 161 edges (avg confidence: 0.54)
+- 1333 nodes · 2405 edges · 117 communities (79 shown, 38 thin omitted)
+- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 155 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8ecf7d1f`
+- Built from commit: `444a665a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - identity/services.py
-- MemoryObjectStore
+- ArtifactStorageService
 - load_settings
 - Graphify Skill Instructions
 - Arquitetura técnica — NFX INOV
@@ -24,14 +24,14 @@
 - audit/services.py
 - dependencies.py
 - certificates/services.py
-- Administração de usuários
+- P4 Ingestão comum
 - companies/services.py
 - devDependencies
 - _HttpResponse
 - What You Must Do When Invoked
 - PRD — NFX INOV
 - compilerOptions
-- test_certificate_lifecycle.py
+- JobEngine
 - 9. Requisitos funcionais e regras de negócio
 - Persistência relacional e migrações
 - Fundação de auditoria append-only
@@ -101,6 +101,15 @@
 - Schema Contract
 - GitHub and Merge Reference
 - 0007_certificate_lifecycle.py
+- Build Pass
+- Specification Pass
+- Issue Creation Pass
+- 10. Fases detalhadas e backlog estável
+- Planning Pass
+- Índice de implementação das specs
+- Administração de usuários
+- Consulta de documentos e download individual
+- 0001_-_durable-job-queue-and-leases.md
 - Docker Compose Development Configuration
 - Authorize Policy
 - Identity Session
@@ -108,6 +117,12 @@
 - Artifact Storage Service
 - Company Model
 - Fiscal Adapter Port
+- Distribuição NF-e e manifestação
+- Distribuição NFS-e/ADN e cobertura
+- 0000_-_ISSUE_TEMPLATE.md
+- jobs/__init__.py
+- 0008_durable_jobs.py
+- loop.sh
 
 ## God Nodes (most connected - your core abstractions)
 1. `AuditService` - 48 edges
@@ -124,13 +139,13 @@
 ## Surprising Connections (you probably didn't know these)
 - `MemoryObjectStore` --uses--> `ObjectMetadata`  [INFERRED]
   tests/unit/test_certificate_lifecycle.py → backend/nfx/artifacts/storage.py
-- `MemoryObjectStore` --uses--> `ArtifactStorageService`  [INFERRED]
-  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/storage.py
 - `test_minio_adapter_writes_and_verifies_synthetic_bytes()` --calls--> `dependencies_from_environment()`  [INFERRED]
   tests/integration/test_artifact_storage.py → backend/nfx/infrastructure/dependencies.py
 - `RecordingOpenCnpj` --uses--> `OpenCnpjResponse`  [INFERRED]
   tests/unit/test_company_lifecycle.py → backend/nfx/adapters/opencnpj.py
 - `MemoryObjectStore` --uses--> `ArtifactState`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
+- `MemoryObjectStore` --uses--> `Artifact`  [INFERRED]
   tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
 
 ## Import Cycles
@@ -143,15 +158,15 @@
 - **Docker Infrastructure Stack** — docker_compose_app, docker_compose_test, docker_compose_dev [EXTRACTED 0.95]
 - **Fiscal Ingestion Flow** — specs_p3_fiscal_adapter_simulation_and_fixtures_fiscal_adapter_port, specs_p4_fiscal_document_ingestion_and_integrity_document, specs_p1_object_storage_and_integrity_artifact_storage_service [EXTRACTED 0.90]
 
-## Communities (102 total, 35 thin omitted)
+## Communities (117 total, 38 thin omitted)
 
 ### Community 0 - "identity/services.py"
-Cohesion: 0.07
-Nodes (92): IdentitySession, LoginThrottle, Meta, A keyed subject digest avoids retaining an account identifier on failed logins., Role, User, authorize(), The single fail-closed policy used by HTTP handlers and future workers. (+84 more)
+Cohesion: 0.08
+Nodes (81): _admin_event(), _assert_not_last_administrator(), _assert_version(), authenticate(), bootstrap_first_administrator(), change_own_password(), change_user_role(), create_user() (+73 more)
 
-### Community 1 - "MemoryObjectStore"
-Cohesion: 0.07
-Nodes (38): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+30 more)
+### Community 1 - "ArtifactStorageService"
+Cohesion: 0.08
+Nodes (39): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+31 more)
 
 ### Community 2 - "load_settings"
 Cohesion: 0.11
@@ -166,28 +181,28 @@ Cohesion: 0.04
 Nodes (46): 11. Organização do repositório, 12. Stack selecionada e justificativa, 13. Alternativas consideradas e rejeitadas, 14. Responsabilidade e propriedade de estado, 15. Estratégia de dados e persistência, 16. Responsabilidades do PostgreSQL, 17. Responsabilidades do armazenamento de objetos, 18. Identidade fiscal de documentos (+38 more)
 
 ### Community 5 - "Plano de implementação — NFX INOV"
-Cohesion: 0.04
-Nodes (44): 10. Fases detalhadas e backlog estável, 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs (+36 more)
+Cohesion: 0.08
+Nodes (26): 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs, 18. Rastreabilidade do PRD (+18 more)
 
 ### Community 6 - "audit/services.py"
-Cohesion: 0.05
-Nodes (47): AuditEvent, AuditChain, AuditEvent, Meta, The single stream serializes appends without allowing event rewrites., AuditUnavailable, AuditVerifier, _canonical() (+39 more)
+Cohesion: 0.06
+Nodes (42): AuditEvent, AuditChain, AuditEvent, Meta, The single stream serializes appends without allowing event rewrites., AuditUnavailable, AuditVerifier, _canonical() (+34 more)
 
 ### Community 7 - "dependencies.py"
 Cohesion: 0.05
 Nodes (44): Append-only audit trail, integrity verifier, and administrative query boundary., Certificate lifecycle and envelope-encryption domain boundary., Company lifecycle, flow configuration, and public enrichment boundary., Identity boundary (no domain implementation in P0)., dependencies_from_environment(), DependencyCheck, _object_probe(), _postgres_probe() (+36 more)
 
 ### Community 8 - "certificates/services.py"
-Cohesion: 0.10
-Nodes (54): ArtifactStorageService, ObjectStore, Protocol, Creates pending metadata, verifies bytes, and finalizes atomically., Certificate, CertificateState, Meta, Certificate metadata plus ciphertext references; plaintext never persists. (+46 more)
+Cohesion: 0.07
+Nodes (70): object_store_from_environment(), ObjectStore, Protocol, Build the adapter at the infrastructure edge, not in a domain caller., Certificate, CertificateState, Meta, Certificate metadata plus ciphertext references; plaintext never persists. (+62 more)
 
-### Community 9 - "Administração de usuários"
-Cohesion: 0.05
-Nodes (41): P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P5 NF-e, P6 NFS-e/ADN, P7 Consulta e artefatos, Aceite e DoD (+33 more)
+### Community 9 - "P4 Ingestão comum"
+Cohesion: 0.24
+Nodes (7): P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P5 NF-e, P6 NFS-e/ADN, P7 Consulta e artefatos
 
 ### Community 10 - "companies/services.py"
 Cohesion: 0.07
-Nodes (79): OpenCnpjClient, OpenCnpjResponse, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Default local/runtime adapter until an approved public endpoint is configured., UnavailableOpenCnpjClient, AuditService, CompanyMetrics (+71 more)
+Nodes (86): OpenCnpjClient, OpenCnpjResponse, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Default local/runtime adapter until an approved public endpoint is configured., UnavailableOpenCnpjClient, AuditService, CompanyMetrics (+78 more)
 
 ### Community 11 - "devDependencies"
 Cohesion: 0.06
@@ -209,9 +224,9 @@ Nodes (24): 10. Ciclo de vida de empresa, 11. Ciclo de vida de certificado, 13. 
 Cohesion: 0.09
 Nodes (21): compilerOptions, allowJs, allowSyntheticDefaultImports, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, lib (+13 more)
 
-### Community 16 - "test_certificate_lifecycle.py"
-Cohesion: 0.27
-Nodes (15): _actor(), _company(), MemoryObjectStore, _pfx(), BytesIO, django_db, parametrize, test_concurrent_replacements_leave_exactly_one_current_certificate() (+7 more)
+### Community 16 - "JobEngine"
+Cohesion: 0.05
+Nodes (58): configure_logging(), JsonFormatter, clear_handlers(), get_handler(), Explicit handler boundary used by the worker and synthetic tests., register_handler(), Job, JobState (+50 more)
 
 ### Community 17 - "9. Requisitos funcionais e regras de negócio"
 Cohesion: 0.15
@@ -377,20 +392,68 @@ Nodes (7): BFS Traversal, Query Reference, Query Feedback Loop, Graph Explain, S
 Cohesion: 0.83
 Nodes (4): Cross-Repository Graph Merge, GitHub and Merge Reference, GitHub Clone, Monorepo Graph Merge
 
+### Community 90 - "Build Pass"
+Cohesion: 0.12
+Nodes (16): Build Pass, Close the selected issue, Create one focused commit, Dependencies and external documentation, Establish the baseline, Final verification, Graphify, Handle newly discovered problems (+8 more)
+
+### Community 91 - "Specification Pass"
+Cohesion: 0.15
+Nodes (12): Create or update specifications, Determine the required specification set, Existing and implemented specs, Final verification, Graphify, Operating mode, Repository inspection, Scope boundaries (+4 more)
+
+### Community 92 - "Issue Creation Pass"
+Cohesion: 0.17
+Nodes (11): Acceptance criteria, Create one issue, Final verification, Graphify, Implementation guidance quality, Issue Creation Pass, Operating mode, Repository inspection (+3 more)
+
+### Community 93 - "10. Fases detalhadas e backlog estável"
+Cohesion: 0.18
+Nodes (11): 10. Fases detalhadas e backlog estável, P0 — Fundação de projeto e isolamento seguro, P1 — Núcleo seguro, persistente e auditável, P2 — Empresas, cobertura e certificados, P3 — Jobs, scheduler, políticas e simuladores, P4 — Ingestão fiscal comum e integridade, P5 — Adaptador e fluxos NF-e, P6 — Adaptador e fluxos NFS-e/ADN (+3 more)
+
+### Community 94 - "Planning Pass"
+Cohesion: 0.18
+Nodes (10): Final verification, Graphify, Operating mode, Planning Pass, Repository inspection, Required analysis, Scope boundaries, Sources of truth (+2 more)
+
+### Community 95 - "Índice de implementação das specs"
+Cohesion: 0.22
+Nodes (7): P0 Fundação, Autoridade, baseline e regra de uso, Como escolher a próxima spec, Decisões Open, Blocked, Deferred e Proposed, Ordem, cobertura e dependências diretas, Paralelismo e conclusão de fase, Índice de implementação das specs
+
+### Community 96 - "Administração de usuários"
+Cohesion: 0.22
+Nodes (9): Aceite e DoD, Administração de usuários, Baseline, escopo e não escopo, Decisões de implementação e evidências, Estado, backend, auditoria e segurança, Falhas, testes e recovery, Metadados, Propósito e resultado (+1 more)
+
+### Community 97 - "Consulta de documentos e download individual"
+Cohesion: 0.22
+Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Consulta de documentos e download individual, Dados, índices e contratos Proposed, Falhas e testes, Metadados, Propósito e resultado, Segurança, auditoria e observabilidade (+1 more)
+
+### Community 100 - "0001_-_durable-job-queue-and-leases.md"
+Cohesion: 0.25
+Nodes (7): Acceptance Criteria, Description, Implementation Plan, Out of Scope, References, Resolution, Tests
+
+### Community 111 - "Distribuição NF-e e manifestação"
+Cohesion: 0.25
+Nodes (8): Aceite e DoD, Decisões e contratos, Distribuição NF-e e manifestação, Estado e comportamento, Falhas, testes e recovery, Metadados, Propósito, baseline e limites, UI, autorização, segurança e auditoria
+
+### Community 112 - "Distribuição NFS-e/ADN e cobertura"
+Cohesion: 0.25
+Nodes (8): Aceite e DoD, Contratos e estado Proposed, Distribuição NFS-e/ADN e cobertura, Falhas, testes e recovery, Metadados, Propósito, baseline, escopo, Regras e comportamento visível, Segurança, auditoria e observabilidade
+
+### Community 113 - "0000_-_ISSUE_TEMPLATE.md"
+Cohesion: 0.29
+Nodes (6): Acceptance Criteria, Description, Implementation Plan, References, Resolution, Tests
+
 ## Knowledge Gaps
-- **470 isolated node(s):** `Meta`, `Meta`, `InitialCollectionRequestState`, `Meta`, `Migration` (+465 more)
+- **531 isolated node(s):** `Meta`, `Meta`, `InitialCollectionRequestState`, `Meta`, `Meta` (+526 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **35 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `Job` connect `JobEngine` to `audit/services.py`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `load_settings()` connect `load_settings` to `certificates/services.py`, `dependencies.py`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **Why does `AuditService` connect `companies/services.py` to `certificates/services.py`, `identity/services.py`, `audit/services.py`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **Why does `dependencies_from_environment()` connect `dependencies.py` to `MemoryObjectStore`, `load_settings`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `AuditService` (e.g. with `CertificateAccessDenied` and `CertificateAlreadyAssigned`) actually correct?**
   _`AuditService` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 28 inferred relationships involving `Action` (e.g. with `CertificateAccessDenied` and `CertificateAlreadyAssigned`) actually correct?**

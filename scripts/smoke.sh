@@ -21,5 +21,5 @@ for _ in $(seq 1 30); do
 done
 "${compose[@]}" exec -T web python -c 'from urllib.request import urlopen; assert urlopen("http://127.0.0.1:8000/health/ready").status == 200'
 "${compose[@]}" ps --status running --services | rg -x 'web|worker|scheduler' | sort | diff -u <(printf '%s\n' scheduler web worker) -
-"${compose[@]}" logs worker | grep -q 'worker_started_no_jobs'
-"${compose[@]}" logs scheduler | grep -q 'scheduler_started_no_jobs'
+"${compose[@]}" logs worker | grep -q 'worker_started'
+"${compose[@]}" logs scheduler | grep -q 'scheduler_started'

@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P3 — pronta após persistência/auditoria.
+- **Fase/status:** P3 — P3-01 implementado; P3-02 e P3-04 pendentes.
 - **Backlog:** P3-01, P3-02, P3-04.
 - **Dependências:** P1-01 e P1-05.
 - **PRD:** FR-COLL-002; BR-COLL-002, BR-COLL-007, BR-COLL-010; OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006; NFR-004, NFR-005, NFR-008. **Aceite:** AC-006, AC-007, AC-017, AC-024.
@@ -43,3 +43,11 @@ Testar dois workers concorrentes, morte antes/depois do efeito, renew atrasado, 
 - [ ] Logs/health/métricas distinguem atraso e falha sem segredo.
 
 DoD: migrações, engine, processos, políticas, telemetria e testes de concorrência/recovery verdes. **Proposed:** tempos/defaults e schema físico; nenhum valor fiscal oficial é fixado.
+
+## Implementação incremental
+
+P3-01 é a fatia concluída nesta iteração: `nfx.jobs` mantém jobs referenciais, claims
+PostgreSQL com `SKIP LOCKED`, leases vinculados ao owner, renovação, conclusão/falha seguras,
+reclaim e a fronteira de handlers sintéticos usada pelo worker. A fila não decide retry,
+backoff, cooldown ou bloqueio permanente; essas decisões continuam pertencendo a P3-02.
+Métricas/health operacionais detalhados continuam pertencendo a P3-04.

@@ -19,7 +19,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 7 | [ ] | `p1-user-administration.md` | P1 | P1-04 | P1-02, P1-03, P1-05 |
 | 8 | [x] | `p2-company-lifecycle-and-public-enrichment.md` | P2 | P2-01, P2-02, P2-04 (empresa/UI) | P0-04, P1-03, P1-05 |
 | 9 | [x] | `p2-certificate-lifecycle-and-envelope-encryption.md` | P2 | P2-03, P2-04 (certificado/UI) | P1-05, P1-06, P2-01 |
-| 10 | [ ] | `p3-durable-jobs-leases-and-policy-engine.md` | P3 | P3-01, P3-02, P3-04 | P1-01, P1-05 |
+| 10 | [ ] | `p3-durable-jobs-leases-and-policy-engine.md` | P3 | P3-01 (implementado), P3-02, P3-04 | P1-01, P1-05 |
 | 11 | [ ] | `p3-manual-collection-control.md` | P3 | P3-05 | P1-03, P1-05, P3-01, P3-02 |
 | 12 | [ ] | `p3-fiscal-adapter-simulation-and-fixtures.md` | P3 | P3-03 | P0-04, P3-01 |
 | 13 | [ ] | `p4-fiscal-document-ingestion-and-integrity.md` | P4 | P4-01, P4-02, P4-03, P4-04 | P1-01/05/06, P2-03, P3-01/03 |

@@ -9,8 +9,9 @@
 - Python usa `pip` com versões exatas em `requirements*.txt`; o frontend usa `npm` e
   `frontend/package-lock.json`. Python 3.12 e Node 20/22 são validados por `make install`.
 - Os comandos são `make web`, `make worker` e `make scheduler`. Eles executam a mesma árvore
-  `backend/nfx`; worker e scheduler são loops vazios nesta fase e não contêm transportes,
-  endpoints, certificados, CNPJs, XMLs ou trabalho fiscal.
+  `backend/nfx`; o worker processa somente handlers registrados na fronteira de jobs e o
+  scheduler recupera leases vencidos. Ambos não têm acesso a transportes, endpoints,
+  certificados, CNPJs, XMLs ou trabalho fiscal.
 - Cada integração/smoke cria um projeto Compose e bucket `nfx-p0-test-<run-id>` exclusivos,
   em uma rede Compose privada. O teardown usa somente `docker compose -p <id> down --volumes`;
   portanto não toca os volumes `postgres_data`/`minio_data` de desenvolvimento.
@@ -24,8 +25,8 @@ or MinIO. `make lint` checks Ruff, mypy, TypeScript and ESLint. `make test-unit`
 `make test-integration` starts isolated PostgreSQL 16 and MinIO, waits for both, runs the
 integration suite and always removes its own containers, network and volumes. `make smoke` does
 the same before starting web, worker and scheduler, verifies liveness/readiness and that both
-background processes report their intentionally empty loops. Set `TEST_RUN_ID` to run two suites
-in parallel with predictable distinct project/bucket names.
+background processes start their durable loops. Set `TEST_RUN_ID` to run two suites in parallel
+with predictable distinct project/bucket names.
 
 `make check-services` returns zero only when PostgreSQL and MinIO are ready. On failure it returns
 non-zero and says only which dependency is unavailable; it never prints connection strings or
