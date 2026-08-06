@@ -17,7 +17,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 5 | [x] | `p1-authentication-sessions-and-rbac.md` | P1 | P1-02, P1-03, P1-07 | P0-02, P1-01 |
 | 6 | [x] | `p1-audit-foundation.md` | P1 | P1-05 | P1-01, P1-03 |
 | 7 | [ ] | `p1-user-administration.md` | P1 | P1-04 | P1-02, P1-03, P1-05 |
-| 8 | [ ] | `p2-company-lifecycle-and-public-enrichment.md` | P2 | P2-01, P2-02, P2-04 (empresa/UI) | P0-04, P1-03, P1-05 |
+| 8 | [x] | `p2-company-lifecycle-and-public-enrichment.md` | P2 | P2-01, P2-02, P2-04 (empresa/UI) | P0-04, P1-03, P1-05 |
 | 9 | [ ] | `p2-certificate-lifecycle-and-envelope-encryption.md` | P2 | P2-03, P2-04 (certificado/UI) | P1-05, P1-06, P2-01 |
 | 10 | [ ] | `p3-durable-jobs-leases-and-policy-engine.md` | P3 | P3-01, P3-02, P3-04 | P1-01, P1-05 |
 | 11 | [ ] | `p3-manual-collection-control.md` | P3 | P3-05 | P1-03, P1-05, P3-01, P3-02 |
@@ -59,6 +59,6 @@ Fases: P0 tem 2 specs e está concluída; P1 tem 5 specs (4 concluídas, P1-04 b
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01, P1-02/P1-03/P1-05/P1-06/P1-07 estão implementados; a próxima implementável é `p1-user-administration.md` (P1-04), bloqueada somente pela atualização Graphify semântica exigida pela sessão.
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07 e P2-01/P2-02/P2-04 estão implementados. A próxima implementável é `p2-certificate-lifecycle-and-envelope-encryption.md` (P2-03), dependente apenas de P1-05, P1-06 e P2-01.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.

@@ -149,12 +149,16 @@ flowchart LR
 
 | ID | Resultado e mudanças | Dependências | PRD/arquitetura | Testes e evidência | Falha/rollback |
 |---|---|---|---|---|---|
-| P2-01 | Empresa, CNPJ normalizado/único, imutabilidade, ativação, pausa e motivo | P1-03, P1-05 | regras de empresas do PRD | Constraint, RBAC e browser | Desativação preserva estado |
-| P2-02 | OpenCNPJ opcional e não autoritativo | P2-01, P0-04 | FR-COMP-004/005; BR-COMP-007/008 | Fake, timeout e somente CNPJ | Falha não bloqueia cadastro |
+| P2-01 | Empresa, CNPJ normalizado/único, imutabilidade, ativação, pausa e motivo — **implementado** (`nfx.companies`, `0006_company_lifecycle`, serviços e APIs) | P1-03, P1-05 | regras de empresas do PRD | Constraint, RBAC, unidade e integração | Desativação preserva estado |
+| P2-02 | OpenCNPJ opcional e não autoritativo — **implementado** (`OpenCnpjClient`, snapshots, métricas e estados de falha) | P2-01, P0-04 | FR-COMP-004/005; BR-COMP-007/008 | Fake, timeout, conteúdo malformado e somente CNPJ | Falha não bloqueia cadastro |
 | P2-03 | Upload/validação de PFX, cifragem, A1 corrente único e vencimento | P1-05, P1-06, P2-01 | regras de certificados do PRD | Fixture sintética, senha/CNPJ inválidos | Rejeitar antes de persistir; substituição preserva acervo |
-| P2-04 | UI de empresas, fluxos, cobertura e certificado | P2-01, P2-02, P2-03 | AC-001, AC-002, AC-020, AC-021 | Browser e mensagens seguras | Segredo nunca exibido |
+| P2-04 | UI de empresas, fluxos, cobertura e certificado — **empresa/UI implementada** (`frontend/src/main.tsx`, P2-01/P2-02) | P2-01, P2-02, P2-03 | AC-001, AC-002, AC-020, AC-021 | UI de empresa, mensagens seguras, build/lint | Segredo nunca exibido |
 
-**Specs futuras:** p2-company-lifecycle-and-public-enrichment.md; p2-certificate-lifecycle-and-envelope-encryption.md.
+**Evidência P2-01/P2-02/P2-04 (empresa):** `tests/unit/test_company_lifecycle.py`,
+`tests/integration/test_migrations.py`, migração `0006_company_lifecycle`, frontend lint/build e
+Docker integration (18 testes) verdes em 2026-08-06. Decisões Proposed aceitas: UUID/version,
+coluna de CNPJ com capacidade alfanumérica futura, dois fluxos criados independentemente, rotas
+de ação sem DELETE e `OpenCnpjClient` injetável com snapshots públicos não autoritativos.
 
 ### P3 — Jobs, scheduler, políticas e simuladores
 

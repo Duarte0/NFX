@@ -2,6 +2,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
 
 from nfx.audit import views as audit_views
+from nfx.companies import views as company_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 
@@ -36,4 +37,11 @@ urlpatterns = [
     path("api/users/password", identity_views.user_password_change),
     path("api/users/<uuid:user_id>/active", identity_views.user_active),
     path("api/audit/events", audit_views.events),
+    path("api/companies", company_views.companies),
+    path("api/companies/create", company_views.company_create),
+    path("api/companies/<uuid:company_id>", company_views.company_detail),
+    path("api/companies/<uuid:company_id>/activate", company_views.company_activate),
+    path("api/companies/<uuid:company_id>/deactivate", company_views.company_deactivate),
+    path("api/companies/<uuid:company_id>/flows/<str:family>", company_views.company_flow),
+    path("api/companies/<uuid:company_id>/enrichment", company_views.company_enrichment),
 ]

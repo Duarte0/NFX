@@ -1,6 +1,78 @@
 {
   "communities": {
     "0": [
+      "backend_nfx_identity_policy",
+      "backend_nfx_identity_policy_action",
+      "backend_nfx_identity_policy_authorize",
+      "backend_nfx_identity_policy_rationale_48",
+      "backend_nfx_identity_services",
+      "backend_nfx_identity_services_admin_event",
+      "backend_nfx_identity_services_assert_not_last_administrator",
+      "backend_nfx_identity_services_assert_version",
+      "backend_nfx_identity_services_authenticate",
+      "backend_nfx_identity_services_bootstrap_first_administrator",
+      "backend_nfx_identity_services_change_own_password",
+      "backend_nfx_identity_services_change_user_role",
+      "backend_nfx_identity_services_create_user",
+      "backend_nfx_identity_services_digest",
+      "backend_nfx_identity_services_duplicateuseremail",
+      "backend_nfx_identity_services_event",
+      "backend_nfx_identity_services_lastadministrator",
+      "backend_nfx_identity_services_normalize_email",
+      "backend_nfx_identity_services_py_user",
+      "backend_nfx_identity_services_rationale_111",
+      "backend_nfx_identity_services_rationale_130",
+      "backend_nfx_identity_services_rationale_94",
+      "backend_nfx_identity_services_require_administrator",
+      "backend_nfx_identity_services_require_authorized",
+      "backend_nfx_identity_services_reset_user_password",
+      "backend_nfx_identity_services_revoke_session",
+      "backend_nfx_identity_services_sessionidentity",
+      "backend_nfx_identity_services_set_user_active",
+      "backend_nfx_identity_services_subject_hash",
+      "backend_nfx_identity_services_update_user",
+      "backend_nfx_identity_services_user_context",
+      "backend_nfx_identity_services_useradministrationerror",
+      "backend_nfx_identity_services_userversionconflict",
+      "backend_nfx_identity_services_validated_email",
+      "backend_nfx_identity_services_validated_reason",
+      "backend_nfx_management_commands_bootstrap_admin",
+      "backend_nfx_management_commands_bootstrap_admin_command",
+      "backend_nfx_management_commands_bootstrap_admin_command_handle",
+      "basecommand",
+      "capturefixture",
+      "django_db",
+      "strenum",
+      "tests_unit_test_identity",
+      "tests_unit_test_identity_py_django_db",
+      "tests_unit_test_identity_py_monkeypatch",
+      "tests_unit_test_identity_py_parametrize",
+      "tests_unit_test_identity_test_bootstrap_command_reads_external_secret_without_echoing_it",
+      "tests_unit_test_identity_test_bootstrap_is_idempotent_argon2_and_never_replaces_the_password",
+      "tests_unit_test_identity_test_bootstrap_refuses_to_add_itself_to_an_existing_user_base",
+      "tests_unit_test_identity_test_invalid_and_unknown_login_have_the_same_response_and_throttle",
+      "tests_unit_test_identity_test_login_requires_csrf_and_sets_only_a_secure_opaque_cookie",
+      "tests_unit_test_identity_test_only_active_users_authenticate_and_revoked_version_invalidates_sessions",
+      "tests_unit_test_identity_test_rbac_matrix_is_central_and_fails_closed",
+      "tests_unit_test_identity_test_session_timeout_boundary_revocation_and_no_expiry_resurrection",
+      "tests_unit_test_user_administration",
+      "tests_unit_test_user_administration_admin",
+      "tests_unit_test_user_administration_identity",
+      "tests_unit_test_user_administration_py_user",
+      "tests_unit_test_user_administration_test_admin_can_edit_role_and_lifecycle_with_audited_before_after",
+      "tests_unit_test_user_administration_test_admin_crud_redacts_password_and_records_required_audit_fields",
+      "tests_unit_test_user_administration_test_concurrent_stale_admin_mutation_cannot_reverse_deactivation",
+      "tests_unit_test_user_administration_test_deactivation_invalidates_a_real_session_on_next_resolution",
+      "tests_unit_test_user_administration_test_disable_and_reset_revoke_all_existing_sessions_and_preserve_history",
+      "tests_unit_test_user_administration_test_reasons_versions_and_last_administrator_are_enforced",
+      "tests_unit_test_user_administration_test_service_boundary_rejects_non_admin_and_duplicate_or_invalid_email",
+      "tests_unit_test_user_administration_test_user_can_change_own_password_with_current_secret_and_revoke_sessions",
+      "tests_unit_test_user_administration_test_user_http_rejects_invalid_filters_reasons_and_duplicate_email",
+      "tests_unit_test_user_administration_test_user_http_routes_are_admin_only_and_never_return_passwords",
+      "timedelta",
+      "valueerror"
+    ],
+    "1": [
       "backend_nfx_artifacts_models",
       "backend_nfx_artifacts_models_artifact",
       "backend_nfx_artifacts_models_artifactstate",
@@ -45,7 +117,6 @@
       "binaryio",
       "bytesio",
       "fixture",
-      "protocol",
       "tests_integration_test_artifact_storage",
       "tests_integration_test_artifact_storage_memoryobjectstore",
       "tests_integration_test_artifact_storage_memoryobjectstore_head",
@@ -69,61 +140,73 @@
       "tests_integration_test_artifact_storage_test_reconciler_reports_orphans_without_deleting_them",
       "tests_integration_test_artifact_storage_test_two_concurrent_finalizations_cannot_create_two_finalized_references"
     ],
-    "1": [
-      "backend_nfx_identity_policy",
-      "backend_nfx_identity_policy_action",
-      "backend_nfx_identity_policy_authorize",
-      "backend_nfx_identity_policy_rationale_48",
-      "backend_nfx_identity_services",
-      "backend_nfx_identity_services_admin_event",
-      "backend_nfx_identity_services_assert_not_last_administrator",
-      "backend_nfx_identity_services_assert_version",
-      "backend_nfx_identity_services_authenticate",
-      "backend_nfx_identity_services_change_own_password",
-      "backend_nfx_identity_services_change_user_role",
-      "backend_nfx_identity_services_create_user",
-      "backend_nfx_identity_services_digest",
-      "backend_nfx_identity_services_duplicateuseremail",
-      "backend_nfx_identity_services_event",
-      "backend_nfx_identity_services_lastadministrator",
-      "backend_nfx_identity_services_normalize_email",
-      "backend_nfx_identity_services_py_user",
-      "backend_nfx_identity_services_rationale_130",
-      "backend_nfx_identity_services_rationale_94",
-      "backend_nfx_identity_services_require_administrator",
-      "backend_nfx_identity_services_require_authorized",
-      "backend_nfx_identity_services_reset_user_password",
-      "backend_nfx_identity_services_revoke_session",
-      "backend_nfx_identity_services_sessionidentity",
-      "backend_nfx_identity_services_set_user_active",
-      "backend_nfx_identity_services_subject_hash",
-      "backend_nfx_identity_services_update_user",
-      "backend_nfx_identity_services_user_context",
-      "backend_nfx_identity_services_useradministrationerror",
-      "backend_nfx_identity_services_userversionconflict",
-      "backend_nfx_identity_services_validated_email",
-      "backend_nfx_identity_services_validated_reason",
-      "django_db",
-      "strenum",
-      "tests_unit_test_identity_py_parametrize",
-      "tests_unit_test_identity_test_rbac_matrix_is_central_and_fails_closed",
-      "tests_unit_test_user_administration",
-      "tests_unit_test_user_administration_admin",
-      "tests_unit_test_user_administration_identity",
-      "tests_unit_test_user_administration_py_user",
-      "tests_unit_test_user_administration_test_admin_can_edit_role_and_lifecycle_with_audited_before_after",
-      "tests_unit_test_user_administration_test_admin_crud_redacts_password_and_records_required_audit_fields",
-      "tests_unit_test_user_administration_test_concurrent_stale_admin_mutation_cannot_reverse_deactivation",
-      "tests_unit_test_user_administration_test_deactivation_invalidates_a_real_session_on_next_resolution",
-      "tests_unit_test_user_administration_test_disable_and_reset_revoke_all_existing_sessions_and_preserve_history",
-      "tests_unit_test_user_administration_test_reasons_versions_and_last_administrator_are_enforced",
-      "tests_unit_test_user_administration_test_service_boundary_rejects_non_admin_and_duplicate_or_invalid_email",
-      "tests_unit_test_user_administration_test_user_can_change_own_password_with_current_secret_and_revoke_sessions",
-      "tests_unit_test_user_administration_test_user_http_rejects_invalid_filters_reasons_and_duplicate_email",
-      "tests_unit_test_user_administration_test_user_http_routes_are_admin_only_and_never_return_passwords",
-      "valueerror"
-    ],
     "2": [
+      "backend_nfx_adapters_fiscal",
+      "backend_nfx_adapters_fiscal_emptyfiscalsimulator",
+      "backend_nfx_adapters_fiscal_emptyfiscalsimulator_collect",
+      "backend_nfx_adapters_fiscal_fiscaldestinationerror",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard_init",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard_send",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard_validate",
+      "backend_nfx_adapters_fiscal_py_runtimeerror",
+      "backend_nfx_adapters_fiscal_rationale_1",
+      "backend_nfx_adapters_fiscal_rationale_12",
+      "backend_nfx_adapters_fiscal_rationale_17",
+      "backend_nfx_adapters_fiscal_rationale_43",
+      "backend_nfx_infrastructure_configuration",
+      "backend_nfx_infrastructure_configuration_configurationerror",
+      "backend_nfx_infrastructure_configuration_error",
+      "backend_nfx_infrastructure_configuration_load_settings",
+      "backend_nfx_infrastructure_configuration_publicsettings",
+      "backend_nfx_infrastructure_configuration_py_runtimeerror",
+      "backend_nfx_infrastructure_configuration_rationale_1",
+      "backend_nfx_infrastructure_configuration_rationale_18",
+      "backend_nfx_infrastructure_configuration_read_secret",
+      "backend_nfx_infrastructure_configuration_secretsettings",
+      "backend_nfx_infrastructure_configuration_settings",
+      "backend_nfx_infrastructure_configuration_validate_database_url",
+      "backend_nfx_infrastructure_configuration_validate_destination",
+      "backend_nfx_infrastructure_configuration_validate_secret",
+      "backend_nfx_infrastructure_http",
+      "backend_nfx_infrastructure_http_configure_logging",
+      "backend_nfx_infrastructure_http_correlationidmiddleware",
+      "backend_nfx_infrastructure_http_correlationidmiddleware_call",
+      "backend_nfx_infrastructure_http_correlationidmiddleware_init",
+      "backend_nfx_infrastructure_http_jsonformatter",
+      "backend_nfx_infrastructure_http_jsonformatter_format",
+      "backend_nfx_infrastructure_http_py_httprequest",
+      "backend_nfx_infrastructure_http_py_httpresponse",
+      "backend_nfx_infrastructure_redaction",
+      "backend_nfx_infrastructure_redaction_py_any",
+      "backend_nfx_infrastructure_redaction_rationale_1",
+      "backend_nfx_infrastructure_redaction_redact",
+      "backend_nfx_infrastructure_redaction_redact_string",
+      "backend_nfx_management_commands_scheduler",
+      "backend_nfx_management_commands_scheduler_command",
+      "backend_nfx_management_commands_scheduler_command_handle",
+      "backend_nfx_management_commands_scheduler_py_basecommand",
+      "backend_nfx_management_commands_worker",
+      "backend_nfx_management_commands_worker_command",
+      "backend_nfx_management_commands_worker_command_handle",
+      "backend_nfx_management_commands_worker_py_basecommand",
+      "logrecord",
+      "path",
+      "tests_unit_test_safe_configuration",
+      "tests_unit_test_safe_configuration_environment",
+      "tests_unit_test_safe_configuration_py_parametrize",
+      "tests_unit_test_safe_configuration_test_empty_allowlist_is_not_valid_for_runtime",
+      "tests_unit_test_safe_configuration_test_equivalent_or_changed_simulator_urls_are_rejected",
+      "tests_unit_test_safe_configuration_test_invalid_configuration_fails_without_disclosing_values",
+      "tests_unit_test_safe_configuration_test_local_profiles_default_to_the_empty_simulator",
+      "tests_unit_test_safe_configuration_test_logging_snapshot_redacts_nested_secret_canary",
+      "tests_unit_test_safe_configuration_test_non_local_profiles_require_explicit_allowlisted_simulator",
+      "tests_unit_test_safe_configuration_test_prohibited_destination_and_redirect_make_zero_network_calls",
+      "tests_unit_test_safe_configuration_test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads",
+      "tests_unit_test_safe_configuration_test_runtime_requires_an_explicit_transport_and_destination",
+      "tests_unit_test_safe_configuration_test_secret_can_be_loaded_from_a_mounted_file"
+    ],
+    "3": [
       "_codex_skills_graphify_references_add_watch_document",
       "_codex_skills_graphify_references_add_watch_url_ingestion",
       "_codex_skills_graphify_references_add_watch_watch_mode",
@@ -174,7 +257,7 @@
       "_codex_skills_graphify_skill_parallel_extraction",
       "_codex_skills_graphify_skill_semantic_extraction"
     ],
-    "3": [
+    "4": [
       "architecture",
       "architecture_11_organiza\u00e7\u00e3o_do_reposit\u00f3rio",
       "architecture_12_stack_selecionada_e_justificativa",
@@ -222,54 +305,6 @@
       "architecture_8_limites_de_confian\u00e7a",
       "architecture_9_vis\u00e3o_de_containers_e_deployment",
       "architecture_arquitetura_t\u00e9cnica_nfx_inov"
-    ],
-    "4": [
-      "any",
-      "auditevent",
-      "backend_nfx_audit_models",
-      "backend_nfx_audit_models_auditchain",
-      "backend_nfx_audit_models_auditevent",
-      "backend_nfx_audit_models_meta",
-      "backend_nfx_audit_models_rationale_9",
-      "backend_nfx_audit_services",
-      "backend_nfx_audit_services_auditservice",
-      "backend_nfx_audit_services_auditservice_append",
-      "backend_nfx_audit_services_auditservice_list",
-      "backend_nfx_audit_services_auditunavailable",
-      "backend_nfx_audit_services_auditverifier",
-      "backend_nfx_audit_services_auditverifier_verify",
-      "backend_nfx_audit_services_canonical",
-      "backend_nfx_audit_services_event_hash",
-      "backend_nfx_audit_services_event_payload",
-      "backend_nfx_audit_services_integrityreport",
-      "backend_nfx_audit_services_missingauditreason",
-      "backend_nfx_audit_services_py_runtimeerror",
-      "backend_nfx_audit_services_py_uuid",
-      "backend_nfx_audit_services_py_valueerror",
-      "backend_nfx_audit_services_rationale_29",
-      "backend_nfx_audit_services_rationale_83",
-      "backend_nfx_audit_views",
-      "backend_nfx_audit_views_events",
-      "backend_nfx_audit_views_integer",
-      "backend_nfx_audit_views_py_httprequest",
-      "backend_nfx_audit_views_py_jsonresponse",
-      "backend_nfx_audit_views_py_require_get",
-      "backend_nfx_identity_models",
-      "backend_nfx_identity_models_identitysession",
-      "backend_nfx_identity_models_loginthrottle",
-      "backend_nfx_identity_models_meta",
-      "backend_nfx_identity_models_rationale_58",
-      "backend_nfx_identity_models_role",
-      "backend_nfx_identity_models_user",
-      "backend_nfx_models",
-      "backend_nfx_models_rationale_1",
-      "datetime",
-      "tests_integration_test_audit",
-      "tests_integration_test_audit_py_django_db",
-      "tests_integration_test_audit_test_append_redacts_canaries_and_uses_a_stable_hash_vector",
-      "tests_integration_test_audit_test_audit_api_is_admin_only_and_paginates",
-      "tests_integration_test_audit_test_required_reasons_and_append_only_guards_are_enforced",
-      "tests_integration_test_audit_test_two_writers_serialize_and_verifier_detects_tampering_removal_and_reordering"
     ],
     "5": [
       "implementation_plan",
@@ -320,6 +355,52 @@
       "specs_readme_\u00edndice_de_implementa\u00e7\u00e3o_das_specs"
     ],
     "6": [
+      "any",
+      "auditevent",
+      "backend_nfx_audit_models",
+      "backend_nfx_audit_models_auditchain",
+      "backend_nfx_audit_models_auditevent",
+      "backend_nfx_audit_models_meta",
+      "backend_nfx_audit_models_rationale_9",
+      "backend_nfx_audit_services",
+      "backend_nfx_audit_services_auditservice",
+      "backend_nfx_audit_services_auditservice_append",
+      "backend_nfx_audit_services_auditservice_list",
+      "backend_nfx_audit_services_auditunavailable",
+      "backend_nfx_audit_services_auditverifier",
+      "backend_nfx_audit_services_auditverifier_verify",
+      "backend_nfx_audit_services_canonical",
+      "backend_nfx_audit_services_event_hash",
+      "backend_nfx_audit_services_event_payload",
+      "backend_nfx_audit_services_integrityreport",
+      "backend_nfx_audit_services_missingauditreason",
+      "backend_nfx_audit_services_py_runtimeerror",
+      "backend_nfx_audit_services_py_uuid",
+      "backend_nfx_audit_services_py_valueerror",
+      "backend_nfx_audit_services_rationale_29",
+      "backend_nfx_audit_services_rationale_83",
+      "backend_nfx_audit_views",
+      "backend_nfx_audit_views_events",
+      "backend_nfx_audit_views_integer",
+      "backend_nfx_audit_views_py_httprequest",
+      "backend_nfx_audit_views_py_jsonresponse",
+      "backend_nfx_audit_views_py_require_get",
+      "backend_nfx_identity_models",
+      "backend_nfx_identity_models_identitysession",
+      "backend_nfx_identity_models_loginthrottle",
+      "backend_nfx_identity_models_meta",
+      "backend_nfx_identity_models_rationale_58",
+      "backend_nfx_identity_models_role",
+      "backend_nfx_identity_models_user",
+      "datetime",
+      "tests_integration_test_audit",
+      "tests_integration_test_audit_py_django_db",
+      "tests_integration_test_audit_test_append_redacts_canaries_and_uses_a_stable_hash_vector",
+      "tests_integration_test_audit_test_audit_api_is_admin_only_and_paginates",
+      "tests_integration_test_audit_test_required_reasons_and_append_only_guards_are_enforced",
+      "tests_integration_test_audit_test_two_writers_serialize_and_verifier_detects_tampering_removal_and_reordering"
+    ],
+    "7": [
       "backend_nfx_infrastructure_dependencies",
       "backend_nfx_infrastructure_dependencies_dependencies_from_environment",
       "backend_nfx_infrastructure_dependencies_dependencycheck",
@@ -365,7 +446,52 @@
       "tests_unit_test_dependencies_test_dependency_check_is_injectable_and_reports_only_service_names",
       "tests_unit_test_dependencies_test_schema_incompatibility_makes_readiness_fail_without_details"
     ],
-    "7": [
+    "8": [
+      "backend_nfx_companies_views_companies",
+      "backend_nfx_companies_views_company_activate",
+      "backend_nfx_companies_views_company_create",
+      "backend_nfx_companies_views_company_deactivate",
+      "backend_nfx_companies_views_company_detail",
+      "backend_nfx_companies_views_company_enrichment",
+      "backend_nfx_companies_views_company_flow",
+      "backend_nfx_companies_views_company_payload",
+      "backend_nfx_companies_views_enrichment_payload",
+      "backend_nfx_companies_views_error",
+      "backend_nfx_companies_views_ip",
+      "backend_nfx_companies_views_json_body",
+      "backend_nfx_companies_views_py_company",
+      "backend_nfx_companies_views_py_uuid",
+      "backend_nfx_identity_services_resolve_session",
+      "backend_nfx_identity_views",
+      "backend_nfx_identity_views_admin_action",
+      "backend_nfx_identity_views_admin_error",
+      "backend_nfx_identity_views_csrf",
+      "backend_nfx_identity_views_integer",
+      "backend_nfx_identity_views_json_body",
+      "backend_nfx_identity_views_login",
+      "backend_nfx_identity_views_logout",
+      "backend_nfx_identity_views_protected",
+      "backend_nfx_identity_views_request_ip",
+      "backend_nfx_identity_views_session",
+      "backend_nfx_identity_views_user_active",
+      "backend_nfx_identity_views_user_create",
+      "backend_nfx_identity_views_user_password_change",
+      "backend_nfx_identity_views_user_password_reset",
+      "backend_nfx_identity_views_user_payload",
+      "backend_nfx_identity_views_user_role",
+      "backend_nfx_identity_views_user_update",
+      "backend_nfx_identity_views_users",
+      "enrichmentsnapshot",
+      "ensure_csrf_cookie",
+      "exception",
+      "httprequest",
+      "jsonresponse",
+      "protected",
+      "require_get",
+      "require_http_methods",
+      "require_post"
+    ],
+    "9": [
       "p1_nucleo_seguro",
       "p2_empresas_certificados",
       "p3_jobs_simuladores",
@@ -407,48 +533,42 @@
       "specs_p7_document_consultation_and_individual_download_seguran\u00e7a_auditoria_e_observabilidade",
       "specs_p7_document_consultation_and_individual_download_ui_e_autoriza\u00e7\u00e3o"
     ],
-    "8": [
-      "backend_nfx_adapters_fiscal",
-      "backend_nfx_adapters_fiscal_emptyfiscalsimulator",
-      "backend_nfx_adapters_fiscal_emptyfiscalsimulator_collect",
-      "backend_nfx_adapters_fiscal_fiscaldestinationerror",
-      "backend_nfx_adapters_fiscal_fiscaldestinationguard",
-      "backend_nfx_adapters_fiscal_fiscaldestinationguard_init",
-      "backend_nfx_adapters_fiscal_fiscaldestinationguard_send",
-      "backend_nfx_adapters_fiscal_fiscaldestinationguard_validate",
-      "backend_nfx_adapters_fiscal_py_runtimeerror",
-      "backend_nfx_adapters_fiscal_rationale_1",
-      "backend_nfx_adapters_fiscal_rationale_12",
-      "backend_nfx_adapters_fiscal_rationale_17",
-      "backend_nfx_adapters_fiscal_rationale_43",
-      "backend_nfx_infrastructure_configuration",
-      "backend_nfx_infrastructure_configuration_configurationerror",
-      "backend_nfx_infrastructure_configuration_error",
-      "backend_nfx_infrastructure_configuration_load_settings",
-      "backend_nfx_infrastructure_configuration_publicsettings",
-      "backend_nfx_infrastructure_configuration_py_runtimeerror",
-      "backend_nfx_infrastructure_configuration_rationale_1",
-      "backend_nfx_infrastructure_configuration_rationale_18",
-      "backend_nfx_infrastructure_configuration_read_secret",
-      "backend_nfx_infrastructure_configuration_secretsettings",
-      "backend_nfx_infrastructure_configuration_settings",
-      "backend_nfx_infrastructure_configuration_validate_database_url",
-      "backend_nfx_infrastructure_configuration_validate_destination",
-      "backend_nfx_infrastructure_configuration_validate_secret",
-      "path",
-      "tests_unit_test_safe_configuration",
-      "tests_unit_test_safe_configuration_environment",
-      "tests_unit_test_safe_configuration_py_parametrize",
-      "tests_unit_test_safe_configuration_test_empty_allowlist_is_not_valid_for_runtime",
-      "tests_unit_test_safe_configuration_test_equivalent_or_changed_simulator_urls_are_rejected",
-      "tests_unit_test_safe_configuration_test_invalid_configuration_fails_without_disclosing_values",
-      "tests_unit_test_safe_configuration_test_local_profiles_default_to_the_empty_simulator",
-      "tests_unit_test_safe_configuration_test_non_local_profiles_require_explicit_allowlisted_simulator",
-      "tests_unit_test_safe_configuration_test_prohibited_destination_and_redirect_make_zero_network_calls",
-      "tests_unit_test_safe_configuration_test_runtime_requires_an_explicit_transport_and_destination",
-      "tests_unit_test_safe_configuration_test_secret_can_be_loaded_from_a_mounted_file"
+    "10": [
+      "backend_nfx_companies_services",
+      "backend_nfx_companies_services_activate_company",
+      "backend_nfx_companies_services_can_execute_flow",
+      "backend_nfx_companies_services_company",
+      "backend_nfx_companies_services_companycnpjimmutable",
+      "backend_nfx_companies_services_companyerror",
+      "backend_nfx_companies_services_companyinactive",
+      "backend_nfx_companies_services_companynotfound",
+      "backend_nfx_companies_services_companyversionconflict",
+      "backend_nfx_companies_services_context",
+      "backend_nfx_companies_services_create_company",
+      "backend_nfx_companies_services_deactivate_company",
+      "backend_nfx_companies_services_duplicatecompanycnpj",
+      "backend_nfx_companies_services_enrichmentresult",
+      "backend_nfx_companies_services_invalidcnpj",
+      "backend_nfx_companies_services_invalidcompanyflow",
+      "backend_nfx_companies_services_mark_first_collection",
+      "backend_nfx_companies_services_normalize_cnpj",
+      "backend_nfx_companies_services_normalize_response",
+      "backend_nfx_companies_services_py_company",
+      "backend_nfx_companies_services_py_uuid",
+      "backend_nfx_companies_services_rationale_273",
+      "backend_nfx_companies_services_request_enrichment",
+      "backend_nfx_companies_services_require_company_access",
+      "backend_nfx_companies_services_set_flow_state",
+      "backend_nfx_companies_services_update_company",
+      "backend_nfx_companies_services_validated_name",
+      "backend_nfx_companies_services_validated_reason",
+      "backend_nfx_companies_views",
+      "companyflow",
+      "opencnpjclient",
+      "opencnpjresponse",
+      "sessionidentity"
     ],
-    "9": [
+    "11": [
       "eslint",
       "eslint_js",
       "eslint_plugin_react_hooks",
@@ -483,64 +603,38 @@
       "vite",
       "vitejs_plugin_react"
     ],
-    "10": [
-      "backend_nfx_identity_services_resolve_session",
-      "backend_nfx_identity_views",
-      "backend_nfx_identity_views_admin_action",
-      "backend_nfx_identity_views_admin_error",
-      "backend_nfx_identity_views_csrf",
-      "backend_nfx_identity_views_integer",
-      "backend_nfx_identity_views_json_body",
-      "backend_nfx_identity_views_login",
-      "backend_nfx_identity_views_logout",
-      "backend_nfx_identity_views_protected",
-      "backend_nfx_identity_views_request_ip",
-      "backend_nfx_identity_views_session",
-      "backend_nfx_identity_views_user_active",
-      "backend_nfx_identity_views_user_create",
-      "backend_nfx_identity_views_user_password_change",
-      "backend_nfx_identity_views_user_password_reset",
-      "backend_nfx_identity_views_user_payload",
-      "backend_nfx_identity_views_user_role",
-      "backend_nfx_identity_views_user_update",
-      "backend_nfx_identity_views_users",
-      "ensure_csrf_cookie",
-      "exception",
-      "httprequest",
-      "httpresponse",
-      "jsonresponse",
-      "require_get",
-      "require_http_methods",
-      "require_post"
-    ],
-    "11": [
-      "backend_nfx_infrastructure_http",
-      "backend_nfx_infrastructure_http_configure_logging",
-      "backend_nfx_infrastructure_http_correlationidmiddleware",
-      "backend_nfx_infrastructure_http_correlationidmiddleware_call",
-      "backend_nfx_infrastructure_http_correlationidmiddleware_init",
-      "backend_nfx_infrastructure_http_jsonformatter",
-      "backend_nfx_infrastructure_http_jsonformatter_format",
-      "backend_nfx_infrastructure_http_py_httprequest",
-      "backend_nfx_infrastructure_http_py_httpresponse",
-      "backend_nfx_infrastructure_redaction",
-      "backend_nfx_infrastructure_redaction_py_any",
-      "backend_nfx_infrastructure_redaction_rationale_1",
-      "backend_nfx_infrastructure_redaction_redact",
-      "backend_nfx_infrastructure_redaction_redact_string",
-      "backend_nfx_management_commands_scheduler",
-      "backend_nfx_management_commands_scheduler_command",
-      "backend_nfx_management_commands_scheduler_command_handle",
-      "backend_nfx_management_commands_scheduler_py_basecommand",
-      "backend_nfx_management_commands_worker",
-      "backend_nfx_management_commands_worker_command",
-      "backend_nfx_management_commands_worker_command_handle",
-      "backend_nfx_management_commands_worker_py_basecommand",
-      "logrecord",
-      "tests_unit_test_safe_configuration_test_logging_snapshot_redacts_nested_secret_canary",
-      "tests_unit_test_safe_configuration_test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads"
-    ],
     "12": [
+      "backend_nfx_adapters_opencnpj",
+      "backend_nfx_adapters_opencnpj_httpopencnpjclient",
+      "backend_nfx_adapters_opencnpj_httpopencnpjclient_fetch",
+      "backend_nfx_adapters_opencnpj_httpopencnpjclient_init",
+      "backend_nfx_adapters_opencnpj_httpresponse",
+      "backend_nfx_adapters_opencnpj_httpresponse_enter",
+      "backend_nfx_adapters_opencnpj_httpresponse_exit",
+      "backend_nfx_adapters_opencnpj_httpresponse_read",
+      "backend_nfx_adapters_opencnpj_opencnpjclient",
+      "backend_nfx_adapters_opencnpj_opencnpjclient_fetch",
+      "backend_nfx_adapters_opencnpj_opencnpjresponse",
+      "backend_nfx_adapters_opencnpj_rationale_14",
+      "backend_nfx_adapters_opencnpj_rationale_22",
+      "backend_nfx_adapters_opencnpj_rationale_38",
+      "backend_nfx_adapters_opencnpj_rationale_77",
+      "backend_nfx_adapters_opencnpj_unavailableopencnpjclient",
+      "backend_nfx_adapters_opencnpj_unavailableopencnpjclient_fetch",
+      "protocol",
+      "tests_unit_test_company_lifecycle",
+      "tests_unit_test_company_lifecycle_actor",
+      "tests_unit_test_company_lifecycle_company",
+      "tests_unit_test_company_lifecycle_recordingopencnpj",
+      "tests_unit_test_company_lifecycle_recordingopencnpj_fetch",
+      "tests_unit_test_company_lifecycle_recordingopencnpj_init",
+      "tests_unit_test_company_lifecycle_test_cnpj_is_normalized_validated_and_duplicate_is_rejected_by_constraint",
+      "tests_unit_test_company_lifecycle_test_company_api_is_restricted_to_admin_and_operator_and_has_no_delete",
+      "tests_unit_test_company_lifecycle_test_deactivation_preserves_flow_state_and_reactivation_resumes_it",
+      "tests_unit_test_company_lifecycle_test_first_durable_collection_makes_cnpj_immutable",
+      "tests_unit_test_company_lifecycle_test_public_enrichment_only_receives_cnpj_and_failures_are_snapshots"
+    ],
+    "13": [
       "codex_skills_graphify_skill",
       "codex_skills_graphify_skill_for_graphify_add_and_watch",
       "codex_skills_graphify_skill_for_graphify_query",
@@ -567,7 +661,7 @@
       "codex_skills_graphify_skill_what_graphify_is_for",
       "codex_skills_graphify_skill_what_you_must_do_when_invoked"
     ],
-    "13": [
+    "14": [
       "prd",
       "prd_10_ciclo_de_vida_de_empresa",
       "prd_11_ciclo_de_vida_de_certificado",
@@ -594,7 +688,7 @@
       "prd_8_escopo_do_mvp",
       "prd_prd_nfx_inov"
     ],
-    "14": [
+    "15": [
       "frontend_tsconfig",
       "frontend_tsconfig_compileroptions",
       "frontend_tsconfig_compileroptions_allowjs",
@@ -618,27 +712,28 @@
       "ref_es2022",
       "ref_src"
     ],
-    "15": [
-      "backend_nfx_identity_services_bootstrap_first_administrator",
-      "backend_nfx_identity_services_rationale_111",
-      "backend_nfx_management_commands_bootstrap_admin",
-      "backend_nfx_management_commands_bootstrap_admin_command",
-      "backend_nfx_management_commands_bootstrap_admin_command_handle",
-      "basecommand",
-      "capturefixture",
-      "tests_unit_test_identity",
-      "tests_unit_test_identity_py_django_db",
-      "tests_unit_test_identity_py_monkeypatch",
-      "tests_unit_test_identity_test_bootstrap_command_reads_external_secret_without_echoing_it",
-      "tests_unit_test_identity_test_bootstrap_is_idempotent_argon2_and_never_replaces_the_password",
-      "tests_unit_test_identity_test_bootstrap_refuses_to_add_itself_to_an_existing_user_base",
-      "tests_unit_test_identity_test_invalid_and_unknown_login_have_the_same_response_and_throttle",
-      "tests_unit_test_identity_test_login_requires_csrf_and_sets_only_a_secure_opaque_cookie",
-      "tests_unit_test_identity_test_only_active_users_authenticate_and_revoked_version_invalidates_sessions",
-      "tests_unit_test_identity_test_session_timeout_boundary_revocation_and_no_expiry_resurrection",
-      "timedelta"
-    ],
     "16": [
+      "backend_nfx_companies_metrics",
+      "backend_nfx_companies_metrics_companymetrics",
+      "backend_nfx_companies_metrics_companymetrics_init",
+      "backend_nfx_companies_metrics_companymetrics_record_enrichment",
+      "backend_nfx_companies_metrics_companymetrics_snapshot",
+      "backend_nfx_companies_metrics_companymetricssnapshot",
+      "backend_nfx_companies_metrics_rationale_21",
+      "backend_nfx_companies_models",
+      "backend_nfx_companies_models_company",
+      "backend_nfx_companies_models_companyflow",
+      "backend_nfx_companies_models_companystatus",
+      "backend_nfx_companies_models_enrichmentsnapshot",
+      "backend_nfx_companies_models_enrichmentstatus",
+      "backend_nfx_companies_models_flowfamily",
+      "backend_nfx_companies_models_flowstate",
+      "backend_nfx_companies_models_meta",
+      "backend_nfx_companies_models_rationale_36",
+      "backend_nfx_models",
+      "backend_nfx_models_rationale_1"
+    ],
+    "17": [
       "prd_9_10_xml_danfe_e_danfse",
       "prd_9_11_exporta\u00e7\u00e3o_zip",
       "prd_9_12_dashboard",
@@ -653,7 +748,7 @@
       "prd_9_9_organiza\u00e7\u00e3o_consulta_e_filtros",
       "prd_9_requisitos_funcionais_e_regras_de_neg\u00f3cio"
     ],
-    "17": [
+    "18": [
       "specs_p1_persistence_and_migrations",
       "specs_p1_persistence_and_migrations_aceite_e_dod",
       "specs_p1_persistence_and_migrations_baseline_e_escopo",
@@ -667,7 +762,7 @@
       "specs_p1_persistence_and_migrations_prop\u00f3sito_e_resultado",
       "specs_p1_persistence_and_migrations_testes_e_evid\u00eancias"
     ],
-    "18": [
+    "19": [
       "specs_p1_audit_foundation",
       "specs_p1_audit_foundation_aceite_e_dod",
       "specs_p1_audit_foundation_baseline_escopo_e_n\u00e3o_escopo",
@@ -680,7 +775,7 @@
       "specs_p1_audit_foundation_prop\u00f3sito_e_resultado",
       "specs_p1_audit_foundation_testes_e_evid\u00eancias"
     ],
-    "19": [
+    "20": [
       "specs_p1_authentication_sessions_and_rbac",
       "specs_p1_authentication_sessions_and_rbac_aceite_e_dod",
       "specs_p1_authentication_sessions_and_rbac_autentica\u00e7\u00e3o_sess\u00f5es_rbac_e_shell_web",
@@ -693,7 +788,7 @@
       "specs_p1_authentication_sessions_and_rbac_seguran\u00e7a_auditoria_e_observabilidade",
       "specs_p1_authentication_sessions_and_rbac_testes_sequ\u00eancia_e_aceite"
     ],
-    "20": [
+    "21": [
       "specs_p4_fiscal_document_ingestion_and_integrity",
       "specs_p4_fiscal_document_ingestion_and_integrity_aceite_e_dod",
       "specs_p4_fiscal_document_ingestion_and_integrity_baseline_escopo_e_n\u00e3o_escopo",
@@ -706,7 +801,19 @@
       "specs_p4_fiscal_document_ingestion_and_integrity_prop\u00f3sito_e_resultado",
       "specs_p4_fiscal_document_ingestion_and_integrity_seguran\u00e7a_auditoria_e_observabilidade"
     ],
-    "21": [
+    "22": [
+      "frontend_src_main",
+      "frontend_src_main_app",
+      "frontend_src_main_auditevent",
+      "frontend_src_main_company",
+      "frontend_src_main_companyflow",
+      "frontend_src_main_cookie",
+      "frontend_src_main_manageduser",
+      "frontend_src_main_root",
+      "frontend_src_main_statuslabel",
+      "frontend_src_main_user"
+    ],
+    "23": [
       "specs_p0_project_foundation",
       "specs_p0_project_foundation_baseline_escopo_e_n\u00e3o_escopo",
       "specs_p0_project_foundation_decis\u00f5es_e_detalhes_proposed",
@@ -718,7 +825,7 @@
       "specs_p0_project_foundation_sequ\u00eancia_aceite_e_dod",
       "specs_p0_project_foundation_testes_e_evid\u00eancias"
     ],
-    "22": [
+    "24": [
       "specs_p0_safe_configuration_and_test_isolation",
       "specs_p0_safe_configuration_and_test_isolation_baseline_escopo_e_n\u00e3o_escopo",
       "specs_p0_safe_configuration_and_test_isolation_configura\u00e7\u00e3o_segura_e_isolamento_fiscal_de_testes",
@@ -730,7 +837,7 @@
       "specs_p0_safe_configuration_and_test_isolation_sequ\u00eancia_aceite_e_dod",
       "specs_p0_safe_configuration_and_test_isolation_testes_e_evid\u00eancias"
     ],
-    "23": [
+    "25": [
       "specs_p1_object_storage_and_integrity",
       "specs_p1_object_storage_and_integrity_aceite_e_dod",
       "specs_p1_object_storage_and_integrity_armazenamento_de_objetos_e_integridade",
@@ -742,7 +849,7 @@
       "specs_p1_object_storage_and_integrity_prop\u00f3sito_e_resultado",
       "specs_p1_object_storage_and_integrity_seguran\u00e7a_observabilidade_e_falhas"
     ],
-    "24": [
+    "26": [
       "specs_p2_certificate_lifecycle_and_envelope_encryption",
       "specs_p2_certificate_lifecycle_and_envelope_encryption_aceite_e_dod",
       "specs_p2_certificate_lifecycle_and_envelope_encryption_baseline_escopo_e_n\u00e3o_escopo",
@@ -754,7 +861,7 @@
       "specs_p2_certificate_lifecycle_and_envelope_encryption_regras_interfaces_e_ui",
       "specs_p2_certificate_lifecycle_and_envelope_encryption_seguran\u00e7a_auditoria_e_observabilidade"
     ],
-    "25": [
+    "27": [
       "specs_p2_company_lifecycle_and_public_enrichment",
       "specs_p2_company_lifecycle_and_public_enrichment_aceite_e_dod",
       "specs_p2_company_lifecycle_and_public_enrichment_autoriza\u00e7\u00e3o_auditoria_e_observabilidade",
@@ -766,7 +873,7 @@
       "specs_p2_company_lifecycle_and_public_enrichment_prop\u00f3sito_e_resultado",
       "specs_p2_company_lifecycle_and_public_enrichment_regras_e_contratos"
     ],
-    "26": [
+    "28": [
       "specs_p3_durable_jobs_leases_and_policy_engine",
       "specs_p3_durable_jobs_leases_and_policy_engine_aceite_e_dod",
       "specs_p3_durable_jobs_leases_and_policy_engine_baseline_escopo_e_n\u00e3o_escopo",
@@ -778,7 +885,7 @@
       "specs_p3_durable_jobs_leases_and_policy_engine_prop\u00f3sito_e_resultado",
       "specs_p3_durable_jobs_leases_and_policy_engine_seguran\u00e7a_logs_m\u00e9tricas_e_health"
     ],
-    "27": [
+    "29": [
       "specs_p8_zip_export",
       "specs_p8_zip_export_aceite_e_dod",
       "specs_p8_zip_export_baseline_escopo_e_n\u00e3o_escopo",
@@ -790,7 +897,7 @@
       "specs_p8_zip_export_seguran\u00e7a_auditoria_observabilidade",
       "specs_p8_zip_export_ui_e_autoriza\u00e7\u00e3o"
     ],
-    "28": [
+    "30": [
       "architecture_nfx_inov",
       "backend_nfx_settings",
       "backend_nfx_settings_database_from_url",
@@ -801,7 +908,29 @@
       "spec_p0_safe_config",
       "spec_p1_audit"
     ],
-    "29": [
+    "31": [
+      "backend_nfx_companies_init",
+      "backend_nfx_companies_init_rationale_1",
+      "backend_nfx_urls",
+      "backend_nfx_urls_index",
+      "backend_nfx_urls_live",
+      "backend_nfx_urls_py_httprequest",
+      "backend_nfx_urls_py_jsonresponse",
+      "backend_nfx_urls_ready",
+      "httpresponse"
+    ],
+    "32": [
+      "backend_nfx_migrations_0006_company_lifecycle",
+      "backend_nfx_migrations_0006_company_lifecycle_migration",
+      "tests_integration_test_migrations",
+      "tests_integration_test_migrations_py_django_db",
+      "tests_integration_test_migrations_test_clean_install_and_rerun_produce_the_same_schema",
+      "tests_integration_test_migrations_test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue",
+      "tests_integration_test_migrations_test_schema_status_detects_ahead_incompatible_history",
+      "tests_integration_test_migrations_test_two_migrators_are_serialized_and_only_one_applies_the_baseline",
+      "tests_integration_test_migrations_unapply_nfx_migrations"
+    ],
+    "33": [
       "codex_skills_graphify_references_exports",
       "codex_skills_graphify_references_exports_graphify_reference_extra_exports_and_benchmark",
       "codex_skills_graphify_references_exports_step_6b_wiki_only_if_wiki_flag",
@@ -812,7 +941,7 @@
       "codex_skills_graphify_references_exports_step_7d_mcp_server_only_if_mcp_flag",
       "codex_skills_graphify_references_exports_step_8_token_reduction_benchmark_only_if_total_words_5000"
     ],
-    "30": [
+    "34": [
       "specs_p3_fiscal_adapter_simulation_and_fixtures",
       "specs_p3_fiscal_adapter_simulation_and_fixtures_aceite_e_dod",
       "specs_p3_fiscal_adapter_simulation_and_fixtures_baseline_escopo_e_n\u00e3o_escopo",
@@ -823,7 +952,7 @@
       "specs_p3_fiscal_adapter_simulation_and_fixtures_seguran\u00e7a_e_fixtures",
       "specs_p3_fiscal_adapter_simulation_and_fixtures_simuladores_fiscais_e_fixtures_seguras"
     ],
-    "31": [
+    "35": [
       "specs_p3_manual_collection_control",
       "specs_p3_manual_collection_control_aceite_e_dod",
       "specs_p3_manual_collection_control_baseline_escopo_e_n\u00e3o_escopo",
@@ -834,7 +963,7 @@
       "specs_p3_manual_collection_control_prop\u00f3sito_e_resultado",
       "specs_p3_manual_collection_control_ui_permiss\u00f5es_e_comportamento_vis\u00edvel"
     ],
-    "32": [
+    "36": [
       "specs_p8_retention_eligibility_aceite_e_dod",
       "specs_p8_retention_eligibility_baseline_escopo_e_n\u00e3o_escopo",
       "specs_p8_retention_eligibility_contratos_ui_e_autoriza\u00e7\u00e3o",
@@ -845,7 +974,7 @@
       "specs_p8_retention_eligibility_seguran\u00e7a_auditoria_e_observabilidade",
       "specs_p8_retention_eligibility_testes_e_recovery"
     ],
-    "33": [
+    "37": [
       "prd_19_jornadas_principais",
       "prd_j1_primeiro_acesso",
       "prd_j2_cadastro_e_coleta_inicial",
@@ -855,7 +984,7 @@
       "prd_j6_administra\u00e7\u00e3o_e_auditoria",
       "prd_j7_exclus\u00e3o_ap\u00f3s_reten\u00e7\u00e3o"
     ],
-    "34": [
+    "38": [
       "specs_p7_danfe_danfse_rendering",
       "specs_p7_danfe_danfse_rendering_auditoria_observabilidade_e_falhas",
       "specs_p7_danfe_danfse_rendering_contrato_e_estado_requerido",
@@ -865,7 +994,7 @@
       "specs_p7_danfe_danfse_rendering_testes_e_aceite_futuro",
       "specs_p7_danfe_danfse_rendering_ui_autoriza\u00e7\u00e3o_e_seguran\u00e7a"
     ],
-    "35": [
+    "39": [
       "specs_p8_dashboard_and_operational_health",
       "specs_p8_dashboard_and_operational_health_aceite_e_dod",
       "specs_p8_dashboard_and_operational_health_baseline_escopo_e_n\u00e3o_escopo",
@@ -875,7 +1004,7 @@
       "specs_p8_dashboard_and_operational_health_prop\u00f3sito_e_resultado",
       "specs_p8_dashboard_and_operational_health_ui_autoriza\u00e7\u00e3o_e_observabilidade"
     ],
-    "36": [
+    "40": [
       "specs_p9_backup_and_restore",
       "specs_p9_backup_and_restore_aceite_e_dod",
       "specs_p9_backup_and_restore_backup_e_restaura\u00e7\u00e3o_comprovada",
@@ -885,7 +1014,7 @@
       "specs_p9_backup_and_restore_seguran\u00e7a_observabilidade_e_falhas",
       "specs_p9_backup_and_restore_testes_e_evid\u00eancia"
     ],
-    "37": [
+    "41": [
       "specs_p9_controlled_deletion_aceite_e_dod",
       "specs_p9_controlled_deletion_baseline_escopo_e_gate_local",
       "specs_p9_controlled_deletion_estado_e_contrato_proposed",
@@ -895,7 +1024,7 @@
       "specs_p9_controlled_deletion_prop\u00f3sito_e_resultado",
       "specs_p9_controlled_deletion_ui_seguran\u00e7a_e_observabilidade"
     ],
-    "38": [
+    "42": [
       "specs_p9_runtime_and_https",
       "specs_p9_runtime_and_https_aceite_e_dod",
       "specs_p9_runtime_and_https_baseline_escopo_e_n\u00e3o_escopo",
@@ -905,16 +1034,7 @@
       "specs_p9_runtime_and_https_seguran\u00e7a_observabilidade_e_falhas",
       "specs_p9_runtime_and_https_testes_rollback_e_evid\u00eancia"
     ],
-    "39": [
-      "backend_nfx_urls",
-      "backend_nfx_urls_index",
-      "backend_nfx_urls_live",
-      "backend_nfx_urls_py_httprequest",
-      "backend_nfx_urls_py_httpresponse",
-      "backend_nfx_urls_py_jsonresponse",
-      "backend_nfx_urls_ready"
-    ],
-    "40": [
+    "43": [
       "docs_development",
       "docs_development_configura\u00e7\u00e3o_segura_e_isolamento_fiscal_p0_02_p0_04",
       "docs_development_contratos_dos_comandos",
@@ -923,16 +1043,7 @@
       "docs_development_persist\u00eancia_e_migra\u00e7\u00f5es_p1_01",
       "docs_development_scope_boundary"
     ],
-    "41": [
-      "frontend_src_main",
-      "frontend_src_main_app",
-      "frontend_src_main_auditevent",
-      "frontend_src_main_cookie",
-      "frontend_src_main_manageduser",
-      "frontend_src_main_root",
-      "frontend_src_main_user"
-    ],
-    "42": [
+    "44": [
       "specs_p9_hardening_aceite_e_dod",
       "specs_p9_hardening_baseline_escopo_e_n\u00e3o_escopo",
       "specs_p9_hardening_hardening_amea\u00e7as_e_testes_de_falha",
@@ -941,7 +1052,7 @@
       "specs_p9_hardening_prop\u00f3sito_e_resultado",
       "specs_p9_hardening_testes_observabilidade_e_capacidade"
     ],
-    "43": [
+    "45": [
       "specs_p9_internal_pilot_and_homologation_baseline_escopo_e_n\u00e3o_escopo",
       "specs_p9_internal_pilot_and_homologation_falhas_observabilidade_e_recovery",
       "specs_p9_internal_pilot_and_homologation_metadados",
@@ -950,16 +1061,7 @@
       "specs_p9_internal_pilot_and_homologation_prop\u00f3sito_e_resultado",
       "specs_p9_internal_pilot_and_homologation_testes_evid\u00eancias_e_aceite"
     ],
-    "44": [
-      "tests_integration_test_migrations",
-      "tests_integration_test_migrations_py_django_db",
-      "tests_integration_test_migrations_test_clean_install_and_rerun_produce_the_same_schema",
-      "tests_integration_test_migrations_test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue",
-      "tests_integration_test_migrations_test_schema_status_detects_ahead_incompatible_history",
-      "tests_integration_test_migrations_test_two_migrators_are_serialized_and_only_one_applies_the_baseline",
-      "tests_integration_test_migrations_unapply_nfx_migrations"
-    ],
-    "45": [
+    "46": [
       "codex_skills_graphify_references_query",
       "codex_skills_graphify_references_query_for_graphify_explain",
       "codex_skills_graphify_references_query_for_graphify_path",
@@ -967,7 +1069,7 @@
       "codex_skills_graphify_references_query_step_0_constrained_query_expansion_required_before_traversal",
       "codex_skills_graphify_references_query_step_1_traversal"
     ],
-    "46": [
+    "47": [
       "p8_zip_dashboard_retencao",
       "p9_operacao_piloto",
       "specs_p8_retention_eligibility",
@@ -975,115 +1077,111 @@
       "specs_p9_hardening",
       "specs_p9_internal_pilot_and_homologation"
     ],
-    "47": [
+    "48": [
       "prd_7_1_administrador",
       "prd_7_2_operador",
       "prd_7_3_visualizador",
       "prd_7_4_regra_global",
       "prd_7_usu\u00e1rios_e_pap\u00e9is"
     ],
-    "48": [
+    "49": [
       "architecture_10_1_m\u00f3dulos_de_dom\u00ednio",
       "architecture_10_2_adaptadores",
       "architecture_10_3_servi\u00e7os_transversais",
       "architecture_10_arquitetura_de_componentes"
     ],
-    "49": [
+    "50": [
       "codex_skills_graphify_references_add_watch",
       "codex_skills_graphify_references_add_watch_for_graphify_add",
       "codex_skills_graphify_references_add_watch_for_watch",
       "codex_skills_graphify_references_add_watch_graphify_reference_add_a_url_and_watch_a_folder"
     ],
-    "50": [
+    "51": [
       "codex_skills_graphify_references_hooks",
       "codex_skills_graphify_references_hooks_for_git_commit_hook",
       "codex_skills_graphify_references_hooks_for_native_claude_md_integration",
       "codex_skills_graphify_references_hooks_graphify_reference_commit_hook_and_native_claude_md_integration"
     ],
-    "51": [
+    "52": [
       "codex_skills_graphify_references_update",
       "codex_skills_graphify_references_update_for_cluster_only",
       "codex_skills_graphify_references_update_for_update_incremental_re_extraction",
       "codex_skills_graphify_references_update_graphify_reference_incremental_update_and_cluster_only"
     ],
-    "52": [
+    "53": [
       "frontend_index_document",
       "frontend_index_main_tsx",
       "frontend_index_nfx_inov",
       "frontend_index_root_mount"
     ],
-    "53": [
+    "54": [
       "specs_p1_object_storage_and_integrity_artifact",
       "specs_p2_certificate_lifecycle_and_envelope_encryption_certificate",
       "specs_p4_fiscal_document_ingestion_and_integrity_document",
       "specs_p7_danfe_danfse_rendering_pdf_renderer"
     ],
-    "54": [
+    "55": [
       "backend_nfx_migrations_0001_schema_contract",
       "backend_nfx_migrations_0001_schema_contract_migration",
       "backend_nfx_migrations_0001_schema_contract_rationale_7"
     ],
-    "55": [
+    "56": [
       "codex_skills_graphify_references_github_and_merge",
       "codex_skills_graphify_references_github_and_merge_graphify_reference_github_clone_and_cross_repo_merge",
       "codex_skills_graphify_references_github_and_merge_step_0_clone_github_repo_s_only_if_a_github_url_was_given"
     ],
-    "56": [
+    "57": [
       "codex_skills_graphify_references_transcribe",
       "codex_skills_graphify_references_transcribe_graphify_reference_transcribe_video_and_audio",
       "codex_skills_graphify_references_transcribe_step_2_5_transcribe_video_audio_files_only_if_video_files_detected"
     ],
-    "57": [
+    "58": [
       "scripts_smoke",
       "scripts_smoke_cleanup",
       "scripts_smoke_sh__entry"
     ],
-    "58": [
+    "59": [
       "scripts_test_integration",
       "scripts_test_integration_cleanup",
       "scripts_test_integration_sh__entry"
     ],
-    "59": [
+    "60": [
       "specs_p3_durable_jobs_leases_and_policy_engine_job_engine",
       "specs_p3_manual_collection_control_collection_request_service",
       "specs_p8_zip_export_zip_export_service"
     ],
-    "60": [
+    "61": [
       "tests_unit_test_health",
       "tests_unit_test_health_test_correlation_id_is_returned",
       "tests_unit_test_health_test_liveness_does_not_need_external_services"
     ],
-    "61": [
+    "62": [
       "agents",
       "agents_graphify"
     ],
-    "62": [
+    "63": [
       "backend_manage",
       "backend_manage_main"
     ],
-    "63": [
+    "64": [
       "backend_nfx_adapters_init",
       "backend_nfx_adapters_init_rationale_1"
     ],
-    "64": [
+    "65": [
       "backend_nfx_artifacts_init",
       "backend_nfx_artifacts_init_rationale_1"
     ],
-    "65": [
+    "66": [
       "backend_nfx_audit_init",
       "backend_nfx_audit_init_rationale_1"
     ],
-    "66": [
+    "67": [
       "backend_nfx_certificates_init",
       "backend_nfx_certificates_init_rationale_1"
     ],
-    "67": [
+    "68": [
       "backend_nfx_collection_init",
       "backend_nfx_collection_init_rationale_1"
-    ],
-    "68": [
-      "backend_nfx_companies_init",
-      "backend_nfx_companies_init_rationale_1"
     ],
     "69": [
       "backend_nfx_documents_init",
@@ -1164,129 +1262,147 @@
       "backend_nfx_audit_services_py_any"
     ],
     "89": [
-      "backend_nfx_identity_services_py_valueerror"
+      "backend_nfx_companies_services_py_sessionidentity"
     ],
     "90": [
-      "backend_nfx_identity_views_py_httprequest"
+      "backend_nfx_companies_views_py_httprequest"
     ],
     "91": [
-      "backend_nfx_identity_views_py_httpresponse"
+      "backend_nfx_companies_views_py_jsonresponse"
     ],
     "92": [
-      "backend_nfx_identity_views_py_jsonresponse"
+      "backend_nfx_identity_services_py_valueerror"
     ],
     "93": [
-      "backend_nfx_identity_views_py_require_get"
+      "backend_nfx_identity_views_py_httprequest"
     ],
     "94": [
-      "backend_nfx_management_commands_bootstrap_admin_py_basecommand"
+      "backend_nfx_identity_views_py_httpresponse"
     ],
     "95": [
-      "backend_nfx_management_commands_init"
+      "backend_nfx_identity_views_py_jsonresponse"
     ],
     "96": [
-      "backend_nfx_management_init"
+      "backend_nfx_identity_views_py_require_get"
     ],
     "97": [
-      "backend_nfx_wsgi"
+      "backend_nfx_management_commands_bootstrap_admin_py_basecommand"
     ],
     "98": [
-      "docker_compose_dev"
+      "backend_nfx_management_commands_init"
     ],
     "99": [
-      "frontend_eslint_config"
+      "backend_nfx_management_init"
     ],
     "100": [
-      "frontend_vite_config"
+      "backend_nfx_urls_py_httpresponse"
     ],
     "101": [
-      "specs_p1_authentication_sessions_and_rbac_authorize"
+      "backend_nfx_wsgi"
     ],
     "102": [
-      "specs_p1_authentication_sessions_and_rbac_identity_session"
+      "docker_compose_dev"
     ],
     "103": [
-      "specs_p1_authentication_sessions_and_rbac_user"
+      "frontend_eslint_config"
     ],
     "104": [
-      "specs_p1_object_storage_and_integrity_artifact_storage_service"
+      "frontend_vite_config"
     ],
     "105": [
-      "specs_p2_company_lifecycle_and_public_enrichment_company"
+      "specs_p1_authentication_sessions_and_rbac_authorize"
     ],
     "106": [
-      "specs_p3_fiscal_adapter_simulation_and_fixtures_fiscal_adapter_port"
+      "specs_p1_authentication_sessions_and_rbac_identity_session"
     ],
     "107": [
-      "tests_unit_test_user_administration_py_django_db"
+      "specs_p1_authentication_sessions_and_rbac_user"
     ],
     "108": [
+      "specs_p1_object_storage_and_integrity_artifact_storage_service"
+    ],
+    "109": [
+      "specs_p2_company_lifecycle_and_public_enrichment_company"
+    ],
+    "110": [
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_fiscal_adapter_port"
+    ],
+    "111": [
+      "tests_unit_test_company_lifecycle_py_django_db"
+    ],
+    "112": [
+      "tests_unit_test_company_lifecycle_py_sessionidentity"
+    ],
+    "113": [
+      "tests_unit_test_user_administration_py_django_db"
+    ],
+    "114": [
       "user"
     ]
   },
   "cohesion": {
-    "0": 0.07507914970601538,
-    "1": 0.13273001508295626,
-    "2": 0.05102040816326531,
-    "3": 0.0425531914893617,
-    "4": 0.08115942028985507,
+    "0": 0.08737060041407868,
+    "1": 0.07692307692307693,
+    "2": 0.061507936507936505,
+    "3": 0.05102040816326531,
+    "4": 0.0425531914893617,
     "5": 0.043478260869565216,
-    "6": 0.07188160676532769,
-    "7": 0.05384615384615385,
-    "8": 0.11605937921727395,
-    "9": 0.06060606060606061,
-    "10": 0.25396825396825395,
-    "11": 0.11333333333333333,
-    "12": 0.08,
+    "6": 0.080338266384778,
+    "7": 0.07188160676532769,
+    "8": 0.17386489479512734,
+    "9": 0.05384615384615385,
+    "10": 0.18371212121212122,
+    "11": 0.06060606060606061,
+    "12": 0.1206896551724138,
     "13": 0.08,
-    "14": 0.09090909090909091,
-    "15": 0.16993464052287582,
-    "16": 0.15384615384615385,
-    "17": 0.16666666666666666,
-    "18": 0.18181818181818182,
+    "14": 0.08,
+    "15": 0.09090909090909091,
+    "16": 0.21052631578947367,
+    "17": 0.15384615384615385,
+    "18": 0.16666666666666666,
     "19": 0.18181818181818182,
     "20": 0.18181818181818182,
-    "21": 0.2,
-    "22": 0.2,
+    "21": 0.18181818181818182,
+    "22": 0.2222222222222222,
     "23": 0.2,
     "24": 0.2,
     "25": 0.2,
     "26": 0.2,
     "27": 0.2,
-    "28": 0.2222222222222222,
-    "29": 0.2222222222222222,
+    "28": 0.2,
+    "29": 0.2,
     "30": 0.2222222222222222,
-    "31": 0.2222222222222222,
-    "32": 0.2222222222222222,
-    "33": 0.25,
-    "34": 0.25,
-    "35": 0.25,
-    "36": 0.25,
+    "31": 0.3055555555555556,
+    "32": 0.4166666666666667,
+    "33": 0.2222222222222222,
+    "34": 0.2222222222222222,
+    "35": 0.2222222222222222,
+    "36": 0.2222222222222222,
     "37": 0.25,
     "38": 0.25,
-    "39": 0.42857142857142855,
-    "40": 0.2857142857142857,
-    "41": 0.2857142857142857,
-    "42": 0.2857142857142857,
+    "39": 0.25,
+    "40": 0.25,
+    "41": 0.25,
+    "42": 0.25,
     "43": 0.2857142857142857,
-    "44": 0.6190476190476191,
-    "45": 0.3333333333333333,
+    "44": 0.2857142857142857,
+    "45": 0.2857142857142857,
     "46": 0.3333333333333333,
-    "47": 0.4,
-    "48": 0.5,
+    "47": 0.3333333333333333,
+    "48": 0.4,
     "49": 0.5,
     "50": 0.5,
     "51": 0.5,
     "52": 0.5,
     "53": 0.5,
-    "54": 0.6666666666666666,
+    "54": 0.5,
     "55": 0.6666666666666666,
     "56": 0.6666666666666666,
     "57": 0.6666666666666666,
     "58": 0.6666666666666666,
     "59": 0.6666666666666666,
     "60": 0.6666666666666666,
-    "61": 1.0,
+    "61": 0.6666666666666666,
     "62": 1.0,
     "63": 1.0,
     "64": 1.0,
@@ -1333,7 +1449,13 @@
     "105": 1.0,
     "106": 1.0,
     "107": 1.0,
-    "108": 1.0
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0
   },
   "gods": [
     {
@@ -1367,13 +1489,13 @@
       "degree": 21
     },
     {
-      "id": "backend_nfx_artifacts_models_artifact",
-      "label": "Artifact",
-      "degree": 20
-    },
-    {
       "id": "backend_nfx_infrastructure_configuration_load_settings",
       "label": "load_settings()",
+      "degree": 19
+    },
+    {
+      "id": "backend_nfx_artifacts_models_artifact",
+      "label": "Artifact",
       "degree": 19
     },
     {

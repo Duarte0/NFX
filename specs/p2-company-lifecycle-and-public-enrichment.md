@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P2 — pronta após núcleo P1.
+- **Fase/status:** P2 — concluída em 2026-08-06.
 - **Backlog:** P2-01, P2-02, parte de UI de P2-04.
 - **Dependências:** P0-04, P1-03 e P1-05.
 - **PRD:** FR-COMP-001, FR-COMP-002, FR-COMP-003, FR-COMP-004, FR-COMP-005; BR-COMP-001, BR-COMP-002, BR-COMP-003, BR-COMP-004, BR-COMP-005, BR-COMP-006, BR-COMP-007, BR-COMP-008; AUD-004, AUD-008, AUD-009; NFR-001, NFR-002. **Aceite:** AC-001, AC-019, AC-020, AC-023.
@@ -36,10 +36,55 @@ Constraint vence corrida de CNPJ duplicado. Timeout/404 OpenCNPJ gera estado inf
 
 ## Aceite e DoD
 
-- [ ] Duplicidade é rejeitada claramente e por constraint.
-- [ ] CNPJ com documento/coleta durável não muda.
-- [ ] Desativação motivada preserva todos os estados e impede agenda automática.
-- [ ] Fluxos podem ser pausados/habilitados independentemente.
-- [ ] OpenCNPJ envia somente CNPJ e nunca bloqueia operação.
+- [x] Duplicidade é rejeitada claramente e por constraint.
+- [x] CNPJ com documento/coleta durável não muda.
+- [x] Desativação motivada preserva todos os estados e impede agenda automática.
+- [x] Fluxos podem ser pausados/habilitados independentemente.
+- [x] OpenCNPJ envia somente CNPJ e nunca bloqueia operação.
 
-DoD: migrações, domínio, APIs, UI, auditoria, métricas e testes verdes. **Proposed:** shape dos snapshots/URLs; escolha local deve preservar invariantes.
+DoD: migrações, domínio, APIs, UI, auditoria, métricas e testes verdes. **Concluído em 2026-08-06.**
+
+## Decisões de implementação e evidências
+
+- **Accepted (Proposed resolvido):** `Company`, `CompanyFlow` e `EnrichmentSnapshot` pertencem a
+  `nfx.companies`; usam UUID na empresa, `version` para mutações concorrentes, CNPJ normalizado
+  armazenado em `CharField(64)` e uma constraint única persistente. O validador vigente aceita
+  CNPJ numérico de 14 posições com dígitos verificadores; a coluna já comporta a futura forma
+  alfanumérica sem presumir que ela seja válida hoje.
+- **Accepted (Proposed resolvido):** cada empresa nasce com NF-e e NFS-e independentes em
+  `habilitado`; a desativação altera apenas o estado da empresa, preservando fluxos, acervo e
+  futuros cursores. `can_execute_flow()` exige empresa ativa, fluxo habilitado e certificado
+  válido, deixando a integração do certificado para P2-03/P3.
+- **Accepted (Proposed resolvido):** os contratos HTTP internos são `GET /api/companies`,
+  `POST /api/companies/create`, `GET/PATCH /api/companies/<id>`, ações explícitas
+  `activate/deactivate`, `flows/<family>` e `enrichment`. Desativação exige `confirmed: true` e
+  motivo; não existe rota DELETE. A política server-side usa `Action.ADMINISTER_COMPANIES`.
+- **Accepted (Proposed resolvido):** snapshots guardam `source`, CNPJ solicitado, instante,
+  status, payload JSON público e `public_non_authoritative=true`; o payload não entra em logs ou
+  auditoria. `OpenCnpjClient` recebe somente o CNPJ normalizado, tem transporte HTTP opcional
+  injetável e o endpoint local padrão é um cliente indisponível seguro. Timeout, 404, vazio,
+  indisponibilidade e conteúdo malformado viram snapshot informativo e não alteram dados da
+  empresa nem estado fiscal.
+- **Implementação:** domínio e casos de uso em `backend/nfx/companies/{models,services,metrics}.py`,
+  contrato/adaptador em `backend/nfx/adapters/opencnpj.py`, endpoints em
+  `backend/nfx/companies/views.py` e `backend/nfx/urls.py`, registro em `backend/nfx/models.py`,
+  e migração `backend/nfx/migrations/0006_company_lifecycle.py`.
+- **UI:** `frontend/src/main.tsx` adiciona lista, cadastro, edição, detalhe, estados de
+  carregamento/vazio/erro, confirmação/motivo de desativação, controle independente dos fluxos e
+  indicação pública não autoritativa do enriquecimento, mantendo Visualizador sem administração.
+- **Auditoria/observabilidade:** criar, editar, ativar, desativar, alterar fluxo e enriquecer usam
+  `AuditService`; métricas de resultado/duração de OpenCNPJ, empresas por estado e fluxos pausados
+  ficam em `CompanyMetrics`. Payload público integral e identificadores desnecessários não são
+  registrados.
+- **Validação:** `tests/unit/test_company_lifecycle.py` cobre CNPJ válido/inválido/duplicado,
+  constraint, imutabilidade antes/depois da primeira coleta durável, desativação/reativação,
+  preservação de fluxo, RBAC, ausência de DELETE, fake OpenCNPJ, somente-CNPJ, sucesso e timeout.
+  `tests/integration/test_migrations.py` cobre instalação limpa, rerun, falha/recovery e dois
+  migradores concorrentes incluindo `0006_company_lifecycle`. Docker integration: 18 testes
+  verdes; foco P2 + regressões: 38 testes verdes; frontend lint/build verdes; Ruff verde.
+- **Graphify:** `graphify . --update --code-only` e `graphify cluster-only .` atualizaram o grafo,
+  relatório, manifest e HTML; a consulta posterior encontrou os nós de empresa, enriquecimento,
+  adaptador, serviços, testes e migração. A atualização semântica completa foi tentada e falhou
+  somente porque não há chave LLM configurada (`5 doc/paper/image file(s) need semantic extraction`);
+  por isso a representação AST/código está atualizada, mas a camada semântica dos documentos não é
+  declarada como sincronizada nesta sessão.

@@ -1,1 +1,1 @@
-"""Company boundary (no domain implementation in P0)."""
+"""Company lifecycle, flow configuration, and public enrichment boundary."""
