@@ -2,7 +2,7 @@
 
 ## Autoridade, baseline e regra de uso
 
-Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0 e P1 estão implementados; as specs P2 em diante permanecem no backlog.
+Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão implementados, exceto o item P1-04 que mantém seu blocker local documentado.
 
 Uma spec individual fica concluída somente quando seu próprio DoD tem evidência. Uma fase fica concluída somente quando todas as specs da fase estão concluídas; marcar uma spec não marca automaticamente a fase.
 
@@ -18,7 +18,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 6 | [x] | `p1-audit-foundation.md` | P1 | P1-05 | P1-01, P1-03 |
 | 7 | [ ] | `p1-user-administration.md` | P1 | P1-04 | P1-02, P1-03, P1-05 |
 | 8 | [x] | `p2-company-lifecycle-and-public-enrichment.md` | P2 | P2-01, P2-02, P2-04 (empresa/UI) | P0-04, P1-03, P1-05 |
-| 9 | [ ] | `p2-certificate-lifecycle-and-envelope-encryption.md` | P2 | P2-03, P2-04 (certificado/UI) | P1-05, P1-06, P2-01 |
+| 9 | [x] | `p2-certificate-lifecycle-and-envelope-encryption.md` | P2 | P2-03, P2-04 (certificado/UI) | P1-05, P1-06, P2-01 |
 | 10 | [ ] | `p3-durable-jobs-leases-and-policy-engine.md` | P3 | P3-01, P3-02, P3-04 | P1-01, P1-05 |
 | 11 | [ ] | `p3-manual-collection-control.md` | P3 | P3-05 | P1-03, P1-05, P3-01, P3-02 |
 | 12 | [ ] | `p3-fiscal-adapter-simulation-and-fixtures.md` | P3 | P3-03 | P0-04, P3-01 |
@@ -46,7 +46,7 @@ Todos os itens P0-01 a P9-05 estão cobertos. P2-04 é deliberadamente compartil
 - Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 também pode avançar após P1/P3, sem esperar todo P8.
 - P9-03 depende de restore comprovado, mas esse gate não bloqueia outras specs.
 
-Fases: P0 tem 2 specs e está concluída; P1 tem 5 specs (4 concluídas, P1-04 bloqueada localmente); P2, 2; P3, 3; P4, 1; P5, 1; P6, 1; P7, 2; P8, 3; P9, 5. Total: 25.
+Fases: P0 tem 2 specs e está concluída; P1 tem 5 specs (4 concluídas, P1-04 bloqueada localmente); P2 tem 2 specs e está concluída; P3, 3; P4, 1; P5, 1; P6, 1; P7, 2; P8, 3; P9, 5. Total: 25.
 
 ## Decisões Open, Blocked, Deferred e Proposed
 
@@ -59,6 +59,6 @@ Fases: P0 tem 2 specs e está concluída; P1 tem 5 specs (4 concluídas, P1-04 b
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07 e P2-01/P2-02/P2-04 estão implementados. A próxima implementável é `p2-certificate-lifecycle-and-envelope-encryption.md` (P2-03), dependente apenas de P1-05, P1-06 e P2-01.
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07 e P2-01/P2-02/P2-03/P2-04 estão implementados. A próxima implementável é `p3-durable-jobs-leases-and-policy-engine.md` (P3-01/P3-02/P3-04), dependente de P1-01 e P1-05.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.

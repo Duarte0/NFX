@@ -3,6 +3,7 @@ from django.urls import path
 
 from nfx.audit import views as audit_views
 from nfx.companies import views as company_views
+from nfx.certificates import views as certificate_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 
@@ -44,4 +45,6 @@ urlpatterns = [
     path("api/companies/<uuid:company_id>/deactivate", company_views.company_deactivate),
     path("api/companies/<uuid:company_id>/flows/<str:family>", company_views.company_flow),
     path("api/companies/<uuid:company_id>/enrichment", company_views.company_enrichment),
+    path("api/companies/<uuid:company_id>/certificate", certificate_views.certificate_detail),
+    path("api/companies/<uuid:company_id>/certificate/upload", certificate_views.certificate_upload),
 ]

@@ -151,14 +151,24 @@ flowchart LR
 |---|---|---|---|---|---|
 | P2-01 | Empresa, CNPJ normalizado/único, imutabilidade, ativação, pausa e motivo — **implementado** (`nfx.companies`, `0006_company_lifecycle`, serviços e APIs) | P1-03, P1-05 | regras de empresas do PRD | Constraint, RBAC, unidade e integração | Desativação preserva estado |
 | P2-02 | OpenCNPJ opcional e não autoritativo — **implementado** (`OpenCnpjClient`, snapshots, métricas e estados de falha) | P2-01, P0-04 | FR-COMP-004/005; BR-COMP-007/008 | Fake, timeout, conteúdo malformado e somente CNPJ | Falha não bloqueia cadastro |
-| P2-03 | Upload/validação de PFX, cifragem, A1 corrente único e vencimento | P1-05, P1-06, P2-01 | regras de certificados do PRD | Fixture sintética, senha/CNPJ inválidos | Rejeitar antes de persistir; substituição preserva acervo |
-| P2-04 | UI de empresas, fluxos, cobertura e certificado — **empresa/UI implementada** (`frontend/src/main.tsx`, P2-01/P2-02) | P2-01, P2-02, P2-03 | AC-001, AC-002, AC-020, AC-021 | UI de empresa, mensagens seguras, build/lint | Segredo nunca exibido |
+| P2-03 | Upload/validação de PFX, cifragem, A1 corrente único e vencimento — **implementado** (`nfx.certificates`, `0007_certificate_lifecycle`, `nfx.collection`) | P1-05, P1-06, P2-01 | regras de certificados do PRD | Fixture sintética, senha/CNPJ inválidos, envelope, corrida e storage failure | Rejeitar antes de persistir; substituição preserva acervo |
+| P2-04 | UI de empresas, fluxos, cobertura e certificado — **implementado** (`frontend/src/main.tsx`, P2-01/P2-02/P2-03) | P2-01, P2-02, P2-03 | AC-001, AC-002, AC-020, AC-021 | UI de empresa/certificado, mensagens seguras, build/lint | Segredo nunca exibido |
 
 **Evidência P2-01/P2-02/P2-04 (empresa):** `tests/unit/test_company_lifecycle.py`,
 `tests/integration/test_migrations.py`, migração `0006_company_lifecycle`, frontend lint/build e
 Docker integration (18 testes) verdes em 2026-08-06. Decisões Proposed aceitas: UUID/version,
 coluna de CNPJ com capacidade alfanumérica futura, dois fluxos criados independentemente, rotas
 de ação sem DELETE e `OpenCnpjClient` injetável com snapshots públicos não autoritativos.
+
+**Evidência P2-03/P2-04 (certificado):** `backend/nfx/certificates/{models,services,views}.py`,
+`backend/nfx/collection/models.py`, migration `0007_certificate_lifecycle`,
+`tests/unit/test_certificate_lifecycle.py`, `tests/unit/test_safe_configuration.py`,
+`tests/integration/test_migrations.py` e `frontend/src/main.tsx`. A validação isolada executou
+29 testes da spec/configuração, 61 testes unitários e 18 testes de integração, todos verdes; o frontend
+passou lint/build e Ruff passou no backend/testes. Decisões Proposed aceitas: `cryptography`
+44.0.2 com AES-256-GCM, chave mestre externa base64url de 32 bytes com versão 1, limite de 5 MiB,
+estado corrente com constraints parciais de empresa/fingerprint e registro `queued` idempotente
+para handoff da coleta inicial sem transporte inline.
 
 ### P3 — Jobs, scheduler, políticas e simuladores
 

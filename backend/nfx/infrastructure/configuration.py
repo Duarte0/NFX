@@ -7,6 +7,8 @@ any work.
 
 from __future__ import annotations
 
+import base64
+import binascii
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -26,6 +28,8 @@ KNOWN_NFX_KEYS = frozenset(
         "NFX_PROCESS",
         "NFX_SECRET_KEY",
         "NFX_SECRET_KEY_FILE",
+        "NFX_CERTIFICATE_MASTER_KEY",
+        "NFX_CERTIFICATE_MASTER_KEY_FILE",
         "NFX_FISCAL_TRANSPORT",
         "NFX_FISCAL_DESTINATION",
         "NFX_FISCAL_ALLOWLIST",
@@ -47,6 +51,7 @@ class SecretSettings:
     django_secret_key: str
     database_url: str
     minio_secret_key: str
+    certificate_master_key: bytes
 
 
 @dataclass(frozen=True)
@@ -78,6 +83,23 @@ def _validate_secret(value: str | None, name: str) -> str:
     if not value or "CHANGE_ME" in value:
         raise _error(name)
     return value
+
+
+def _read_certificate_master_key(
+    environ: Mapping[str, str],
+) -> bytes:
+    encoded = _read_secret(
+        environ,
+        "NFX_CERTIFICATE_MASTER_KEY",
+        "NFX_CERTIFICATE_MASTER_KEY_FILE",
+    )
+    try:
+        key = base64.urlsafe_b64decode(encoded.encode("ascii"))
+    except (UnicodeEncodeError, ValueError, binascii.Error) as exc:
+        raise _error("NFX_CERTIFICATE_MASTER_KEY") from exc
+    if len(key) != 32:
+        raise _error("NFX_CERTIFICATE_MASTER_KEY")
+    return key
 
 
 def _validate_database_url(value: str | None) -> str:
@@ -159,5 +181,6 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
             minio_secret_key=_validate_secret(
                 values.get("MINIO_ROOT_PASSWORD"), "MINIO_ROOT_PASSWORD"
             ),
+            certificate_master_key=_read_certificate_master_key(values),
         ),
     )

@@ -65,19 +65,19 @@
     "semantic_hash": "a85c5725d160c1adc06d40d4741c6f23"
   },
   "docker-compose.yml": {
-    "mtime": 1785857156.5040236,
-    "ast_hash": "ee710374452052fe4d1fcb2e3f5f709a",
-    "semantic_hash": "ee710374452052fe4d1fcb2e3f5f709a"
+    "mtime": 1786020680.341172,
+    "ast_hash": "44598f5fc716e2e3169e029a1328aa02",
+    "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786016846.751058,
-    "ast_hash": "efddcb9c8cd6642ecaf5828135c4698f",
-    "semantic_hash": "efddcb9c8cd6642ecaf5828135c4698f"
+    "mtime": 1786027833.123773,
+    "ast_hash": "7a53a670de246f846214fc53ddd67e31",
+    "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1785893887.6080108,
-    "ast_hash": "f74acc2fd9d3d7066a9ee07ca36a0122",
-    "semantic_hash": "f74acc2fd9d3d7066a9ee07ca36a0122"
+    "mtime": 1786027791.8228173,
+    "ast_hash": "00e7c51a99d03b2d5058eb21cff9c9b3",
+    "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
     "mtime": 1785878785.9330065,
@@ -110,19 +110,19 @@
     "semantic_hash": "b0626e9f398006c53f5d3226cc7d7b54"
   },
   "specs/p1-user-administration.md": {
-    "mtime": 1786016846.751058,
-    "ast_hash": "5140040a83de0307897d67502b2f7e3e",
-    "semantic_hash": "5140040a83de0307897d67502b2f7e3e"
+    "mtime": 1786020325.6521432,
+    "ast_hash": "d2e60d222a9e091e8ebfb6d3101dad3a",
+    "semantic_hash": ""
   },
   "specs/p2-certificate-lifecycle-and-envelope-encryption.md": {
-    "mtime": 1785879275.9521794,
-    "ast_hash": "bed5f77e128a8349b70b8d3c723691c4",
-    "semantic_hash": "bed5f77e128a8349b70b8d3c723691c4"
+    "mtime": 1786027735.3758771,
+    "ast_hash": "fbd62d9a5df4ea4ed9f36327de0dee0d",
+    "semantic_hash": ""
   },
   "specs/p2-company-lifecycle-and-public-enrichment.md": {
-    "mtime": 1785879275.9521794,
-    "ast_hash": "90e0d09b0817b19fb928f352d962dcb6",
-    "semantic_hash": "90e0d09b0817b19fb928f352d962dcb6"
+    "mtime": 1786022614.2785342,
+    "ast_hash": "74edf975e3c6f053a78960e27ca9c2d9",
+    "semantic_hash": ""
   },
   "specs/p3-durable-jobs-leases-and-policy-engine.md": {
     "mtime": 1785879309.7251318,
@@ -235,14 +235,14 @@
     "semantic_hash": "0ea3186319bc8089e1cece3bb099c5b7"
   },
   "backend/nfx/certificates/__init__.py": {
-    "mtime": 1785882349.8717988,
-    "ast_hash": "8cd2cf7555ec5374b247b98b82a498bc",
-    "semantic_hash": "8cd2cf7555ec5374b247b98b82a498bc"
+    "mtime": 1786027017.0424943,
+    "ast_hash": "a2a1ce047bebaade432ebc02686e73d1",
+    "semantic_hash": ""
   },
   "backend/nfx/collection/__init__.py": {
-    "mtime": 1785882349.8719208,
-    "ast_hash": "e1309ece588bda1dd1172f18ee009e15",
-    "semantic_hash": "e1309ece588bda1dd1172f18ee009e15"
+    "mtime": 1786027017.0424943,
+    "ast_hash": "aea0f11ee245d3b33d151a14b33c6166",
+    "semantic_hash": ""
   },
   "backend/nfx/companies/__init__.py": {
     "mtime": 1786022003.841117,
@@ -320,9 +320,9 @@
     "semantic_hash": "090595e2358fc50b3215387c7e3b3c28"
   },
   "backend/nfx/urls.py": {
-    "mtime": 1786022003.841117,
-    "ast_hash": "63f0073b2d070e1049d4818f1a3af0eb",
-    "semantic_hash": "63f0073b2d070e1049d4818f1a3af0eb"
+    "mtime": 1786027221.3573575,
+    "ast_hash": "8de14c4ccd8dccd7282d13fe710f3c4b",
+    "semantic_hash": ""
   },
   "backend/nfx/wsgi.py": {
     "mtime": 1785882349.870728,
@@ -340,9 +340,9 @@
     "semantic_hash": "8435964a4fd1a46cc8b7f44ad069a630"
   },
   "frontend/src/main.tsx": {
-    "mtime": 1786022428.9917498,
-    "ast_hash": "f20b6cf281cd10b2154456a4a70e7c13",
-    "semantic_hash": "f20b6cf281cd10b2154456a4a70e7c13"
+    "mtime": 1786027367.3112366,
+    "ast_hash": "dadcdbe1b0b7c6af7bbe74a684823589",
+    "semantic_hash": ""
   },
   "frontend/tsconfig.json": {
     "mtime": 1785882401.3943243,
@@ -390,19 +390,19 @@
     "semantic_hash": "1be411eb5a14006dfb7ff89dcba80aff"
   },
   "docker-compose.app.yml": {
-    "mtime": 1785883720.0369532,
-    "ast_hash": "ea94eca25355fd1aafab25b019d169fa",
-    "semantic_hash": "ea94eca25355fd1aafab25b019d169fa"
+    "mtime": 1786026993.0915072,
+    "ast_hash": "70d7d01ba002be47a414d5a3e36b0906",
+    "semantic_hash": ""
   },
   "docker-compose.test.yml": {
-    "mtime": 1785883720.0369532,
-    "ast_hash": "6ff33986de92ddcd3de0698ba25cce2a",
-    "semantic_hash": "6ff33986de92ddcd3de0698ba25cce2a"
+    "mtime": 1786026993.0915072,
+    "ast_hash": "723542960edd6da821c8fdf6dc9c0f13",
+    "semantic_hash": ""
   },
   "docs/DEVELOPMENT.md": {
-    "mtime": 1785884518.587116,
-    "ast_hash": "41a162eb756c96e23341d14a1d45cecb",
-    "semantic_hash": "41a162eb756c96e23341d14a1d45cecb"
+    "mtime": 1786026993.0925071,
+    "ast_hash": "4bd7b971c60c87caf0a8ad3f42ae1cd2",
+    "semantic_hash": ""
   },
   "frontend/index.html": {
     "mtime": 1785882401.3944385,
@@ -415,9 +415,9 @@
     "semantic_hash": "2c9f087f718059ff1dca45546773f520"
   },
   "requirements.txt": {
-    "mtime": 1785889402.7416396,
-    "ast_hash": "11e7f1494432a898fb0e40cb15410c45",
-    "semantic_hash": "11e7f1494432a898fb0e40cb15410c45"
+    "mtime": 1786026993.089507,
+    "ast_hash": "eacfcfb2f7f6788b2cbc58a10c2bf1f5",
+    "semantic_hash": ""
   },
   "backend/nfx/adapters/fiscal.py": {
     "mtime": 1785883805.4602418,
@@ -425,9 +425,9 @@
     "semantic_hash": "e19112108453ba5f5e7c6ff9c4744b1f"
   },
   "backend/nfx/infrastructure/configuration.py": {
-    "mtime": 1785883959.4644756,
-    "ast_hash": "c4ad8c4e824610384e813ec5567c4f81",
-    "semantic_hash": "c4ad8c4e824610384e813ec5567c4f81"
+    "mtime": 1786027374.0142307,
+    "ast_hash": "d1739a4519ab2db2f34cd94c7e1d2fd6",
+    "semantic_hash": ""
   },
   "backend/nfx/infrastructure/redaction.py": {
     "mtime": 1785883805.4592416,
@@ -435,9 +435,9 @@
     "semantic_hash": "2ac9cac1a32d8b34e45e76060047d15c"
   },
   "tests/unit/test_safe_configuration.py": {
-    "mtime": 1785883959.4644756,
-    "ast_hash": "45222b3282a89b0cda54ec523b24ac09",
-    "semantic_hash": "45222b3282a89b0cda54ec523b24ac09"
+    "mtime": 1786027227.2933528,
+    "ast_hash": "a1e20854a8cde18c4deeeb50f0bfaa39",
+    "semantic_hash": ""
   },
   "backend/nfx/infrastructure/schema.py": {
     "mtime": 1785884518.587116,
@@ -465,9 +465,9 @@
     "semantic_hash": "4a7a1dcf7939f053fa37862ccef77e01"
   },
   "tests/integration/test_migrations.py": {
-    "mtime": 1786022207.8959692,
-    "ast_hash": "8ada600eccfb3599e4f1879a4ec56ecf",
-    "semantic_hash": "8ada600eccfb3599e4f1879a4ec56ecf"
+    "mtime": 1786027640.3709755,
+    "ast_hash": "854b944828dc7221aba5776b6d49e95d",
+    "semantic_hash": ""
   },
   "backend/nfx/artifacts/models.py": {
     "mtime": 1785885213.871288,
@@ -485,9 +485,9 @@
     "semantic_hash": "1599a9cc3d4aa12b4a8729583fcc9655"
   },
   "backend/nfx/models.py": {
-    "mtime": 1786022003.841117,
-    "ast_hash": "f875b215f72ee8ea0be4df62ada852f2",
-    "semantic_hash": "f875b215f72ee8ea0be4df62ada852f2"
+    "mtime": 1786026993.0905073,
+    "ast_hash": "7e04d6c0ce2fa5440d75b33af455a6cb",
+    "semantic_hash": ""
   },
   "tests/integration/test_artifact_storage.py": {
     "mtime": 1785885387.2393918,
@@ -598,5 +598,35 @@
     "mtime": 1786022657.8454804,
     "ast_hash": "3f4f5b29cb2c616e86e3522c86ab9905",
     "semantic_hash": "3f4f5b29cb2c616e86e3522c86ab9905"
+  },
+  "backend/nfx/certificates/models.py": {
+    "mtime": 1786027473.10014,
+    "ast_hash": "8d03cbbc80bc0365f62d6dd16c08ddb9",
+    "semantic_hash": ""
+  },
+  "backend/nfx/certificates/services.py": {
+    "mtime": 1786027552.5990634,
+    "ast_hash": "578ce4e463b546b58e7e5fe7b1613106",
+    "semantic_hash": ""
+  },
+  "backend/nfx/certificates/views.py": {
+    "mtime": 1786027473.10114,
+    "ast_hash": "db8eb4eb32fa43b3388d068f63352d52",
+    "semantic_hash": ""
+  },
+  "backend/nfx/collection/models.py": {
+    "mtime": 1786027473.10014,
+    "ast_hash": "565d7fe27a18477e3d8d62eda41801c8",
+    "semantic_hash": ""
+  },
+  "backend/nfx/migrations/0007_certificate_lifecycle.py": {
+    "mtime": 1786027045.900478,
+    "ast_hash": "81ddde0591ccb2b5f8c8e427b0fe0b4b",
+    "semantic_hash": ""
+  },
+  "tests/unit/test_certificate_lifecycle.py": {
+    "mtime": 1786027901.5176985,
+    "ast_hash": "bf4e8dfd8491408468caaebea36a054f",
+    "semantic_hash": ""
   }
 }

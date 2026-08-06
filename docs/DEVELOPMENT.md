@@ -61,7 +61,9 @@ Every web, worker and scheduler boot loads `nfx.infrastructure.configuration` be
 connection. `NFX_PROFILE` is mandatory and is exactly `test`, `development`, `homologation`, or
 `runtime`; it is never inferred from a hostname. `NFX_SECRET_KEY` is supplied through the process
 environment or `NFX_SECRET_KEY_FILE` (a mounted secret file), never both. `DATABASE_URL` and
-`MINIO_ROOT_PASSWORD` are also required external secrets; PostgreSQL URLs, MinIO credentials and
+`MINIO_ROOT_PASSWORD` and `NFX_CERTIFICATE_MASTER_KEY` are also required external secrets;
+the certificate key is base64url-encoded 32-byte key material and may be mounted through
+`NFX_CERTIFICATE_MASTER_KEY_FILE`. PostgreSQL URLs, MinIO credentials and
 `CHANGE_ME` values fail boot with a safe, non-zero configuration error.
 
 `test` and `development` are restricted to `simulator://empty` and local transport names. The

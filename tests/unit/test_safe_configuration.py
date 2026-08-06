@@ -18,6 +18,7 @@ def environment(**overrides: str) -> dict[str, str]:
     values = {
         "NFX_PROFILE": "test",
         "NFX_SECRET_KEY": CANARY,
+        "NFX_CERTIFICATE_MASTER_KEY": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
         "NFX_FISCAL_TRANSPORT": "simulator",
         "NFX_FISCAL_DESTINATION": "simulator://empty",
         "DATABASE_URL": "postgresql://user:password@database.test:5432/nfx_test",
@@ -72,6 +73,13 @@ def test_secret_can_be_loaded_from_a_mounted_file(tmp_path: Path) -> None:
     secret_file.write_text(CANARY, encoding="utf-8")
     settings = load_settings(environment(NFX_SECRET_KEY="", NFX_SECRET_KEY_FILE=str(secret_file)))
     assert settings.secrets.django_secret_key == CANARY
+
+
+def test_certificate_master_key_requires_external_base64url_32_byte_material() -> None:
+    settings = load_settings(environment())
+    assert settings.secrets.certificate_master_key == b"\x00" * 32
+    with pytest.raises(ConfigurationError):
+        load_settings(environment(NFX_CERTIFICATE_MASTER_KEY="too-short"))
 
 
 def test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads() -> None:

@@ -1,1 +1,1 @@
-"""Collection boundary (no domain implementation in P0)."""
+"""Durable collection request boundary used by certificate activation."""

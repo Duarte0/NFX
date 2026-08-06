@@ -1,1 +1,1 @@
-"""Certificate boundary (no domain implementation in P0)."""
+"""Certificate lifecycle and envelope-encryption domain boundary."""

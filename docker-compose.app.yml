@@ -8,6 +8,7 @@ services:
       NFX_PROCESS: web
       NFX_PROFILE: development
       NFX_SECRET_KEY: ${NFX_SECRET_KEY:?NFX_SECRET_KEY must be set outside version control}
+      NFX_CERTIFICATE_MASTER_KEY: ${NFX_CERTIFICATE_MASTER_KEY:?NFX_CERTIFICATE_MASTER_KEY must be set outside version control}
       DATABASE_URL: postgresql://${POSTGRES_USER:-nfx_inov}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-nfx_inov}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}

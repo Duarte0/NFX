@@ -40,6 +40,7 @@ services:
     environment: &test_environment
       NFX_PROFILE: test
       NFX_SECRET_KEY: synthetic-test-django-secret
+      NFX_CERTIFICATE_MASTER_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
       DATABASE_URL: postgresql://nfx_test:nfx_test_only@postgres:5432/nfx_test
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ROOT_USER: nfx_test

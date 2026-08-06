@@ -3,6 +3,8 @@
 from nfx.artifacts.models import Artifact
 from nfx.audit.models import AuditChain, AuditEvent
 from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
+from nfx.certificates.models import Certificate
+from nfx.collection.models import InitialCollectionRequest
 from nfx.identity.models import IdentitySession, LoginThrottle, User
 
 __all__ = [
@@ -12,6 +14,8 @@ __all__ = [
     "Company",
     "CompanyFlow",
     "EnrichmentSnapshot",
+    "Certificate",
+    "InitialCollectionRequest",
     "IdentitySession",
     "LoginThrottle",
     "User",
