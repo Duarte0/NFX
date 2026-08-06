@@ -28,5 +28,12 @@ urlpatterns = [
     path("api/auth/login", identity_views.login),
     path("api/auth/logout", identity_views.logout),
     path("api/auth/session", identity_views.session),
+    path("api/users", identity_views.users),
+    path("api/users/create", identity_views.user_create),
+    path("api/users/<uuid:user_id>", identity_views.user_update),
+    path("api/users/<uuid:user_id>/role", identity_views.user_role),
+    path("api/users/<uuid:user_id>/password-reset", identity_views.user_password_reset),
+    path("api/users/password", identity_views.user_password_change),
+    path("api/users/<uuid:user_id>/active", identity_views.user_active),
     path("api/audit/events", audit_views.events),
 ]

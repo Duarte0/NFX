@@ -9,7 +9,9 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
-from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from nfx.audit.services import AuditService
@@ -28,8 +30,46 @@ class SessionIdentity:
     role: str
 
 
+class UserAdministrationError(ValueError):
+    pass
+
+
+class UserVersionConflict(UserAdministrationError):
+    pass
+
+
+class DuplicateUserEmail(UserAdministrationError):
+    pass
+
+
+class LastAdministrator(UserAdministrationError):
+    pass
+
+
 def normalize_email(email: str) -> str:
     return email.strip().casefold()
+
+
+def _validated_email(email: str) -> str:
+    if not isinstance(email, str):
+        raise UserAdministrationError("Invalid email")
+    normalized = normalize_email(email)
+    try:
+        validate_email(normalized)
+    except ValidationError as exc:
+        raise UserAdministrationError("Invalid email") from exc
+    return normalized
+
+
+def _require_administrator(actor: SessionIdentity) -> None:
+    if actor.role != Role.ADMINISTRATOR:
+        raise UserAdministrationError("Administrator access required")
+
+
+def _validated_reason(reason: str) -> str:
+    if not isinstance(reason, str) or not reason.strip():
+        raise UserAdministrationError("A reason is required")
+    return reason.strip()
 
 
 def _digest(value: str) -> str:
@@ -189,6 +229,219 @@ def revoke_session(token: str | None) -> None:
                 actor_role=session.user.role,
                 ip_address=session.ip_address,
             )
+
+
+def _user_context(user: User) -> dict[str, object]:
+    return {"name": user.name, "email": user.email, "role": user.role, "active": user.active}
+
+
+def _assert_version(user: User, version: int) -> None:
+    if user.version != version:
+        raise UserVersionConflict("The user was changed by another request")
+
+
+def _assert_not_last_administrator(user: User, *, loses_administrator: bool) -> None:
+    if not loses_administrator or user.role != Role.ADMINISTRATOR or not user.active:
+        return
+    active_admins = list(
+        User.objects.select_for_update().filter(role=Role.ADMINISTRATOR, active=True).order_by("id")
+    )
+    if len(active_admins) == 1 and active_admins[0].id == user.id:
+        raise LastAdministrator("At least one active Administrator is required")
+
+
+def _admin_event(
+    action: str,
+    *,
+    actor: SessionIdentity,
+    target: User,
+    ip_address: str,
+    before: dict[str, object] | None = None,
+    reason: str = "",
+) -> None:
+    context: dict[str, object] = {"after": _user_context(target)}
+    if before is not None:
+        context["before"] = before
+    AuditService().append(
+        action=action,
+        entity_type="user",
+        entity_id=str(target.id),
+        result="success",
+        actor_id=actor.user_id,
+        actor_role=actor.role,
+        ip_address=ip_address,
+        reason=reason,
+        context=context,
+    )
+
+
+def create_user(
+    *, actor: SessionIdentity, name: str, email: str, role: str, password: str, ip_address: str
+) -> User:
+    _require_administrator(actor)
+    normalized_email = _validated_email(email)
+    if not name.strip() or not normalized_email or not password or role not in Role.values:
+        raise UserAdministrationError("Invalid user data")
+    try:
+        with transaction.atomic():
+            user = User.objects.create(
+                name=name.strip(),
+                email=normalized_email,
+                role=role,
+                password_hash=make_password(password),
+            )
+            _admin_event("user.create", actor=actor, target=user, ip_address=ip_address)
+            return user
+    except IntegrityError as exc:
+        raise DuplicateUserEmail("An account with this email already exists") from exc
+
+
+def update_user(
+    *, actor: SessionIdentity, user_id: str, version: int, name: str, email: str, ip_address: str
+) -> User:
+    _require_administrator(actor)
+    normalized_email = _validated_email(email)
+    if not name.strip() or not normalized_email:
+        raise UserAdministrationError("Invalid user data")
+    try:
+        with transaction.atomic():
+            user = User.objects.select_for_update().get(id=user_id)
+            _assert_version(user, version)
+            before = _user_context(user)
+            user.name, user.email, user.version = name.strip(), normalized_email, user.version + 1
+            user.save(update_fields=["name", "email", "version", "updated_at"])
+            _admin_event(
+                "user.update", actor=actor, target=user, ip_address=ip_address, before=before
+            )
+            return user
+    except User.DoesNotExist as exc:
+        raise UserAdministrationError("User not found") from exc
+    except IntegrityError as exc:
+        raise DuplicateUserEmail("An account with this email already exists") from exc
+
+
+def change_user_role(
+    *, actor: SessionIdentity, user_id: str, version: int, role: str, reason: str, ip_address: str
+) -> User:
+    _require_administrator(actor)
+    if role not in Role.values:
+        raise UserAdministrationError("Invalid role")
+    reason = _validated_reason(reason)
+    with transaction.atomic():
+        try:
+            user = User.objects.select_for_update().get(id=user_id)
+        except User.DoesNotExist as exc:
+            raise UserAdministrationError("User not found") from exc
+        _assert_version(user, version)
+        _assert_not_last_administrator(user, loses_administrator=role != Role.ADMINISTRATOR)
+        before = _user_context(user)
+        user.role, user.version = role, user.version + 1
+        user.save(update_fields=["role", "version", "updated_at"])
+        _admin_event(
+            "user.role_change",
+            actor=actor,
+            target=user,
+            ip_address=ip_address,
+            before=before,
+            reason=reason,
+        )
+        return user
+
+
+def reset_user_password(
+    *,
+    actor: SessionIdentity,
+    user_id: str,
+    version: int,
+    password: str,
+    reason: str,
+    ip_address: str,
+) -> User:
+    _require_administrator(actor)
+    if not password:
+        raise UserAdministrationError("Invalid password")
+    reason = _validated_reason(reason)
+    with transaction.atomic():
+        try:
+            user = User.objects.select_for_update().get(id=user_id)
+        except User.DoesNotExist as exc:
+            raise UserAdministrationError("User not found") from exc
+        _assert_version(user, version)
+        before = _user_context(user)
+        user.password_hash, user.revocation_version, user.version = (
+            make_password(password),
+            user.revocation_version + 1,
+            user.version + 1,
+        )
+        user.save(update_fields=["password_hash", "revocation_version", "version", "updated_at"])
+        _admin_event(
+            "user.password_reset",
+            actor=actor,
+            target=user,
+            ip_address=ip_address,
+            before=before,
+            reason=reason,
+        )
+        return user
+
+
+def change_own_password(
+    *, actor: SessionIdentity, current_password: str, password: str, ip_address: str
+) -> None:
+    if not isinstance(current_password, str) or not isinstance(password, str) or not password:
+        raise UserAdministrationError("Invalid password")
+    with transaction.atomic():
+        try:
+            user = User.objects.select_for_update().get(id=actor.user_id, active=True)
+        except User.DoesNotExist as exc:
+            raise UserAdministrationError("User not found") from exc
+        if not check_password(current_password, user.password_hash):
+            raise UserAdministrationError("Invalid current password")
+        before = _user_context(user)
+        user.password_hash = make_password(password)
+        user.revocation_version += 1
+        user.version += 1
+        user.save(update_fields=["password_hash", "revocation_version", "version", "updated_at"])
+        _admin_event(
+            "user.password_change", actor=actor, target=user, ip_address=ip_address, before=before
+        )
+
+
+def set_user_active(
+    *,
+    actor: SessionIdentity,
+    user_id: str,
+    version: int,
+    active: bool,
+    reason: str,
+    ip_address: str,
+) -> User:
+    _require_administrator(actor)
+    if not isinstance(active, bool):
+        raise UserAdministrationError("Invalid state")
+    if not active:
+        reason = _validated_reason(reason)
+    with transaction.atomic():
+        try:
+            user = User.objects.select_for_update().get(id=user_id)
+        except User.DoesNotExist as exc:
+            raise UserAdministrationError("User not found") from exc
+        _assert_version(user, version)
+        _assert_not_last_administrator(user, loses_administrator=not active)
+        before = _user_context(user)
+        user.active, user.version = active, user.version + 1
+        if not active:
+            user.revocation_version += 1
+        user.save(update_fields=["active", "revocation_version", "version", "updated_at"])
+        _admin_event(
+            "user.activate" if active else "user.deactivate",
+            actor=actor,
+            target=user,
+            ip_address=ip_address,
+            before=before,
+            reason=reason,
+        )
+        return user
 
 
 def require_authorized(

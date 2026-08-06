@@ -6,6 +6,7 @@ from nfx.identity.models import Role
 
 
 class Action(StrEnum):
+    CHANGE_OWN_PASSWORD = "change_own_password"
     ADMINISTER_USERS = "administer_users"
     ADMINISTER_COMPANIES = "administer_companies"
     ADMINISTER_CERTIFICATES = "administer_certificates"
@@ -20,6 +21,7 @@ class Action(StrEnum):
 
 _OPERATOR_ACTIONS = frozenset(
     {
+        Action.CHANGE_OWN_PASSWORD,
         Action.ADMINISTER_COMPANIES,
         Action.ADMINISTER_CERTIFICATES,
         Action.CONTROL_COLLECTIONS,
@@ -30,11 +32,19 @@ _OPERATOR_ACTIONS = frozenset(
     }
 )
 _VIEWER_ACTIONS = frozenset(
-    {Action.READ_DOCUMENTS, Action.DOWNLOAD_DOCUMENTS, Action.CREATE_ZIP, Action.DOWNLOAD_OWN_ZIP}
+    {
+        Action.CHANGE_OWN_PASSWORD,
+        Action.READ_DOCUMENTS,
+        Action.DOWNLOAD_DOCUMENTS,
+        Action.CREATE_ZIP,
+        Action.DOWNLOAD_OWN_ZIP,
+    }
 )
 
 
-def authorize(role: str, action: Action, *, owner_id: str | None = None, actor_id: str | None = None) -> bool:
+def authorize(
+    role: str, action: Action, *, owner_id: str | None = None, actor_id: str | None = None
+) -> bool:
     """The single fail-closed policy used by HTTP handlers and future workers."""
     if role == Role.ADMINISTRATOR:
         return True

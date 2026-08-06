@@ -21,6 +21,7 @@ class User(models.Model):
     password_hash = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
     revocation_version = models.PositiveIntegerField(default=1)
+    version = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

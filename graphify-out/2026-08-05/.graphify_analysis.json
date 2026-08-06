@@ -1,0 +1,1065 @@
+{
+  "communities": {
+    "0": [
+      "architecture",
+      "architecture_11_organização_do_repositório",
+      "architecture_12_stack_selecionada_e_justificativa",
+      "architecture_13_alternativas_consideradas_e_rejeitadas",
+      "architecture_14_responsabilidade_e_propriedade_de_estado",
+      "architecture_15_estratégia_de_dados_e_persistência",
+      "architecture_16_responsabilidades_do_postgresql",
+      "architecture_17_responsabilidades_do_armazenamento_de_objetos",
+      "architecture_18_identidade_fiscal_de_documentos",
+      "architecture_19_estado_de_coleta_e_cursor",
+      "architecture_1_controle_do_documento_e_status",
+      "architecture_20_jobs_duráveis_scheduler_e_workers",
+      "architecture_21_concorrência_e_leases",
+      "architecture_22_retry_backoff_cooldown_e_bloqueio",
+      "architecture_23_limite_nf_e",
+      "architecture_24_limite_nfs_e_adn",
+      "architecture_25_certificado_e_ciclo_de_segredos",
+      "architecture_26_autenticação_sessões_e_autorização",
+      "architecture_27_auditoria",
+      "architecture_28_xml_e_payload_original",
+      "architecture_29_danfe_danfse",
+      "architecture_2_escopo_e_relação_com_o_prd",
+      "architecture_30_zip",
+      "architecture_31_retenção_e_exclusão_controlada",
+      "architecture_32_erro_quarentena_conflito_e_degradação",
+      "architecture_33_segurança_e_ameaças",
+      "architecture_34_rede_e_https",
+      "architecture_35_backup_e_restauração",
+      "architecture_36_observabilidade_e_saúde",
+      "architecture_37_estratégia_de_testes",
+      "architecture_38_simulação_oficial_e_rede_de_testes",
+      "architecture_39_deployment_e_limites_de_recurso",
+      "architecture_3_drivers_arquiteturais",
+      "architecture_40_falhas_e_recuperação",
+      "architecture_41_upgrade_e_rollback",
+      "architecture_42_resumo_de_decisões_arquiteturais",
+      "architecture_43_traceabilidade_prd_arquitetura",
+      "architecture_44_riscos_limitações_e_evolução",
+      "architecture_45_decisões_explicitamente_adiadas",
+      "architecture_46_critérios_de_aceitação_da_arquitetura",
+      "architecture_4_restrições",
+      "architecture_5_atributos_de_qualidade",
+      "architecture_6_visão_geral_da_arquitetura",
+      "architecture_7_contexto_do_sistema",
+      "architecture_8_limites_de_confiança",
+      "architecture_9_visão_de_containers_e_deployment",
+      "architecture_arquitetura_técnica_nfx_inov"
+    ],
+    "1": [
+      "backend_nfx_adapters_fiscal",
+      "backend_nfx_adapters_fiscal_emptyfiscalsimulator",
+      "backend_nfx_adapters_fiscal_emptyfiscalsimulator_collect",
+      "backend_nfx_adapters_fiscal_fiscaldestinationerror",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard_init",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard_send",
+      "backend_nfx_adapters_fiscal_fiscaldestinationguard_validate",
+      "backend_nfx_adapters_fiscal_py_runtimeerror",
+      "backend_nfx_adapters_fiscal_rationale_1",
+      "backend_nfx_adapters_fiscal_rationale_12",
+      "backend_nfx_adapters_fiscal_rationale_17",
+      "backend_nfx_adapters_fiscal_rationale_43",
+      "backend_nfx_infrastructure_configuration",
+      "backend_nfx_infrastructure_configuration_configurationerror",
+      "backend_nfx_infrastructure_configuration_error",
+      "backend_nfx_infrastructure_configuration_load_settings",
+      "backend_nfx_infrastructure_configuration_publicsettings",
+      "backend_nfx_infrastructure_configuration_py_runtimeerror",
+      "backend_nfx_infrastructure_configuration_rationale_1",
+      "backend_nfx_infrastructure_configuration_rationale_18",
+      "backend_nfx_infrastructure_configuration_read_secret",
+      "backend_nfx_infrastructure_configuration_secretsettings",
+      "backend_nfx_infrastructure_configuration_settings",
+      "backend_nfx_infrastructure_configuration_validate_database_url",
+      "backend_nfx_infrastructure_configuration_validate_destination",
+      "backend_nfx_infrastructure_configuration_validate_secret",
+      "backend_nfx_settings",
+      "backend_nfx_settings_database_from_url",
+      "parametrize",
+      "path",
+      "tests_unit_test_safe_configuration",
+      "tests_unit_test_safe_configuration_environment",
+      "tests_unit_test_safe_configuration_test_empty_allowlist_is_not_valid_for_runtime",
+      "tests_unit_test_safe_configuration_test_equivalent_or_changed_simulator_urls_are_rejected",
+      "tests_unit_test_safe_configuration_test_invalid_configuration_fails_without_disclosing_values",
+      "tests_unit_test_safe_configuration_test_local_profiles_default_to_the_empty_simulator",
+      "tests_unit_test_safe_configuration_test_non_local_profiles_require_explicit_allowlisted_simulator",
+      "tests_unit_test_safe_configuration_test_prohibited_destination_and_redirect_make_zero_network_calls",
+      "tests_unit_test_safe_configuration_test_runtime_requires_an_explicit_transport_and_destination",
+      "tests_unit_test_safe_configuration_test_secret_can_be_loaded_from_a_mounted_file"
+    ],
+    "2": [
+      "implementation_plan",
+      "implementation_plan_10_fases_detalhadas_e_backlog_estável",
+      "implementation_plan_11_dependências_caminho_crítico_e_paralelismo",
+      "implementation_plan_12_estratégia_de_testes_e_validação",
+      "implementation_plan_13_estratégia_de_segurança_fiscal",
+      "implementation_plan_14_banco_e_migrações",
+      "implementation_plan_15_sequência_de_frontend",
+      "implementation_plan_16_observabilidade_backup_e_restore",
+      "implementation_plan_17_mapa_de_specs",
+      "implementation_plan_18_rastreabilidade_do_prd",
+      "implementation_plan_19_rastreabilidade_da_arquitetura",
+      "implementation_plan_1_controle_do_documento",
+      "implementation_plan_20_riscos_e_mitigação",
+      "implementation_plan_21_decisões_open_deferred_e_blocked",
+      "implementation_plan_22_definição_de_pronto",
+      "implementation_plan_23_definição_de_concluído",
+      "implementation_plan_24_critérios_de_conclusão_do_mvp",
+      "implementation_plan_25_handoff_para_criação_de_specs",
+      "implementation_plan_2_propósito_e_escopo",
+      "implementation_plan_3_fontes_e_precedência",
+      "implementation_plan_4_base_atual_do_repositório",
+      "implementation_plan_5_assunções_de_implementação",
+      "implementation_plan_6_modelo_de_status",
+      "implementation_plan_7_estratégia_de_entrega",
+      "implementation_plan_8_workstreams",
+      "implementation_plan_9_visão_das_fases",
+      "implementation_plan_critérios_de_aceitação",
+      "implementation_plan_p0_fundação_de_projeto_e_isolamento_seguro",
+      "implementation_plan_p1_núcleo_seguro_persistente_e_auditável",
+      "implementation_plan_p2_empresas_cobertura_e_certificados",
+      "implementation_plan_p3_jobs_scheduler_políticas_e_simuladores",
+      "implementation_plan_p4_ingestão_fiscal_comum_e_integridade",
+      "implementation_plan_p5_adaptador_e_fluxos_nf_e",
+      "implementation_plan_p6_adaptador_e_fluxos_nfs_e_adn",
+      "implementation_plan_p7_consulta_downloads_e_artefatos",
+      "implementation_plan_p8_zip_dashboard_e_elegibilidade_de_retenção",
+      "implementation_plan_p9_operação_recuperação_exclusão_habilitada_e_piloto",
+      "implementation_plan_plano_de_implementação_nfx_inov"
+    ],
+    "3": [
+      "backend_nfx_infrastructure_schema",
+      "backend_nfx_infrastructure_schema_migration_names",
+      "backend_nfx_infrastructure_schema_migrationoutcome",
+      "backend_nfx_infrastructure_schema_py_runtimeerror",
+      "backend_nfx_infrastructure_schema_rationale_1",
+      "backend_nfx_infrastructure_schema_rationale_30",
+      "backend_nfx_infrastructure_schema_rationale_64",
+      "backend_nfx_infrastructure_schema_rationale_80",
+      "backend_nfx_infrastructure_schema_schema_status",
+      "backend_nfx_infrastructure_schema_schemaincompatibleerror",
+      "backend_nfx_infrastructure_schema_schemamigrator",
+      "backend_nfx_infrastructure_schema_schemamigrator_init",
+      "backend_nfx_infrastructure_schema_schemamigrator_migrate",
+      "backend_nfx_infrastructure_schema_schemastatus",
+      "backend_nfx_infrastructure_schema_schemastatus_compatible",
+      "backend_nfx_infrastructure_schema_schemastatus_require_compatible",
+      "backend_nfx_management_commands_nfx_migrate",
+      "backend_nfx_management_commands_nfx_migrate_command",
+      "backend_nfx_management_commands_nfx_migrate_command_handle",
+      "backend_nfx_management_commands_nfx_migrate_py_basecommand",
+      "backend_nfx_management_commands_schema_status",
+      "backend_nfx_management_commands_schema_status_command",
+      "backend_nfx_management_commands_schema_status_command_handle",
+      "backend_nfx_management_commands_schema_status_py_basecommand",
+      "backend_nfx_migrations_0001_schema_contract",
+      "backend_nfx_migrations_0001_schema_contract_migration",
+      "backend_nfx_migrations_0001_schema_contract_rationale_7",
+      "basedatabasewrapper",
+      "migrationexecutor",
+      "tests_integration_test_migrations",
+      "tests_integration_test_migrations_py_django_db",
+      "tests_integration_test_migrations_test_clean_install_and_rerun_produce_the_same_schema",
+      "tests_integration_test_migrations_test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue",
+      "tests_integration_test_migrations_test_schema_status_detects_ahead_incompatible_history",
+      "tests_integration_test_migrations_test_two_migrators_are_serialized_and_only_one_applies_the_baseline",
+      "tests_integration_test_migrations_unapply_nfx_migrations"
+    ],
+    "4": [
+      "eslint",
+      "eslint_js",
+      "eslint_plugin_react_hooks",
+      "frontend_package",
+      "frontend_package_dependencies",
+      "frontend_package_dependencies_react",
+      "frontend_package_dependencies_react_dom",
+      "frontend_package_dependencies_vite",
+      "frontend_package_dependencies_vitejs_plugin_react",
+      "frontend_package_devdependencies",
+      "frontend_package_devdependencies_eslint",
+      "frontend_package_devdependencies_eslint_js",
+      "frontend_package_devdependencies_eslint_plugin_react_hooks",
+      "frontend_package_devdependencies_types_react",
+      "frontend_package_devdependencies_types_react_dom",
+      "frontend_package_devdependencies_typescript",
+      "frontend_package_devdependencies_typescript_eslint",
+      "frontend_package_name",
+      "frontend_package_private",
+      "frontend_package_scripts",
+      "frontend_package_scripts_build",
+      "frontend_package_scripts_dev",
+      "frontend_package_scripts_lint",
+      "frontend_package_type",
+      "frontend_package_version",
+      "react",
+      "react_dom",
+      "types_react",
+      "types_react_dom",
+      "typescript",
+      "typescript_eslint",
+      "vite",
+      "vitejs_plugin_react"
+    ],
+    "5": [
+      "any",
+      "backend_nfx_infrastructure_http",
+      "backend_nfx_infrastructure_http_configure_logging",
+      "backend_nfx_infrastructure_http_correlationidmiddleware",
+      "backend_nfx_infrastructure_http_correlationidmiddleware_call",
+      "backend_nfx_infrastructure_http_correlationidmiddleware_init",
+      "backend_nfx_infrastructure_http_jsonformatter",
+      "backend_nfx_infrastructure_http_jsonformatter_format",
+      "backend_nfx_infrastructure_http_py_httprequest",
+      "backend_nfx_infrastructure_http_py_httpresponse",
+      "backend_nfx_infrastructure_redaction",
+      "backend_nfx_infrastructure_redaction_rationale_1",
+      "backend_nfx_infrastructure_redaction_redact",
+      "backend_nfx_infrastructure_redaction_redact_string",
+      "backend_nfx_management_commands_scheduler",
+      "backend_nfx_management_commands_scheduler_command",
+      "backend_nfx_management_commands_scheduler_command_handle",
+      "backend_nfx_management_commands_scheduler_py_basecommand",
+      "backend_nfx_management_commands_worker",
+      "backend_nfx_management_commands_worker_command",
+      "backend_nfx_management_commands_worker_command_handle",
+      "backend_nfx_management_commands_worker_py_basecommand",
+      "logrecord",
+      "tests_unit_test_safe_configuration_test_logging_snapshot_redacts_nested_secret_canary",
+      "tests_unit_test_safe_configuration_test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads"
+    ],
+    "6": [
+      "backend_nfx_infrastructure_dependencies",
+      "backend_nfx_infrastructure_dependencies_dependencies_from_environment",
+      "backend_nfx_infrastructure_dependencies_dependencycheck",
+      "backend_nfx_infrastructure_dependencies_object_probe",
+      "backend_nfx_infrastructure_dependencies_postgres_probe",
+      "backend_nfx_infrastructure_dependencies_schema_probe",
+      "backend_nfx_infrastructure_dependencies_servicedependencies",
+      "backend_nfx_infrastructure_dependencies_servicedependencies_check",
+      "backend_nfx_management_commands_check_services",
+      "backend_nfx_management_commands_check_services_command",
+      "backend_nfx_management_commands_check_services_command_handle",
+      "backend_nfx_management_commands_check_services_py_basecommand",
+      "backend_nfx_urls",
+      "backend_nfx_urls_index",
+      "backend_nfx_urls_live",
+      "backend_nfx_urls_py_httprequest",
+      "backend_nfx_urls_py_httpresponse",
+      "backend_nfx_urls_ready",
+      "jsonresponse",
+      "tests_integration_test_services",
+      "tests_integration_test_services_py_django_db",
+      "tests_integration_test_services_test_postgres_and_minio_are_reachable_in_an_isolated_run",
+      "tests_unit_test_dependencies",
+      "tests_unit_test_dependencies_test_dependency_check_is_injectable_and_reports_only_service_names",
+      "tests_unit_test_dependencies_test_schema_incompatibility_makes_readiness_fail_without_details"
+    ],
+    "7": [
+      "codex_skills_graphify_skill",
+      "codex_skills_graphify_skill_for_graphify_add_and_watch",
+      "codex_skills_graphify_skill_for_graphify_query",
+      "codex_skills_graphify_skill_for_the_commit_hook_and_native_claude_md_integration",
+      "codex_skills_graphify_skill_for_update_and_cluster_only",
+      "codex_skills_graphify_skill_graphify",
+      "codex_skills_graphify_skill_honesty_rules",
+      "codex_skills_graphify_skill_interpreter_guard_for_subcommands",
+      "codex_skills_graphify_skill_part_a_structural_extraction_for_code_files",
+      "codex_skills_graphify_skill_part_b_semantic_extraction_parallel_subagents",
+      "codex_skills_graphify_skill_part_c_merge_ast_semantic_into_final_extraction",
+      "codex_skills_graphify_skill_step_0_github_repos_and_multi_path_merge_only_if_a_url_or_several_paths",
+      "codex_skills_graphify_skill_step_1_ensure_graphify_is_installed",
+      "codex_skills_graphify_skill_step_2_5_video_and_audio_only_if_video_files_detected",
+      "codex_skills_graphify_skill_step_2_detect_files",
+      "codex_skills_graphify_skill_step_3_extract_entities_and_relationships",
+      "codex_skills_graphify_skill_step_4_5_graph_health_check_read_only_integrity_gate",
+      "codex_skills_graphify_skill_step_4_build_graph_cluster_analyze_generate_outputs",
+      "codex_skills_graphify_skill_step_5_label_communities",
+      "codex_skills_graphify_skill_step_6_generate_obsidian_vault_opt_in_html",
+      "codex_skills_graphify_skill_step_9_save_manifest_update_cost_tracker_clean_up_and_report",
+      "codex_skills_graphify_skill_steps_6b_8_wiki_neo4j_falkordb_svg_graphml_mcp_benchmark_only_on_their_flags",
+      "codex_skills_graphify_skill_usage",
+      "codex_skills_graphify_skill_what_graphify_is_for",
+      "codex_skills_graphify_skill_what_you_must_do_when_invoked"
+    ],
+    "8": [
+      "prd",
+      "prd_10_ciclo_de_vida_de_empresa",
+      "prd_11_ciclo_de_vida_de_certificado",
+      "prd_13_retenção_e_exclusão",
+      "prd_14_auditoria",
+      "prd_15_backup_e_recuperação",
+      "prd_16_requisitos_operacionais_e_observabilidade",
+      "prd_17_requisitos_não_funcionais",
+      "prd_18_estados_de_erro_vazio_bloqueio_e_degradação",
+      "prd_1_controle_do_documento",
+      "prd_20_critérios_de_aceitação",
+      "prd_21_critérios_de_sucesso_do_produto",
+      "prd_22_riscos_e_mitigações",
+      "prd_23_dependências_e_restrições_externas",
+      "prd_24_segurança_e_privacidade_operacional",
+      "prd_25_glossário",
+      "prd_26_rastreabilidade_e_cobertura",
+      "prd_27_premissas_registradas",
+      "prd_2_resumo_executivo",
+      "prd_3_visão_do_produto",
+      "prd_4_problema",
+      "prd_5_objetivos",
+      "prd_6_não_objetivos",
+      "prd_8_escopo_do_mvp",
+      "prd_prd_nfx_inov"
+    ],
+    "9": [
+      "frontend_tsconfig",
+      "frontend_tsconfig_compileroptions",
+      "frontend_tsconfig_compileroptions_allowjs",
+      "frontend_tsconfig_compileroptions_allowsyntheticdefaultimports",
+      "frontend_tsconfig_compileroptions_esmoduleinterop",
+      "frontend_tsconfig_compileroptions_forceconsistentcasinginfilenames",
+      "frontend_tsconfig_compileroptions_isolatedmodules",
+      "frontend_tsconfig_compileroptions_jsx",
+      "frontend_tsconfig_compileroptions_lib",
+      "frontend_tsconfig_compileroptions_module",
+      "frontend_tsconfig_compileroptions_moduleresolution",
+      "frontend_tsconfig_compileroptions_noemit",
+      "frontend_tsconfig_compileroptions_resolvejsonmodule",
+      "frontend_tsconfig_compileroptions_skiplibcheck",
+      "frontend_tsconfig_compileroptions_strict",
+      "frontend_tsconfig_compileroptions_target",
+      "frontend_tsconfig_compileroptions_usedefineforclassfields",
+      "frontend_tsconfig_include",
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_es2022",
+      "ref_src"
+    ],
+    "10": [
+      "prd_9_10_xml_danfe_e_danfse",
+      "prd_9_11_exportação_zip",
+      "prd_9_12_dashboard",
+      "prd_9_1_usuários_autenticação_e_autorização",
+      "prd_9_2_empresas",
+      "prd_9_3_enriquecimento_opencnpj",
+      "prd_9_4_certificados",
+      "prd_9_5_coleta_geral",
+      "prd_9_6_nf_e",
+      "prd_9_7_nfs_e",
+      "prd_9_8_integridade_fiscal_e_idempotência",
+      "prd_9_9_organização_consulta_e_filtros",
+      "prd_9_requisitos_funcionais_e_regras_de_negócio"
+    ],
+    "11": [
+      "specs_p4_fiscal_document_ingestion_and_integrity",
+      "specs_p4_fiscal_document_ingestion_and_integrity_aceite_e_dod",
+      "specs_p4_fiscal_document_ingestion_and_integrity_baseline_escopo_e_não_escopo",
+      "specs_p4_fiscal_document_ingestion_and_integrity_contratos_frontend_e_autorização",
+      "specs_p4_fiscal_document_ingestion_and_integrity_falhas_recovery_e_testes",
+      "specs_p4_fiscal_document_ingestion_and_integrity_ingestão_fiscal_comum_e_integridade",
+      "specs_p4_fiscal_document_ingestion_and_integrity_metadados",
+      "specs_p4_fiscal_document_ingestion_and_integrity_pipeline_e_invariantes",
+      "specs_p4_fiscal_document_ingestion_and_integrity_propriedade_e_schema_proposed",
+      "specs_p4_fiscal_document_ingestion_and_integrity_propósito_e_resultado",
+      "specs_p4_fiscal_document_ingestion_and_integrity_segurança_auditoria_e_observabilidade"
+    ],
+    "12": [
+      "specs_p0_project_foundation",
+      "specs_p0_project_foundation_baseline_escopo_e_não_escopo",
+      "specs_p0_project_foundation_decisões_e_detalhes_proposed",
+      "specs_p0_project_foundation_fundação_do_projeto",
+      "specs_p0_project_foundation_metadados",
+      "specs_p0_project_foundation_módulos_contratos_e_estado",
+      "specs_p0_project_foundation_propósito_e_resultado_observável",
+      "specs_p0_project_foundation_segurança_observabilidade_e_falhas",
+      "specs_p0_project_foundation_sequência_aceite_e_dod",
+      "specs_p0_project_foundation_testes_e_evidências"
+    ],
+    "13": [
+      "specs_p0_safe_configuration_and_test_isolation",
+      "specs_p0_safe_configuration_and_test_isolation_baseline_escopo_e_não_escopo",
+      "specs_p0_safe_configuration_and_test_isolation_configuração_segura_e_isolamento_fiscal_de_testes",
+      "specs_p0_safe_configuration_and_test_isolation_decisões_e_propostas",
+      "specs_p0_safe_configuration_and_test_isolation_estado_falhas_e_observabilidade",
+      "specs_p0_safe_configuration_and_test_isolation_metadados",
+      "specs_p0_safe_configuration_and_test_isolation_propósito_e_resultado_observável",
+      "specs_p0_safe_configuration_and_test_isolation_segurança_redaction_e_interfaces",
+      "specs_p0_safe_configuration_and_test_isolation_sequência_aceite_e_dod",
+      "specs_p0_safe_configuration_and_test_isolation_testes_e_evidências"
+    ],
+    "14": [
+      "specs_p1_audit_foundation",
+      "specs_p1_audit_foundation_aceite_e_dod",
+      "specs_p1_audit_foundation_baseline_escopo_e_não_escopo",
+      "specs_p1_audit_foundation_contratos_comportamento_e_autorização",
+      "specs_p1_audit_foundation_estado_e_schema_proposed",
+      "specs_p1_audit_foundation_falhas_segurança_e_observabilidade",
+      "specs_p1_audit_foundation_fundação_de_auditoria_append_only",
+      "specs_p1_audit_foundation_metadados",
+      "specs_p1_audit_foundation_propósito_e_resultado",
+      "specs_p1_audit_foundation_testes_e_evidências"
+    ],
+    "15": [
+      "specs_p1_object_storage_and_integrity",
+      "specs_p1_object_storage_and_integrity_aceite_e_dod",
+      "specs_p1_object_storage_and_integrity_armazenamento_de_objetos_e_integridade",
+      "specs_p1_object_storage_and_integrity_baseline_escopo_e_não_escopo",
+      "specs_p1_object_storage_and_integrity_estado_e_schema_proposed",
+      "specs_p1_object_storage_and_integrity_interfaces_e_responsabilidades",
+      "specs_p1_object_storage_and_integrity_metadados",
+      "specs_p1_object_storage_and_integrity_propósito_e_resultado",
+      "specs_p1_object_storage_and_integrity_segurança_observabilidade_e_falhas",
+      "specs_p1_object_storage_and_integrity_testes_e_fixtures"
+    ],
+    "16": [
+      "specs_p1_persistence_and_migrations",
+      "specs_p1_persistence_and_migrations_aceite_e_dod",
+      "specs_p1_persistence_and_migrations_baseline_e_escopo",
+      "specs_p1_persistence_and_migrations_contratos_e_operação",
+      "specs_p1_persistence_and_migrations_decisões_e_proposed",
+      "specs_p1_persistence_and_migrations_falha_recuperação_e_compatibilidade",
+      "specs_p1_persistence_and_migrations_metadados",
+      "specs_p1_persistence_and_migrations_persistência_relacional_e_migrações",
+      "specs_p1_persistence_and_migrations_propósito_e_resultado",
+      "specs_p1_persistence_and_migrations_testes_e_evidências"
+    ],
+    "17": [
+      "specs_p2_certificate_lifecycle_and_envelope_encryption",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_aceite_e_dod",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_baseline_escopo_e_não_escopo",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_certificados_a1_e_criptografia_por_envelope",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_estado_e_schema_proposed",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_falhas_testes_e_recovery",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_metadados",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_propósito_e_resultado",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_regras_interfaces_e_ui",
+      "specs_p2_certificate_lifecycle_and_envelope_encryption_segurança_auditoria_e_observabilidade"
+    ],
+    "18": [
+      "specs_p2_company_lifecycle_and_public_enrichment",
+      "specs_p2_company_lifecycle_and_public_enrichment_aceite_e_dod",
+      "specs_p2_company_lifecycle_and_public_enrichment_autorização_auditoria_e_observabilidade",
+      "specs_p2_company_lifecycle_and_public_enrichment_baseline_escopo_e_não_escopo",
+      "specs_p2_company_lifecycle_and_public_enrichment_empresas_fluxos_e_enriquecimento_público",
+      "specs_p2_company_lifecycle_and_public_enrichment_estado_e_schema_proposed",
+      "specs_p2_company_lifecycle_and_public_enrichment_falhas_testes_e_recovery",
+      "specs_p2_company_lifecycle_and_public_enrichment_metadados",
+      "specs_p2_company_lifecycle_and_public_enrichment_propósito_e_resultado",
+      "specs_p2_company_lifecycle_and_public_enrichment_regras_e_contratos"
+    ],
+    "19": [
+      "specs_p3_durable_jobs_leases_and_policy_engine",
+      "specs_p3_durable_jobs_leases_and_policy_engine_aceite_e_dod",
+      "specs_p3_durable_jobs_leases_and_policy_engine_baseline_escopo_e_não_escopo",
+      "specs_p3_durable_jobs_leases_and_policy_engine_contratos_e_comportamento",
+      "specs_p3_durable_jobs_leases_and_policy_engine_estado_e_schema_proposed",
+      "specs_p3_durable_jobs_leases_and_policy_engine_falhas_e_testes",
+      "specs_p3_durable_jobs_leases_and_policy_engine_jobs_duráveis_leases_políticas_e_observabilidade_inicial",
+      "specs_p3_durable_jobs_leases_and_policy_engine_metadados",
+      "specs_p3_durable_jobs_leases_and_policy_engine_propósito_e_resultado",
+      "specs_p3_durable_jobs_leases_and_policy_engine_segurança_logs_métricas_e_health"
+    ],
+    "20": [
+      "specs_p7_document_consultation_and_individual_download",
+      "specs_p7_document_consultation_and_individual_download_aceite_e_dod",
+      "specs_p7_document_consultation_and_individual_download_baseline_escopo_e_não_escopo",
+      "specs_p7_document_consultation_and_individual_download_consulta_de_documentos_e_download_individual",
+      "specs_p7_document_consultation_and_individual_download_dados_índices_e_contratos_proposed",
+      "specs_p7_document_consultation_and_individual_download_falhas_e_testes",
+      "specs_p7_document_consultation_and_individual_download_metadados",
+      "specs_p7_document_consultation_and_individual_download_propósito_e_resultado",
+      "specs_p7_document_consultation_and_individual_download_segurança_auditoria_e_observabilidade",
+      "specs_p7_document_consultation_and_individual_download_ui_e_autorização"
+    ],
+    "21": [
+      "specs_p8_retention_eligibility",
+      "specs_p8_retention_eligibility_aceite_e_dod",
+      "specs_p8_retention_eligibility_baseline_escopo_e_não_escopo",
+      "specs_p8_retention_eligibility_contratos_ui_e_autorização",
+      "specs_p8_retention_eligibility_elegibilidade_de_retenção_e_prévia_administrativa",
+      "specs_p8_retention_eligibility_metadados",
+      "specs_p8_retention_eligibility_propósito_e_resultado",
+      "specs_p8_retention_eligibility_regras_e_estado",
+      "specs_p8_retention_eligibility_segurança_auditoria_e_observabilidade",
+      "specs_p8_retention_eligibility_testes_e_recovery"
+    ],
+    "22": [
+      "specs_p8_zip_export",
+      "specs_p8_zip_export_aceite_e_dod",
+      "specs_p8_zip_export_baseline_escopo_e_não_escopo",
+      "specs_p8_zip_export_estado_e_contratos_proposed",
+      "specs_p8_zip_export_exportação_zip_assíncrona",
+      "specs_p8_zip_export_falhas_recovery_e_testes",
+      "specs_p8_zip_export_metadados",
+      "specs_p8_zip_export_propósito_e_resultado",
+      "specs_p8_zip_export_segurança_auditoria_observabilidade",
+      "specs_p8_zip_export_ui_e_autorização"
+    ],
+    "23": [
+      "codex_skills_graphify_references_exports",
+      "codex_skills_graphify_references_exports_graphify_reference_extra_exports_and_benchmark",
+      "codex_skills_graphify_references_exports_step_6b_wiki_only_if_wiki_flag",
+      "codex_skills_graphify_references_exports_step_7_neo4j_export_only_if_neo4j_or_neo4j_push_flag",
+      "codex_skills_graphify_references_exports_step_7a_falkordb_export_only_if_falkordb_or_falkordb_push_flag",
+      "codex_skills_graphify_references_exports_step_7b_svg_export_only_if_svg_flag",
+      "codex_skills_graphify_references_exports_step_7c_graphml_export_only_if_graphml_flag",
+      "codex_skills_graphify_references_exports_step_7d_mcp_server_only_if_mcp_flag",
+      "codex_skills_graphify_references_exports_step_8_token_reduction_benchmark_only_if_total_words_5000"
+    ],
+    "24": [
+      "specs_p1_authentication_sessions_and_rbac",
+      "specs_p1_authentication_sessions_and_rbac_autenticação_sessões_rbac_e_shell_web",
+      "specs_p1_authentication_sessions_and_rbac_baseline_escopo_e_não_escopo",
+      "specs_p1_authentication_sessions_and_rbac_estado_e_contratos_proposed",
+      "specs_p1_authentication_sessions_and_rbac_metadados",
+      "specs_p1_authentication_sessions_and_rbac_propósito_e_resultado",
+      "specs_p1_authentication_sessions_and_rbac_regras_ui_e_autorização",
+      "specs_p1_authentication_sessions_and_rbac_segurança_auditoria_e_observabilidade",
+      "specs_p1_authentication_sessions_and_rbac_testes_sequência_e_aceite"
+    ],
+    "25": [
+      "specs_p1_user_administration",
+      "specs_p1_user_administration_aceite_e_dod",
+      "specs_p1_user_administration_administração_de_usuários",
+      "specs_p1_user_administration_baseline_escopo_e_não_escopo",
+      "specs_p1_user_administration_estado_backend_auditoria_e_segurança",
+      "specs_p1_user_administration_falhas_testes_e_recovery",
+      "specs_p1_user_administration_metadados",
+      "specs_p1_user_administration_propósito_e_resultado",
+      "specs_p1_user_administration_regras_contratos_e_ui"
+    ],
+    "26": [
+      "specs_p3_fiscal_adapter_simulation_and_fixtures",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_aceite_e_dod",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_baseline_escopo_e_não_escopo",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_contratos_proposed_e_cenários",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_metadados",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_observabilidade_falha_e_testes",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_propósito_e_resultado",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_segurança_e_fixtures",
+      "specs_p3_fiscal_adapter_simulation_and_fixtures_simuladores_fiscais_e_fixtures_seguras"
+    ],
+    "27": [
+      "specs_p3_manual_collection_control",
+      "specs_p3_manual_collection_control_aceite_e_dod",
+      "specs_p3_manual_collection_control_baseline_escopo_e_não_escopo",
+      "specs_p3_manual_collection_control_controle_manual_de_coleta",
+      "specs_p3_manual_collection_control_estado_e_contratos_proposed",
+      "specs_p3_manual_collection_control_falhas_observabilidade_e_testes",
+      "specs_p3_manual_collection_control_metadados",
+      "specs_p3_manual_collection_control_propósito_e_resultado",
+      "specs_p3_manual_collection_control_ui_permissões_e_comportamento_visível"
+    ],
+    "28": [
+      "specs_p5_nfe_distribution_and_manifestation",
+      "specs_p5_nfe_distribution_and_manifestation_aceite_e_dod",
+      "specs_p5_nfe_distribution_and_manifestation_decisões_e_contratos",
+      "specs_p5_nfe_distribution_and_manifestation_distribuição_nf_e_e_manifestação",
+      "specs_p5_nfe_distribution_and_manifestation_estado_e_comportamento",
+      "specs_p5_nfe_distribution_and_manifestation_falhas_testes_e_recovery",
+      "specs_p5_nfe_distribution_and_manifestation_metadados",
+      "specs_p5_nfe_distribution_and_manifestation_propósito_baseline_e_limites",
+      "specs_p5_nfe_distribution_and_manifestation_ui_autorização_segurança_e_auditoria"
+    ],
+    "29": [
+      "specs_p6_nfse_adn_distribution_and_coverage",
+      "specs_p6_nfse_adn_distribution_and_coverage_aceite_e_dod",
+      "specs_p6_nfse_adn_distribution_and_coverage_contratos_e_estado_proposed",
+      "specs_p6_nfse_adn_distribution_and_coverage_distribuição_nfs_e_adn_e_cobertura",
+      "specs_p6_nfse_adn_distribution_and_coverage_falhas_testes_e_recovery",
+      "specs_p6_nfse_adn_distribution_and_coverage_metadados",
+      "specs_p6_nfse_adn_distribution_and_coverage_propósito_baseline_escopo",
+      "specs_p6_nfse_adn_distribution_and_coverage_regras_e_comportamento_visível",
+      "specs_p6_nfse_adn_distribution_and_coverage_segurança_auditoria_e_observabilidade"
+    ],
+    "30": [
+      "specs_p8_dashboard_and_operational_health",
+      "specs_p8_dashboard_and_operational_health_aceite_e_dod",
+      "specs_p8_dashboard_and_operational_health_baseline_escopo_e_não_escopo",
+      "specs_p8_dashboard_and_operational_health_contratos_e_dados_proposed",
+      "specs_p8_dashboard_and_operational_health_dashboard_e_saúde_operacional",
+      "specs_p8_dashboard_and_operational_health_falhas_e_testes",
+      "specs_p8_dashboard_and_operational_health_metadados",
+      "specs_p8_dashboard_and_operational_health_propósito_e_resultado",
+      "specs_p8_dashboard_and_operational_health_ui_autorização_e_observabilidade"
+    ],
+    "31": [
+      "specs_p9_controlled_deletion",
+      "specs_p9_controlled_deletion_aceite_e_dod",
+      "specs_p9_controlled_deletion_baseline_escopo_e_gate_local",
+      "specs_p9_controlled_deletion_estado_e_contrato_proposed",
+      "specs_p9_controlled_deletion_exclusão_definitiva_controlada",
+      "specs_p9_controlled_deletion_falhas_recovery_e_testes",
+      "specs_p9_controlled_deletion_metadados",
+      "specs_p9_controlled_deletion_propósito_e_resultado",
+      "specs_p9_controlled_deletion_ui_segurança_e_observabilidade"
+    ],
+    "32": [
+      "specs_p9_runtime_and_https",
+      "specs_p9_runtime_and_https_aceite_e_dod",
+      "specs_p9_runtime_and_https_baseline_escopo_e_não_escopo",
+      "specs_p9_runtime_and_https_decisões_e_configuração_proposed",
+      "specs_p9_runtime_and_https_metadados",
+      "specs_p9_runtime_and_https_propósito_e_resultado",
+      "specs_p9_runtime_and_https_runtime_interno_e_https",
+      "specs_p9_runtime_and_https_segurança_observabilidade_e_falhas",
+      "specs_p9_runtime_and_https_testes_rollback_e_evidência"
+    ],
+    "33": [
+      "prd_19_jornadas_principais",
+      "prd_j1_primeiro_acesso",
+      "prd_j2_cadastro_e_coleta_inicial",
+      "prd_j3_operação_recorrente",
+      "prd_j4_consulta_fiscal",
+      "prd_j5_exportação_em_lote",
+      "prd_j6_administração_e_auditoria",
+      "prd_j7_exclusão_após_retenção"
+    ],
+    "34": [
+      "specs_p7_danfe_danfse_rendering",
+      "specs_p7_danfe_danfse_rendering_auditoria_observabilidade_e_falhas",
+      "specs_p7_danfe_danfse_rendering_contrato_e_estado_requerido",
+      "specs_p7_danfe_danfse_rendering_metadados",
+      "specs_p7_danfe_danfse_rendering_propósito_baseline_e_blocker",
+      "specs_p7_danfe_danfse_rendering_renderização_de_danfe_e_danfse",
+      "specs_p7_danfe_danfse_rendering_testes_e_aceite_futuro",
+      "specs_p7_danfe_danfse_rendering_ui_autorização_e_segurança"
+    ],
+    "35": [
+      "specs_p9_backup_and_restore",
+      "specs_p9_backup_and_restore_aceite_e_dod",
+      "specs_p9_backup_and_restore_backup_e_restauração_comprovada",
+      "specs_p9_backup_and_restore_estado_e_contratos_proposed",
+      "specs_p9_backup_and_restore_metadados",
+      "specs_p9_backup_and_restore_propósito_baseline_e_exceção",
+      "specs_p9_backup_and_restore_segurança_observabilidade_e_falhas",
+      "specs_p9_backup_and_restore_testes_e_evidência"
+    ],
+    "36": [
+      "specs_p9_hardening",
+      "specs_p9_hardening_aceite_e_dod",
+      "specs_p9_hardening_baseline_escopo_e_não_escopo",
+      "specs_p9_hardening_hardening_ameaças_e_testes_de_falha",
+      "specs_p9_hardening_metadados",
+      "specs_p9_hardening_método_e_contratos_de_evidência",
+      "specs_p9_hardening_propósito_e_resultado",
+      "specs_p9_hardening_testes_observabilidade_e_capacidade"
+    ],
+    "37": [
+      "specs_p9_internal_pilot_and_homologation",
+      "specs_p9_internal_pilot_and_homologation_baseline_escopo_e_não_escopo",
+      "specs_p9_internal_pilot_and_homologation_falhas_observabilidade_e_recovery",
+      "specs_p9_internal_pilot_and_homologation_metadados",
+      "specs_p9_internal_pilot_and_homologation_piloto_interno_e_homologação_segregada",
+      "specs_p9_internal_pilot_and_homologation_plano_e_decisões",
+      "specs_p9_internal_pilot_and_homologation_propósito_e_resultado",
+      "specs_p9_internal_pilot_and_homologation_testes_evidências_e_aceite"
+    ],
+    "38": [
+      "specs_readme",
+      "specs_readme_autoridade_baseline_e_regra_de_uso",
+      "specs_readme_como_escolher_a_próxima_spec",
+      "specs_readme_decisões_open_blocked_deferred_e_proposed",
+      "specs_readme_ordem_cobertura_e_dependências_diretas",
+      "specs_readme_paralelismo_e_conclusão_de_fase",
+      "specs_readme_índice_de_implementação_das_specs"
+    ],
+    "39": [
+      "codex_skills_graphify_references_query",
+      "codex_skills_graphify_references_query_for_graphify_explain",
+      "codex_skills_graphify_references_query_for_graphify_path",
+      "codex_skills_graphify_references_query_graphify_reference_query_path_explain",
+      "codex_skills_graphify_references_query_step_0_constrained_query_expansion_required_before_traversal",
+      "codex_skills_graphify_references_query_step_1_traversal"
+    ],
+    "40": [
+      "docs_development",
+      "docs_development_configuração_segura_e_isolamento_fiscal_p0_02_p0_04",
+      "docs_development_contratos_dos_comandos",
+      "docs_development_decisões_proposed_adotadas",
+      "docs_development_fundação_p0",
+      "docs_development_scope_boundary"
+    ],
+    "41": [
+      "prd_7_1_administrador",
+      "prd_7_2_operador",
+      "prd_7_3_visualizador",
+      "prd_7_4_regra_global",
+      "prd_7_usuários_e_papéis"
+    ],
+    "42": [
+      "architecture_10_1_módulos_de_domínio",
+      "architecture_10_2_adaptadores",
+      "architecture_10_3_serviços_transversais",
+      "architecture_10_arquitetura_de_componentes"
+    ],
+    "43": [
+      "codex_skills_graphify_references_add_watch",
+      "codex_skills_graphify_references_add_watch_for_graphify_add",
+      "codex_skills_graphify_references_add_watch_for_watch",
+      "codex_skills_graphify_references_add_watch_graphify_reference_add_a_url_and_watch_a_folder"
+    ],
+    "44": [
+      "codex_skills_graphify_references_hooks",
+      "codex_skills_graphify_references_hooks_for_git_commit_hook",
+      "codex_skills_graphify_references_hooks_for_native_claude_md_integration",
+      "codex_skills_graphify_references_hooks_graphify_reference_commit_hook_and_native_claude_md_integration"
+    ],
+    "45": [
+      "codex_skills_graphify_references_update",
+      "codex_skills_graphify_references_update_for_cluster_only",
+      "codex_skills_graphify_references_update_for_update_incremental_re_extraction",
+      "codex_skills_graphify_references_update_graphify_reference_incremental_update_and_cluster_only"
+    ],
+    "46": [
+      "codex_skills_graphify_references_github_and_merge",
+      "codex_skills_graphify_references_github_and_merge_graphify_reference_github_clone_and_cross_repo_merge",
+      "codex_skills_graphify_references_github_and_merge_step_0_clone_github_repo_s_only_if_a_github_url_was_given"
+    ],
+    "47": [
+      "codex_skills_graphify_references_transcribe",
+      "codex_skills_graphify_references_transcribe_graphify_reference_transcribe_video_and_audio",
+      "codex_skills_graphify_references_transcribe_step_2_5_transcribe_video_audio_files_only_if_video_files_detected"
+    ],
+    "48": [
+      "scripts_smoke",
+      "scripts_smoke_cleanup",
+      "scripts_smoke_sh__entry"
+    ],
+    "49": [
+      "scripts_test_integration",
+      "scripts_test_integration_cleanup",
+      "scripts_test_integration_sh__entry"
+    ],
+    "50": [
+      "tests_unit_test_health",
+      "tests_unit_test_health_test_correlation_id_is_returned",
+      "tests_unit_test_health_test_liveness_does_not_need_external_services"
+    ],
+    "51": [
+      "agents",
+      "agents_graphify"
+    ],
+    "52": [
+      "backend_manage",
+      "backend_manage_main"
+    ],
+    "53": [
+      "backend_nfx_adapters_init",
+      "backend_nfx_adapters_init_rationale_1"
+    ],
+    "54": [
+      "backend_nfx_artifacts_init",
+      "backend_nfx_artifacts_init_rationale_1"
+    ],
+    "55": [
+      "backend_nfx_audit_init",
+      "backend_nfx_audit_init_rationale_1"
+    ],
+    "56": [
+      "backend_nfx_certificates_init",
+      "backend_nfx_certificates_init_rationale_1"
+    ],
+    "57": [
+      "backend_nfx_collection_init",
+      "backend_nfx_collection_init_rationale_1"
+    ],
+    "58": [
+      "backend_nfx_companies_init",
+      "backend_nfx_companies_init_rationale_1"
+    ],
+    "59": [
+      "backend_nfx_documents_init",
+      "backend_nfx_documents_init_rationale_1"
+    ],
+    "60": [
+      "backend_nfx_exports_init",
+      "backend_nfx_exports_init_rationale_1"
+    ],
+    "61": [
+      "backend_nfx_identity_init",
+      "backend_nfx_identity_init_rationale_1"
+    ],
+    "62": [
+      "backend_nfx_infrastructure_init",
+      "backend_nfx_infrastructure_init_rationale_1"
+    ],
+    "63": [
+      "backend_nfx_init",
+      "backend_nfx_init_rationale_1"
+    ],
+    "64": [
+      "backend_nfx_migrations_init",
+      "backend_nfx_migrations_init_rationale_1"
+    ],
+    "65": [
+      "backend_nfx_operations_init",
+      "backend_nfx_operations_init_rationale_1"
+    ],
+    "66": [
+      "backend_nfx_retention_init",
+      "backend_nfx_retention_init_rationale_1"
+    ],
+    "67": [
+      "codex_skills_graphify_references_extraction_spec",
+      "codex_skills_graphify_references_extraction_spec_graphify_reference_extraction_subagent_prompt_compact"
+    ],
+    "68": [
+      "frontend_src_main",
+      "frontend_src_main_root"
+    ],
+    "69": [
+      "prd_12_autenticação_e_autorização",
+      "prd_requisitos_de_segurança"
+    ],
+    "70": [
+      "tests_smoke_probe",
+      "tests_smoke_probe_request"
+    ],
+    "71": [
+      "backend_nfx_asgi"
+    ],
+    "72": [
+      "backend_nfx_management_commands_init"
+    ],
+    "73": [
+      "backend_nfx_management_init"
+    ],
+    "74": [
+      "backend_nfx_wsgi"
+    ],
+    "75": [
+      "frontend_eslint_config"
+    ],
+    "76": [
+      "frontend_vite_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.0425531914893617,
+    "1": 0.10853658536585366,
+    "2": 0.05263157894736842,
+    "3": 0.09682539682539683,
+    "4": 0.06060606060606061,
+    "5": 0.11333333333333333,
+    "6": 0.13,
+    "7": 0.08,
+    "8": 0.08,
+    "9": 0.09090909090909091,
+    "10": 0.15384615384615385,
+    "11": 0.18181818181818182,
+    "12": 0.2,
+    "13": 0.2,
+    "14": 0.2,
+    "15": 0.2,
+    "16": 0.2,
+    "17": 0.2,
+    "18": 0.2,
+    "19": 0.2,
+    "20": 0.2,
+    "21": 0.2,
+    "22": 0.2,
+    "23": 0.2222222222222222,
+    "24": 0.2222222222222222,
+    "25": 0.2222222222222222,
+    "26": 0.2222222222222222,
+    "27": 0.2222222222222222,
+    "28": 0.2222222222222222,
+    "29": 0.2222222222222222,
+    "30": 0.2222222222222222,
+    "31": 0.2222222222222222,
+    "32": 0.2222222222222222,
+    "33": 0.25,
+    "34": 0.25,
+    "35": 0.25,
+    "36": 0.25,
+    "37": 0.25,
+    "38": 0.2857142857142857,
+    "39": 0.3333333333333333,
+    "40": 0.3333333333333333,
+    "41": 0.4,
+    "42": 0.5,
+    "43": 0.5,
+    "44": 0.5,
+    "45": 0.5,
+    "46": 0.6666666666666666,
+    "47": 0.6666666666666666,
+    "48": 0.6666666666666666,
+    "49": 0.6666666666666666,
+    "50": 0.6666666666666666,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0
+  },
+  "gods": [
+    {
+      "id": "architecture_arquitetura_técnica_nfx_inov",
+      "label": "Arquitetura técnica — NFX INOV",
+      "degree": 47
+    },
+    {
+      "id": "prd_prd_nfx_inov",
+      "label": "PRD — NFX INOV",
+      "degree": 28
+    },
+    {
+      "id": "implementation_plan_plano_de_implementação_nfx_inov",
+      "label": "Plano de implementação — NFX INOV",
+      "degree": 26
+    },
+    {
+      "id": "backend_nfx_infrastructure_configuration_load_settings",
+      "label": "load_settings()",
+      "degree": 20
+    },
+    {
+      "id": "frontend_tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 16
+    },
+    {
+      "id": "backend_nfx_infrastructure_schema_schema_status",
+      "label": "schema_status()",
+      "degree": 14
+    },
+    {
+      "id": "prd_9_requisitos_funcionais_e_regras_de_negócio",
+      "label": "9. Requisitos funcionais e regras de negócio",
+      "degree": 13
+    },
+    {
+      "id": "codex_skills_graphify_skill_what_you_must_do_when_invoked",
+      "label": "What You Must Do When Invoked",
+      "degree": 12
+    },
+    {
+      "id": "implementation_plan_10_fases_detalhadas_e_backlog_estável",
+      "label": "10. Fases detalhadas e backlog estável",
+      "degree": 11
+    },
+    {
+      "id": "backend_nfx_infrastructure_dependencies_dependencies_from_environment",
+      "label": "dependencies_from_environment()",
+      "degree": 11
+    }
+  ],
+  "surprises": [
+    {
+      "source": "test_dependency_check_is_injectable_and_reports_only_service_names()",
+      "target": "ServiceDependencies",
+      "source_files": [
+        "tests/unit/test_dependencies.py",
+        "backend/nfx/infrastructure/dependencies.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `test_dependency_check_is_injectable_and_reports_only_service_names()` unexpectedly reaches hub `ServiceDependencies`"
+    },
+    {
+      "source": "test_schema_incompatibility_makes_readiness_fail_without_details()",
+      "target": "ServiceDependencies",
+      "source_files": [
+        "tests/unit/test_dependencies.py",
+        "backend/nfx/infrastructure/dependencies.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `test_schema_incompatibility_makes_readiness_fail_without_details()` unexpectedly reaches hub `ServiceDependencies`"
+    },
+    {
+      "source": "test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads()",
+      "target": "redact()",
+      "source_files": [
+        "tests/unit/test_safe_configuration.py",
+        "backend/nfx/infrastructure/redaction.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads()` unexpectedly reaches hub `redact()`"
+    },
+    {
+      "source": "test_postgres_and_minio_are_reachable_in_an_isolated_run()",
+      "target": "schema_status()",
+      "source_files": [
+        "tests/integration/test_services.py",
+        "backend/nfx/infrastructure/schema.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue()",
+      "target": "Migration",
+      "source_files": [
+        "tests/integration/test_migrations.py",
+        "backend/nfx/migrations/0001_schema_contract.py"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `load_settings()` connect `load_settings` to `dependencies.py`?",
+      "why": "High betweenness centrality (0.008) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `schema_status()` connect `schema_status` to `dependencies.py`?",
+      "why": "High betweenness centrality (0.008) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Arquitetura técnica — NFX INOV` connect `Arquitetura técnica — NFX INOV` to `10. Arquitetura de componentes`?",
+      "why": "High betweenness centrality (0.005) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Usage`, `What graphify is for`, `Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)` to the rest of the system?",
+      "why": "403 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Arquitetura técnica — NFX INOV` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `load_settings` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.10853658536585366 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Plano de implementação — NFX INOV` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05263157894736842 - nodes in this community are weakly interconnected."
+    }
+  ]
+}
