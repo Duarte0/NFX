@@ -33,6 +33,9 @@ KNOWN_NFX_KEYS = frozenset(
         "NFX_FISCAL_TRANSPORT",
         "NFX_FISCAL_DESTINATION",
         "NFX_FISCAL_ALLOWLIST",
+        "NFX_WORKER_HEARTBEAT_TIMEOUT_SECONDS",
+        "NFX_SCHEDULER_HEARTBEAT_TIMEOUT_SECONDS",
+        "NFX_JOB_BACKLOG_DELAY_SECONDS",
     }
 )
 
@@ -55,9 +58,17 @@ class SecretSettings:
 
 
 @dataclass(frozen=True)
+class OperationalSettings:
+    worker_heartbeat_timeout_seconds: int
+    scheduler_heartbeat_timeout_seconds: int
+    job_backlog_delay_seconds: int
+
+
+@dataclass(frozen=True)
 class Settings:
     public: PublicSettings
     secrets: SecretSettings
+    operational: OperationalSettings
 
 
 def _error(field: str) -> ConfigurationError:
@@ -114,6 +125,17 @@ def _validate_database_url(value: str | None) -> str:
     if port is not None and not 1 <= port <= 65535:
         raise _error("DATABASE_URL")
     return value
+
+
+def _duration_seconds(values: Mapping[str, str], name: str, default: int) -> int:
+    raw = values.get(name, str(default))
+    try:
+        parsed = int(raw)
+    except ValueError as exc:
+        raise _error(name) from exc
+    if not 1 <= parsed <= 86400:
+        raise _error(name)
+    return parsed
 
 
 def _validate_destination(value: str, field: str) -> str:
@@ -182,5 +204,16 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
                 values.get("MINIO_ROOT_PASSWORD"), "MINIO_ROOT_PASSWORD"
             ),
             certificate_master_key=_read_certificate_master_key(values),
+        ),
+        operational=OperationalSettings(
+            worker_heartbeat_timeout_seconds=_duration_seconds(
+                values, "NFX_WORKER_HEARTBEAT_TIMEOUT_SECONDS", 30
+            ),
+            scheduler_heartbeat_timeout_seconds=_duration_seconds(
+                values, "NFX_SCHEDULER_HEARTBEAT_TIMEOUT_SECONDS", 30
+            ),
+            job_backlog_delay_seconds=_duration_seconds(
+                values, "NFX_JOB_BACKLOG_DELAY_SECONDS", 300
+            ),
         ),
     )

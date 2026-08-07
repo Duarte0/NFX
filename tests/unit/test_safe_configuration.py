@@ -82,6 +82,15 @@ def test_certificate_master_key_requires_external_base64url_32_byte_material() -
         load_settings(environment(NFX_CERTIFICATE_MASTER_KEY="too-short"))
 
 
+def test_operational_thresholds_have_safe_defaults_and_are_validated() -> None:
+    settings = load_settings(environment())
+    assert settings.operational.worker_heartbeat_timeout_seconds == 30
+    assert settings.operational.scheduler_heartbeat_timeout_seconds == 30
+    assert settings.operational.job_backlog_delay_seconds == 300
+    with pytest.raises(ConfigurationError):
+        load_settings(environment(NFX_JOB_BACKLOG_DELAY_SECONDS="0"))
+
+
 def test_redaction_handles_nested_values_exceptions_urls_and_binary_payloads() -> None:
     payload = {
         "password": CANARY,

@@ -4,10 +4,12 @@ import logging
 import signal
 from argparse import ArgumentParser
 from typing import cast
+from uuid import uuid4
 
 from django.core.management.base import BaseCommand
 
-from nfx.infrastructure.http import configure_logging
+from nfx.infrastructure.http import configure_logging, safe_log
+from nfx.jobs.observability import HeartbeatService
 from nfx.jobs.services import JobEngine, run_scheduler_loop
 
 
@@ -27,10 +29,19 @@ class Command(BaseCommand):
 
         signal.signal(signal.SIGTERM, stop)
         signal.signal(signal.SIGINT, stop)
-        logging.info("scheduler_started")
-        run_scheduler_loop(
-            JobEngine(),
-            poll_interval=cast(float, options["poll_interval"]),
-            should_continue=lambda: running,
-        )
-        logging.info("scheduler_stopped")
+        process_id = f"scheduler-{uuid4()}"
+        heartbeat = HeartbeatService(component="scheduler", process_id=process_id)
+        safe_log(logging.getLogger(__name__), "info", "scheduler_started", process_id=process_id)
+        try:
+            run_scheduler_loop(
+                JobEngine(),
+                poll_interval=cast(float, options["poll_interval"]),
+                should_continue=lambda: running,
+                heartbeat=heartbeat,
+            )
+        finally:
+            try:
+                heartbeat.stop()
+            except Exception:
+                safe_log(logging.getLogger(__name__), "warning", "scheduler_stop_unavailable")
+        safe_log(logging.getLogger(__name__), "info", "scheduler_stopped", process_id=process_id)

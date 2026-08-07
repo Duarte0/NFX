@@ -45,6 +45,7 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx.0007_certificate_lifecycle",
         "nfx.0008_durable_jobs",
         "nfx.0009_job_policies",
+        "nfx.0010_process_heartbeats",
     )
     assert second.applied == ()
     assert constraints == (
@@ -93,6 +94,7 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
         "nfx.0007_certificate_lifecycle",
         "nfx.0008_durable_jobs",
         "nfx.0009_job_policies",
+        "nfx.0010_process_heartbeats",
     )
     assert schema_status().compatible
 
@@ -134,6 +136,7 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
             "nfx.0007_certificate_lifecycle",
             "nfx.0008_durable_jobs",
             "nfx.0009_job_policies",
+            "nfx.0010_process_heartbeats",
         ),
     ]
     assert schema_status().compatible

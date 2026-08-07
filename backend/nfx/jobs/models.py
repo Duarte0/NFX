@@ -168,3 +168,39 @@ class Job(models.Model):
                 name="nfx_job_blocked_without_lease_ck",
             ),
         ]
+
+
+class ProcessHeartbeat(models.Model):
+    """Durable freshness evidence for a worker or scheduler process."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    component = models.CharField(max_length=16)
+    process_id = models.CharField(max_length=128)
+    started_at = models.DateTimeField()
+    last_seen_at = models.DateTimeField()
+    status = models.CharField(max_length=16, default="running")
+
+    class Meta:
+        db_table = "nfx_process_heartbeat"
+        indexes = [
+            models.Index(
+                fields=("component", "-last_seen_at"), name="nfx_heartbeat_component_ix"
+            ),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=("component", "process_id"), name="nfx_heartbeat_identity_uq"
+            ),
+            models.CheckConstraint(
+                condition=Q(component__in=("worker", "scheduler")),
+                name="nfx_heartbeat_component_ck",
+            ),
+            models.CheckConstraint(
+                condition=Q(status__in=("running", "stopping")),
+                name="nfx_heartbeat_status_ck",
+            ),
+            models.CheckConstraint(
+                condition=Q(process_id__regex=r"^[a-z][a-z0-9_.-]{0,127}$"),
+                name="nfx_heartbeat_process_id_ck",
+            ),
+        ]

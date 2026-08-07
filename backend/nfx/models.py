@@ -6,7 +6,7 @@ from nfx.certificates.models import Certificate
 from nfx.collection.models import InitialCollectionRequest
 from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
 from nfx.identity.models import IdentitySession, LoginThrottle, User
-from nfx.jobs.models import Job, JobPolicy
+from nfx.jobs.models import Job, JobPolicy, ProcessHeartbeat
 
 __all__ = [
     "Artifact",
@@ -22,4 +22,5 @@ __all__ = [
     "User",
     "Job",
     "JobPolicy",
+    "ProcessHeartbeat",
 ]

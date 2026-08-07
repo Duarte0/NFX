@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P3 — P3-01 e P3-02 implementados e validados; P3-04 pendente.
+- **Fase/status:** P3 — P3-01, P3-02 e P3-04 implementados e validados; P3-05 permanece pendente.
 - **Backlog:** P3-01, P3-02, P3-04.
 - **Dependências:** P1-01 e P1-05.
 - **PRD:** FR-COLL-002; BR-COLL-002, BR-COLL-007, BR-COLL-010; OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006; NFR-004, NFR-005, NFR-008. **Aceite:** AC-006, AC-007, AC-017, AC-024.
@@ -40,7 +40,7 @@ Testar dois workers concorrentes, morte antes/depois do efeito, renew atrasado, 
 - [x] Worker sem lease válido não conclui job.
 - [x] Restart recupera agenda e leases vencidos idempotentemente.
 - [x] Retry/cooldown/bloqueio seguem política versionada.
-- [ ] Logs/health/métricas distinguem atraso e falha sem segredo.
+- [x] Logs/health/métricas distinguem atraso e falha sem segredo.
 
 DoD: migrações, engine, processos, políticas, telemetria e testes de concorrência/recovery verdes. **Proposed:** tempos/defaults e schema físico; nenhum valor fiscal oficial é fixado.
 
@@ -61,3 +61,12 @@ rejeitadas, a política e sua referência capturada pelo job são imutáveis, e 
 referência continuam compatíveis com o contrato P3-01. A validação final cobriu os comandos Make,
 108 testes unitários, 22 testes PostgreSQL de integração, migração, build e smoke; telemetria
 detalhada, métricas e health continuam pertencendo a P3-04.
+
+P3-04 é a fatia concluída nesta iteração: `ProcessHeartbeat` registra identidade, início,
+último contato e parada de worker/scheduler em migration aditiva `0010_process_heartbeats`.
+`JobObservability` calcula agregados bounded de estado, idade, tentativas, retry, lease expirado,
+cooldown, bloqueio e outcomes sem mutar jobs. `OperationalHealth` expõe o contrato somente leitura
+em `/health/operational`, protegido para Administrador, mantendo `/health/live` independente e
+`/health/ready` inalterado. Limites de frescor/backlog são configuráveis e injetáveis nos testes;
+logs JSON incluem somente campos estruturados permitidos e passam pela fronteira de redaction.
+Capacidades futuras sem implementação aparecem como `unavailable`.

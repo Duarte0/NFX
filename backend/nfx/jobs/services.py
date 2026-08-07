@@ -14,8 +14,10 @@ from uuid import UUID, uuid4
 from django.db import IntegrityError, OperationalError, transaction
 from django.utils import timezone
 
+from nfx.infrastructure.http import safe_log
 from nfx.jobs.handlers import HandlerOutcome, get_handler
 from nfx.jobs.models import Job, JobOutcomeKind, JobPolicy, JobState
+from nfx.jobs.observability import HeartbeatService
 from nfx.jobs.policy import select_policy
 
 logger = logging.getLogger(__name__)
@@ -388,10 +390,11 @@ class JobEngine:
 
 def process_one(engine: JobEngine, *, owner: str) -> bool:
     """Run one registered handler, finalizing only through the lease contract."""
+    started = time.monotonic()
     try:
         job = engine.claim(owner)
     except OperationalError:
-        logger.warning("job_database_unavailable")
+        safe_log(logger, "warning", "job_database_unavailable", outcome="unavailable")
         return False
     if job is None:
         return False
@@ -407,19 +410,68 @@ def process_one(engine: JobEngine, *, owner: str) -> bool:
             else:
                 engine.fail(job.id, owner, error_code="handler_not_registered")
         except LeaseLost:
-            logger.warning("job_lease_lost", extra={"job_id": str(job.id)})
+            safe_log(
+                logger,
+                "warning",
+                "job_lease_lost",
+                job_id=str(job.id),
+                job_type=job.job_type,
+                attempt=job.attempt_count,
+                outcome="lease_lost",
+            )
+        safe_log(
+            logger,
+            "info",
+            "job_handler_finished",
+            job_id=str(job.id),
+            job_type=job.job_type,
+            attempt=job.attempt_count,
+            duration_ms=round((time.monotonic() - started) * 1000),
+            outcome="handler_not_registered",
+        )
         return True
     try:
         result = handler(job)
         if isinstance(result, HandlerOutcome):
             engine.finalize(job.id, owner, result)
+            outcome = result.kind
         else:
             engine.complete(job.id, owner, result)
+            outcome = JobOutcomeKind.SUCCESS
+        safe_log(
+            logger,
+            "info",
+            "job_handler_finished",
+            job_id=str(job.id),
+            job_type=job.job_type,
+            attempt=job.attempt_count,
+            duration_ms=round((time.monotonic() - started) * 1000),
+            outcome=outcome,
+        )
     except LeaseLost:
-        logger.warning("job_lease_lost", extra={"job_id": str(job.id)})
+        safe_log(
+            logger,
+            "warning",
+            "job_lease_lost",
+            job_id=str(job.id),
+            job_type=job.job_type,
+            attempt=job.attempt_count,
+            outcome="lease_lost",
+        )
     except OperationalError:
-        logger.warning("job_database_unavailable")
-    except Exception:
+        safe_log(logger, "warning", "job_database_unavailable", outcome="unavailable")
+    except Exception as exc:
+        safe_log(
+            logger,
+            "warning",
+            "job_handler_failed",
+            job_id=str(job.id),
+            job_type=job.job_type,
+            attempt=job.attempt_count,
+            duration_ms=round((time.monotonic() - started) * 1000),
+            outcome="temporary",
+            error_class=type(exc).__name__,
+        )
         try:
             if job.effective_policy is not None:
                 engine.finalize(
@@ -430,7 +482,7 @@ def process_one(engine: JobEngine, *, owner: str) -> bool:
             else:
                 engine.fail(job.id, owner, error_code="handler_failed")
         except (LeaseLost, OperationalError):
-            logger.warning("job_finalize_unavailable")
+            safe_log(logger, "warning", "job_finalize_unavailable", outcome="unavailable")
     return True
 
 
@@ -441,10 +493,16 @@ def run_worker_loop(
     poll_interval: float = 0.2,
     should_continue: Callable[[], bool] = lambda: True,
     sleep: Callable[[float], None] = time.sleep,
+    heartbeat: HeartbeatService | None = None,
 ) -> None:
     worker_owner = owner or f"worker-{uuid4()}"
     while should_continue():
         process_one(engine, owner=worker_owner)
+        if heartbeat is not None:
+            try:
+                heartbeat.beat()
+            except OperationalError:
+                safe_log(logger, "warning", "worker_heartbeat_unavailable", outcome="unavailable")
         if should_continue():
             sleep(poll_interval)
 
@@ -455,11 +513,19 @@ def run_scheduler_loop(
     poll_interval: float = 0.2,
     should_continue: Callable[[], bool] = lambda: True,
     sleep: Callable[[float], None] = time.sleep,
+    heartbeat: HeartbeatService | None = None,
 ) -> None:
     while should_continue():
         try:
             engine.recover()
         except OperationalError:
-            logger.warning("scheduler_database_unavailable")
+            safe_log(logger, "warning", "scheduler_database_unavailable", outcome="unavailable")
+        if heartbeat is not None:
+            try:
+                heartbeat.beat()
+            except OperationalError:
+                safe_log(
+                    logger, "warning", "scheduler_heartbeat_unavailable", outcome="unavailable"
+                )
         if should_continue():
             sleep(poll_interval)
