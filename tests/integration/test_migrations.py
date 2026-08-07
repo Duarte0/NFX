@@ -44,6 +44,7 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx.0006_company_lifecycle",
         "nfx.0007_certificate_lifecycle",
         "nfx.0008_durable_jobs",
+        "nfx.0009_job_policies",
     )
     assert second.applied == ()
     assert constraints == (
@@ -87,10 +88,11 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
         "nfx.0002_artifact",
         "nfx.0003_identity",
         "nfx.0004_audit_foundation",
-            "nfx.0005_user_administration_version",
-            "nfx.0006_company_lifecycle",
-            "nfx.0007_certificate_lifecycle",
-            "nfx.0008_durable_jobs",
+        "nfx.0005_user_administration_version",
+        "nfx.0006_company_lifecycle",
+        "nfx.0007_certificate_lifecycle",
+        "nfx.0008_durable_jobs",
+        "nfx.0009_job_policies",
     )
     assert schema_status().compatible
 
@@ -125,12 +127,13 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
         (
             "nfx.0001_schema_contract",
             "nfx.0002_artifact",
-                "nfx.0003_identity",
+            "nfx.0003_identity",
             "nfx.0004_audit_foundation",
             "nfx.0005_user_administration_version",
             "nfx.0006_company_lifecycle",
             "nfx.0007_certificate_lifecycle",
             "nfx.0008_durable_jobs",
+            "nfx.0009_job_policies",
         ),
     ]
     assert schema_status().compatible

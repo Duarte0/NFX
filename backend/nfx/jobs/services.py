@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import random
 import re
 import time
 from collections.abc import Callable, Mapping
@@ -13,8 +14,9 @@ from uuid import UUID, uuid4
 from django.db import IntegrityError, OperationalError, transaction
 from django.utils import timezone
 
-from nfx.jobs.handlers import get_handler
-from nfx.jobs.models import Job, JobState
+from nfx.jobs.handlers import HandlerOutcome, get_handler
+from nfx.jobs.models import Job, JobOutcomeKind, JobPolicy, JobState
+from nfx.jobs.policy import select_policy
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +54,7 @@ def _validate_safe_value(value: Any, *, path: str = "payload") -> Any:
         return result
     if isinstance(value, list):
         return [_validate_safe_value(item, path=f"{path}[]") for item in value]
-    if value is None or isinstance(value, (bool, int, float, str)):
+    if value is None or isinstance(value, bool | int | float | str):
         if isinstance(value, str) and (value.lstrip().startswith("<") or value.startswith("%PDF")):
             raise InvalidJobPayload(f"unsafe value at {path}")
         return value
@@ -71,11 +73,17 @@ class JobEngine:
         *,
         clock: Callable[[], datetime] = timezone.now,
         lease_duration: timedelta = timedelta(seconds=30),
+        jitter_source: Callable[[int], int] | None = None,
     ) -> None:
         if lease_duration <= timedelta(0):
             raise ValueError("lease_duration must be positive")
         self.clock = clock
         self.lease_duration = lease_duration
+        self.jitter_source = jitter_source or self._random_jitter
+
+    @staticmethod
+    def _random_jitter(max_seconds: int) -> int:
+        return random.SystemRandom().randint(-max_seconds, max_seconds) if max_seconds else 0
 
     def enqueue(
         self,
@@ -86,6 +94,9 @@ class JobEngine:
         idempotency_key: str,
         priority: int = 0,
         scheduled_at: datetime | None = None,
+        policy: JobPolicy | None = None,
+        policy_source: str | None = None,
+        policy_flow: str | None = None,
     ) -> Job:
         safe_payload = _validate_safe_value(payload)
         due_at = scheduled_at or self.clock()
@@ -93,6 +104,17 @@ class JobEngine:
             raise ValueError("scheduled_at must be timezone-aware")
         if not job_type or not logical_target or not idempotency_key:
             raise ValueError("job_type, logical_target, and idempotency_key are required")
+        if policy is not None and (policy_source is not None or policy_flow is not None):
+            raise ValueError("use policy or policy scope, not both")
+        if (policy_source is None) != (policy_flow is None):
+            raise ValueError("policy_source and policy_flow must be provided together")
+        if policy_source is not None and policy_flow is not None:
+            policy = select_policy(source=policy_source, flow=policy_flow, at=due_at)
+        if policy is not None and not (
+            policy.valid_from <= due_at
+            and (policy.valid_until is None or due_at < policy.valid_until)
+        ):
+            raise ValueError("policy is not valid at the scheduled time")
 
         for _ in range(2):
             try:
@@ -114,6 +136,7 @@ class JobEngine:
                         priority=priority,
                         idempotency_key=idempotency_key,
                         scheduled_at=due_at,
+                        effective_policy=policy,
                     )
             except IntegrityError:
                 # A concurrent insert won the partial unique constraint. The
@@ -224,7 +247,9 @@ class JobEngine:
             lease_expires_at=now + self.lease_duration,
         )
 
-    def complete(self, job_id: UUID | str, owner: str, result: Mapping[str, Any] | None = None) -> Job:
+    def complete(
+        self, job_id: UUID | str, owner: str, result: Mapping[str, Any] | None = None
+    ) -> Job:
         safe_result = _validate_safe_value(result or {}, path="result")
         now = self.clock()
         return self._lease_update(
@@ -237,7 +262,100 @@ class JobEngine:
             safe_result=safe_result,
             safe_error="",
             completed_at=now,
+            last_outcome=JobOutcomeKind.SUCCESS,
+            cooldown_until=None,
+            blocked_at=None,
+            blocked_reason="",
         )
+
+    def finalize(self, job_id: UUID | str, owner: str, outcome: HandlerOutcome) -> Job:
+        """Apply a classified handler result while its lease is still valid."""
+        if outcome.kind not in JobOutcomeKind.values:
+            raise InvalidTransition("unknown handler outcome")
+        safe_result = _validate_safe_value(outcome.result, path="result")
+        error_code = _safe_error_code(outcome.error_code or outcome.kind)
+        now = self.clock()
+        with transaction.atomic():
+            job = Job.objects.select_related("effective_policy").filter(id=job_id).first()
+            if job is None or job.state != JobState.RUNNING:
+                raise InvalidTransition("job is not running")
+            if (
+                job.lease_owner != owner
+                or job.lease_expires_at is None
+                or job.lease_expires_at <= now
+            ):
+                raise LeaseLost("job lease is no longer valid")
+            fields: dict[str, Any] = {
+                "safe_result": safe_result,
+                "safe_error": error_code,
+                "last_outcome": outcome.kind,
+                "cooldown_until": None,
+                "blocked_at": None,
+                "blocked_reason": "",
+                "lease_owner": None,
+                "lease_issued_at": None,
+                "lease_expires_at": None,
+            }
+            if outcome.kind == JobOutcomeKind.SUCCESS:
+                fields.update(state=JobState.COMPLETED, completed_at=now)
+            elif outcome.kind == JobOutcomeKind.PERMANENT:
+                fields.update(
+                    state=JobState.BLOCKED,
+                    completed_at=None,
+                    blocked_at=now,
+                    blocked_reason=error_code,
+                )
+            else:
+                policy = job.effective_policy
+                if policy is None:
+                    fields.update(
+                        state=JobState.BLOCKED,
+                        completed_at=None,
+                        blocked_at=now,
+                        blocked_reason="policy_required",
+                        safe_error="policy_required",
+                    )
+                elif job.attempt_count > policy.retry_limit:
+                    fields.update(
+                        state=JobState.BLOCKED,
+                        completed_at=None,
+                        blocked_at=now,
+                        blocked_reason="retry_exhausted",
+                        safe_error="retry_exhausted",
+                    )
+                else:
+                    due_at = now + self._retry_delay(job, policy)
+                    if outcome.kind == JobOutcomeKind.COOLDOWN:
+                        due_at = self._cooldown_due(outcome, policy, now)
+                        fields["cooldown_until"] = due_at
+                    fields.update(state=JobState.QUEUED, scheduled_at=due_at, completed_at=None)
+            updated = Job.objects.filter(
+                id=job_id,
+                state=JobState.RUNNING,
+                lease_owner=owner,
+                lease_expires_at__gt=now,
+            ).update(**fields, updated_at=now)
+            if not updated:
+                raise LeaseLost("job lease is no longer valid")
+            return Job.objects.get(id=job_id)
+
+    def _retry_delay(self, job: Job, policy: JobPolicy) -> timedelta:
+        exponent = max(0, job.attempt_count - 1)
+        base_seconds = min(
+            policy.backoff_cap_seconds, policy.backoff_initial_seconds * (2**exponent)
+        )
+        jitter = self.jitter_source(policy.jitter_seconds)
+        jitter = max(-policy.jitter_seconds, min(policy.jitter_seconds, jitter))
+        return timedelta(seconds=min(policy.backoff_cap_seconds, max(0, base_seconds + jitter)))
+
+    @staticmethod
+    def _cooldown_due(outcome: HandlerOutcome, policy: JobPolicy, now: datetime) -> datetime:
+        due_at = outcome.cooldown_until
+        if due_at is None and policy.cooldown_seconds:
+            due_at = now + timedelta(seconds=policy.cooldown_seconds)
+        if due_at is None or timezone.is_naive(due_at) or due_at <= now:
+            raise InvalidTransition("cooldown outcome requires a future timezone-aware deadline")
+        return due_at
 
     def fail(
         self,
@@ -261,6 +379,10 @@ class JobEngine:
             safe_result=None,
             safe_error=_safe_error_code(error_code),
             completed_at=None,
+            last_outcome=JobOutcomeKind.TEMPORARY,
+            cooldown_until=None,
+            blocked_at=None,
+            blocked_reason="",
         )
 
 
@@ -276,20 +398,37 @@ def process_one(engine: JobEngine, *, owner: str) -> bool:
     handler = get_handler(job.job_type)
     if handler is None:
         try:
-            engine.fail(job.id, owner, error_code="handler_not_registered")
+            if job.effective_policy is not None:
+                engine.finalize(
+                    job.id,
+                    owner,
+                    HandlerOutcome.temporary(error_code="handler_not_registered"),
+                )
+            else:
+                engine.fail(job.id, owner, error_code="handler_not_registered")
         except LeaseLost:
             logger.warning("job_lease_lost", extra={"job_id": str(job.id)})
         return True
     try:
         result = handler(job)
-        engine.complete(job.id, owner, result)
+        if isinstance(result, HandlerOutcome):
+            engine.finalize(job.id, owner, result)
+        else:
+            engine.complete(job.id, owner, result)
     except LeaseLost:
         logger.warning("job_lease_lost", extra={"job_id": str(job.id)})
     except OperationalError:
         logger.warning("job_database_unavailable")
     except Exception:
         try:
-            engine.fail(job.id, owner, error_code="handler_failed")
+            if job.effective_policy is not None:
+                engine.finalize(
+                    job.id,
+                    owner,
+                    HandlerOutcome.temporary(error_code="handler_failed"),
+                )
+            else:
+                engine.fail(job.id, owner, error_code="handler_failed")
         except (LeaseLost, OperationalError):
             logger.warning("job_finalize_unavailable")
     return True

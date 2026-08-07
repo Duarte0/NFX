@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P3 — P3-01 implementado; P3-02 e P3-04 pendentes.
+- **Fase/status:** P3 — P3-01 e P3-02 implementados e validados; P3-04 pendente.
 - **Backlog:** P3-01, P3-02, P3-04.
 - **Dependências:** P1-01 e P1-05.
 - **PRD:** FR-COLL-002; BR-COLL-002, BR-COLL-007, BR-COLL-010; OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006; NFR-004, NFR-005, NFR-008. **Aceite:** AC-006, AC-007, AC-017, AC-024.
@@ -36,10 +36,10 @@ Testar dois workers concorrentes, morte antes/depois do efeito, renew atrasado, 
 
 ## Aceite e DoD
 
-- [ ] Claim/lease persistentes impedem execução concorrente lógica.
-- [ ] Worker sem lease válido não conclui job.
-- [ ] Restart recupera agenda e leases vencidos idempotentemente.
-- [ ] Retry/cooldown/bloqueio seguem política versionada.
+- [x] Claim/lease persistentes impedem execução concorrente lógica.
+- [x] Worker sem lease válido não conclui job.
+- [x] Restart recupera agenda e leases vencidos idempotentemente.
+- [x] Retry/cooldown/bloqueio seguem política versionada.
 - [ ] Logs/health/métricas distinguem atraso e falha sem segredo.
 
 DoD: migrações, engine, processos, políticas, telemetria e testes de concorrência/recovery verdes. **Proposed:** tempos/defaults e schema físico; nenhum valor fiscal oficial é fixado.
@@ -51,3 +51,13 @@ PostgreSQL com `SKIP LOCKED`, leases vinculados ao owner, renovação, conclusã
 reclaim e a fronteira de handlers sintéticos usada pelo worker. A fila não decide retry,
 backoff, cooldown ou bloqueio permanente; essas decisões continuam pertencendo a P3-02.
 Métricas/health operacionais detalhados continuam pertencendo a P3-04.
+
+P3-02 é a fatia concluída na sequência: `JobPolicy` persiste versões por escopo de fonte/fluxo
+com validade, limite de retry, backoff, teto, jitter e cooldown. Cada job captura a política
+efetiva no agendamento; handlers retornam resultados classificados e o engine aplica retry
+progressivo determinístico sob relógio/jitter injetáveis, cooldown oficial sem backoff local,
+ou bloqueio terminal para falha permanente e esgotamento. Políticas ambíguas ou inválidas são
+rejeitadas, a política e sua referência capturada pelo job são imutáveis, e jobs antigos sem
+referência continuam compatíveis com o contrato P3-01. A validação final cobriu os comandos Make,
+108 testes unitários, 22 testes PostgreSQL de integração, migração, build e smoke; telemetria
+detalhada, métricas e health continuam pertencendo a P3-04.

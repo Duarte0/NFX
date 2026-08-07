@@ -1,37 +1,37 @@
-# Graph Report - workspace  (2026-08-06)
+# Graph Report - workspace  (2026-08-07)
 
 ## Corpus Check
-- 134 files · ~69,962 words
+- 141 files · ~77,526 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1333 nodes · 2405 edges · 117 communities (79 shown, 38 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 155 edges (avg confidence: 0.53)
+- 1471 nodes · 2754 edges · 123 communities (84 shown, 39 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 182 edges (avg confidence: 0.53)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `444a665a`
+- Built from commit: `b444fab2`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - identity/services.py
-- ArtifactStorageService
+- MemoryObjectStore
 - load_settings
 - Graphify Skill Instructions
 - Arquitetura técnica — NFX INOV
 - Plano de implementação — NFX INOV
-- audit/services.py
+- nfx/models.py
 - dependencies.py
 - certificates/services.py
 - P4 Ingestão comum
 - companies/services.py
 - devDependencies
-- _HttpResponse
+- companies/views.py
 - What You Must Do When Invoked
 - PRD — NFX INOV
 - compilerOptions
-- JobEngine
+- http.py
 - 9. Requisitos funcionais e regras de negócio
 - Persistência relacional e migrações
 - Fundação de auditoria append-only
@@ -46,7 +46,7 @@
 - Jobs duráveis, leases, políticas e observabilidade inicial
 - Exportação ZIP assíncrona
 - Technical Architecture - NFX INOV
-- Update Reference
+- Job
 - 0006_company_lifecycle.py
 - graphify reference: extra exports and benchmark
 - Simuladores fiscais e fixtures seguras
@@ -79,12 +79,12 @@
 - AGENTS.md
 - adapters/__init__.py
 - artifacts/__init__.py
-- /graphify
-- Exports Reference
+- jobs/policy.py
+- .as_job_outcome
 - collection/__init__.py
 - documents/__init__.py
 - exports/__init__.py
-- Query Reference
+- JobEngine
 - infrastructure/__init__.py
 - nfx/__init__.py
 - 0002_artifact.py
@@ -99,16 +99,16 @@
 - Docker Compose Test Configuration
 - 12. Autenticação e autorização
 - Schema Contract
-- GitHub and Merge Reference
+- jobs/services.py
 - 0007_certificate_lifecycle.py
 - Build Pass
 - Specification Pass
 - Issue Creation Pass
-- 10. Fases detalhadas e backlog estável
+- 0002_-_policy-driven-job-retry-and-blocking.md
 - Planning Pass
-- Índice de implementação das specs
-- Administração de usuários
-- Consulta de documentos e download individual
+- 0003_-_deterministic-fiscal-simulators-and-fixtures.md
+- test_jobs.py
+- 0009_job_policies.py
 - 0001_-_durable-job-queue-and-leases.md
 - Docker Compose Development Configuration
 - Authorize Policy
@@ -117,36 +117,42 @@
 - Artifact Storage Service
 - Company Model
 - Fiscal Adapter Port
-- Distribuição NF-e e manifestação
-- Distribuição NFS-e/ADN e cobertura
+- HandlerOutcome
+- 10. Fases detalhadas e backlog estável
 - 0000_-_ISSUE_TEMPLATE.md
 - jobs/__init__.py
 - 0008_durable_jobs.py
 - loop.sh
+- Índice de implementação das specs
+- Administração de usuários
+- Consulta de documentos e download individual
+- Distribuição NF-e e manifestação
+- .save
+- Distribuição NFS-e/ADN e cobertura
 
 ## God Nodes (most connected - your core abstractions)
 1. `AuditService` - 48 edges
 2. `Arquitetura técnica — NFX INOV` - 47 edges
 3. `Action` - 41 edges
 4. `ArtifactStorageService` - 38 edges
-5. `SessionIdentity` - 30 edges
-6. `PRD — NFX INOV` - 28 edges
-7. `add_certificate()` - 27 edges
-8. `ObjectStore` - 26 edges
-9. `protected()` - 26 edges
-10. `Plano de implementação — NFX INOV` - 26 edges
+5. `JobEngine` - 36 edges
+6. `HandlerOutcome` - 34 edges
+7. `SessionIdentity` - 30 edges
+8. `PRD — NFX INOV` - 28 edges
+9. `add_certificate()` - 27 edges
+10. `ObjectStore` - 26 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `FrozenClock` --uses--> `FiscalFamily`  [INFERRED]
+  tests/integration/test_fiscal_simulators.py → backend/nfx/adapters/simulation.py
+- `FrozenClock` --uses--> `ScenarioName`  [INFERRED]
+  tests/integration/test_fiscal_simulators.py → backend/nfx/adapters/simulation.py
+- `FrozenClock` --uses--> `NFeSimulator`  [INFERRED]
+  tests/integration/test_fiscal_simulators.py → backend/nfx/adapters/simulation.py
 - `MemoryObjectStore` --uses--> `ObjectMetadata`  [INFERRED]
   tests/unit/test_certificate_lifecycle.py → backend/nfx/artifacts/storage.py
-- `test_minio_adapter_writes_and_verifies_synthetic_bytes()` --calls--> `dependencies_from_environment()`  [INFERRED]
-  tests/integration/test_artifact_storage.py → backend/nfx/infrastructure/dependencies.py
-- `RecordingOpenCnpj` --uses--> `OpenCnpjResponse`  [INFERRED]
-  tests/unit/test_company_lifecycle.py → backend/nfx/adapters/opencnpj.py
-- `MemoryObjectStore` --uses--> `ArtifactState`  [INFERRED]
-  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
-- `MemoryObjectStore` --uses--> `Artifact`  [INFERRED]
-  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
+- `MemoryObjectStore` --uses--> `ArtifactStorageService`  [INFERRED]
+  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/storage.py
 
 ## Import Cycles
 - None detected.
@@ -158,23 +164,23 @@
 - **Docker Infrastructure Stack** — docker_compose_app, docker_compose_test, docker_compose_dev [EXTRACTED 0.95]
 - **Fiscal Ingestion Flow** — specs_p3_fiscal_adapter_simulation_and_fixtures_fiscal_adapter_port, specs_p4_fiscal_document_ingestion_and_integrity_document, specs_p1_object_storage_and_integrity_artifact_storage_service [EXTRACTED 0.90]
 
-## Communities (117 total, 38 thin omitted)
+## Communities (123 total, 39 thin omitted)
 
 ### Community 0 - "identity/services.py"
-Cohesion: 0.08
-Nodes (81): _admin_event(), _assert_not_last_administrator(), _assert_version(), authenticate(), bootstrap_first_administrator(), change_own_password(), change_user_role(), create_user() (+73 more)
+Cohesion: 0.10
+Nodes (57): _admin_event(), _assert_not_last_administrator(), _assert_version(), authenticate(), bootstrap_first_administrator(), change_own_password(), change_user_role(), create_user() (+49 more)
 
-### Community 1 - "ArtifactStorageService"
-Cohesion: 0.08
-Nodes (39): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+31 more)
+### Community 1 - "MemoryObjectStore"
+Cohesion: 0.07
+Nodes (40): Artifact, ArtifactState, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, ArtifactConflict, ArtifactError, ArtifactMetrics, ArtifactNotReadable (+32 more)
 
 ### Community 2 - "load_settings"
-Cohesion: 0.11
-Nodes (34): EmptyFiscalSimulator, FiscalDestinationError, FiscalDestinationGuard, RuntimeError, P0 fiscal boundary: validate every destination before a transport can run., Safe rejection that intentionally contains no destination value., The sole initial fiscal transport; it always produces an empty result., Validate the configured URL and every declared redirect before I/O. (+26 more)
+Cohesion: 0.10
+Nodes (36): EmptyFiscalSimulator, FiscalDestinationError, FiscalDestinationGuard, RuntimeError, P0 fiscal boundary: validate every destination before a transport can run., Safe rejection that intentionally contains no destination value., The sole initial fiscal transport; it always produces an empty result., Validate the configured URL and every declared redirect before I/O. (+28 more)
 
 ### Community 3 - "Graphify Skill Instructions"
-Cohesion: 0.13
-Nodes (20): Add and Watch Reference, URL Ingestion, Watch Mode, Confidence Audit Trail, Extraction Specification, Extraction Subagent Prompt, Transcription Reference, Whisper Domain Hint (+12 more)
+Cohesion: 0.05
+Nodes (49): Add and Watch Reference, URL Ingestion, Watch Mode, Exports Reference, FalkorDB Export, GraphML Export, MCP Server, Neo4j Export (+41 more)
 
 ### Community 4 - "Arquitetura técnica — NFX INOV"
 Cohesion: 0.04
@@ -184,9 +190,9 @@ Nodes (46): 11. Organização do repositório, 12. Stack selecionada e justifica
 Cohesion: 0.08
 Nodes (26): 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs, 18. Rastreabilidade do PRD (+18 more)
 
-### Community 6 - "audit/services.py"
-Cohesion: 0.06
-Nodes (42): AuditEvent, AuditChain, AuditEvent, Meta, The single stream serializes appends without allowing event rewrites., AuditUnavailable, AuditVerifier, _canonical() (+34 more)
+### Community 6 - "nfx/models.py"
+Cohesion: 0.07
+Nodes (36): AuditEvent, AuditChain, AuditEvent, Meta, The single stream serializes appends without allowing event rewrites., AuditUnavailable, AuditVerifier, _canonical() (+28 more)
 
 ### Community 7 - "dependencies.py"
 Cohesion: 0.05
@@ -194,27 +200,27 @@ Nodes (44): Append-only audit trail, integrity verifier, and administrative quer
 
 ### Community 8 - "certificates/services.py"
 Cohesion: 0.07
-Nodes (70): object_store_from_environment(), ObjectStore, Protocol, Build the adapter at the infrastructure edge, not in a domain caller., Certificate, CertificateState, Meta, Certificate metadata plus ciphertext references; plaintext never persists. (+62 more)
+Nodes (72): ArtifactStorageService, ObjectStore, Protocol, Creates pending metadata, verifies bytes, and finalizes atomically., Certificate, CertificateState, Meta, Certificate metadata plus ciphertext references; plaintext never persists. (+64 more)
 
 ### Community 9 - "P4 Ingestão comum"
 Cohesion: 0.24
 Nodes (7): P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P5 NF-e, P6 NFS-e/ADN, P7 Consulta e artefatos
 
 ### Community 10 - "companies/services.py"
-Cohesion: 0.07
-Nodes (86): OpenCnpjClient, OpenCnpjResponse, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Default local/runtime adapter until an approved public endpoint is configured., UnavailableOpenCnpjClient, AuditService, CompanyMetrics (+78 more)
+Cohesion: 0.06
+Nodes (66): HttpOpenCnpjClient, _HttpResponse, OpenCnpjClient, OpenCnpjResponse, Protocol, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Optional public-source transport with an injected opener for tests. (+58 more)
 
 ### Community 11 - "devDependencies"
 Cohesion: 0.06
 Nodes (32): eslint, @eslint/js, eslint-plugin-react-hooks, dependencies, react, react-dom, vite, @vitejs/plugin-react (+24 more)
 
-### Community 12 - "_HttpResponse"
-Cohesion: 0.19
-Nodes (6): HttpOpenCnpjClient, _HttpResponse, Protocol, Optional public-source transport with an injected opener for tests., CorrelationIdMiddleware, HttpRequest
+### Community 12 - "companies/views.py"
+Cohesion: 0.11
+Nodes (54): Default local/runtime adapter until an approved public endpoint is configured., UnavailableOpenCnpjClient, events(), _integer(), HttpRequest, JsonResponse, require_GET, companies() (+46 more)
 
 ### Community 13 - "What You Must Do When Invoked"
-Cohesion: 0.13
-Nodes (15): Part A - Structural extraction for code files, Part B - Semantic extraction (parallel subagents), Part C - Merge AST + semantic into final extraction, Step 0 - GitHub repos and multi-path merge (only if a URL or several paths), Step 1 - Ensure graphify is installed, Step 2.5 - Video and audio (only if video files detected), Step 2 - Detect files, Step 3 - Extract entities and relationships (+7 more)
+Cohesion: 0.08
+Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
 ### Community 14 - "PRD — NFX INOV"
 Cohesion: 0.08
@@ -224,9 +230,9 @@ Nodes (24): 10. Ciclo de vida de empresa, 11. Ciclo de vida de certificado, 13. 
 Cohesion: 0.09
 Nodes (21): compilerOptions, allowJs, allowSyntheticDefaultImports, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, lib (+13 more)
 
-### Community 16 - "JobEngine"
-Cohesion: 0.05
-Nodes (58): configure_logging(), JsonFormatter, clear_handlers(), get_handler(), Explicit handler boundary used by the worker and synthetic tests., register_handler(), Job, JobState (+50 more)
+### Community 16 - "http.py"
+Cohesion: 0.13
+Nodes (13): configure_logging(), JsonFormatter, Reclaim leases and report queued work due for a worker., run_scheduler_loop(), run_worker_loop(), Command, ArgumentParser, BaseCommand (+5 more)
 
 ### Community 17 - "9. Requisitos funcionais e regras de negócio"
 Cohesion: 0.15
@@ -284,9 +290,9 @@ Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Estado e contratos Prop
 Cohesion: 0.29
 Nodes (7): Technical Architecture - NFX INOV, Audit Chain Mechanism, Infrastructure Configuration Module, Product Requirements Document - NFX INOV, Spec: P0 Project Foundation, Spec: P0 Safe Configuration, Spec: P1 Audit Foundation
 
-### Community 31 - "Update Reference"
-Cohesion: 0.20
-Nodes (10): CLAUDE.md Integration, Hooks Reference, Post-Commit Hook, Change Detection, Deleted Source Pruning, Directed Graph Preservation, Update Reference, Incremental Update (+2 more)
+### Community 31 - "Job"
+Cohesion: 0.14
+Nodes (19): Job, A safe, referential unit of background work and its current lease., InvalidJobPayload, InvalidTransition, JobEngineError, LeaseLost, Any, datetime (+11 more)
 
 ### Community 33 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -376,21 +382,21 @@ Nodes (4): Artifact Model, Certificate Model, Fiscal Document Model, PDF Rendere
 Cohesion: 0.67
 Nodes (3): Durable Job Engine, Collection Request Service, ZIP Export Service
 
-### Community 66 - "/graphify"
-Cohesion: 0.20
-Nodes (9): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Usage (+1 more)
+### Community 66 - "jobs/policy.py"
+Cohesion: 0.22
+Nodes (14): AmbiguousPolicy, InvalidPolicy, PolicyError, PolicyNotFound, datetime, RuntimeError, ValueError, Validated selection and creation of versioned job policies. (+6 more)
 
-### Community 67 - "Exports Reference"
-Cohesion: 0.25
-Nodes (8): Exports Reference, FalkorDB Export, GraphML Export, MCP Server, Neo4j Export, SVG Export, Token Reduction Benchmark, Wiki Export
-
-### Community 71 - "Query Reference"
+### Community 67 - ".as_job_outcome"
 Cohesion: 0.33
-Nodes (7): BFS Traversal, Query Reference, Query Feedback Loop, Graph Explain, Shortest Path, Constrained Query Expansion, Knowledge Graph
+Nodes (3): Translate a synthetic response at the generic jobs handler seam., Any, datetime
 
-### Community 88 - "GitHub and Merge Reference"
-Cohesion: 0.83
-Nodes (4): Cross-Repository Graph Merge, GitHub and Merge Reference, GitHub Clone, Monorepo Graph Merge
+### Community 71 - "JobEngine"
+Cohesion: 0.25
+Nodes (17): create_policy(), JobEngine, Owns all durable state transitions for background jobs., FrozenClock, datetime, django_db, test_claim_renew_complete_and_stale_owner_rejection_are_atomic(), test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks() (+9 more)
+
+### Community 88 - "jobs/services.py"
+Cohesion: 0.11
+Nodes (22): clear_handlers(), get_handler(), Explicit handler boundary used by the worker and synthetic tests., register_handler(), JobOutcomeKind, JobPolicy, JobState, Meta (+14 more)
 
 ### Community 90 - "Build Pass"
 Cohesion: 0.12
@@ -404,61 +410,81 @@ Nodes (12): Create or update specifications, Determine the required specificatio
 Cohesion: 0.17
 Nodes (11): Acceptance criteria, Create one issue, Final verification, Graphify, Implementation guidance quality, Issue Creation Pass, Operating mode, Repository inspection (+3 more)
 
-### Community 93 - "10. Fases detalhadas e backlog estável"
-Cohesion: 0.18
-Nodes (11): 10. Fases detalhadas e backlog estável, P0 — Fundação de projeto e isolamento seguro, P1 — Núcleo seguro, persistente e auditável, P2 — Empresas, cobertura e certificados, P3 — Jobs, scheduler, políticas e simuladores, P4 — Ingestão fiscal comum e integridade, P5 — Adaptador e fluxos NF-e, P6 — Adaptador e fluxos NFS-e/ADN (+3 more)
+### Community 93 - "0002_-_policy-driven-job-retry-and-blocking.md"
+Cohesion: 0.25
+Nodes (7): Acceptance Criteria, Description, Implementation Plan, Out of Scope, References, Resolution, Tests
 
 ### Community 94 - "Planning Pass"
 Cohesion: 0.18
 Nodes (10): Final verification, Graphify, Operating mode, Planning Pass, Repository inspection, Required analysis, Scope boundaries, Sources of truth (+2 more)
 
-### Community 95 - "Índice de implementação das specs"
-Cohesion: 0.22
-Nodes (7): P0 Fundação, Autoridade, baseline e regra de uso, Como escolher a próxima spec, Decisões Open, Blocked, Deferred e Proposed, Ordem, cobertura e dependências diretas, Paralelismo e conclusão de fase, Índice de implementação das specs
+### Community 95 - "0003_-_deterministic-fiscal-simulators-and-fixtures.md"
+Cohesion: 0.25
+Nodes (7): Acceptance Criteria, Description, Implementation Plan, Out of Scope, References, Resolution, Tests
 
-### Community 96 - "Administração de usuários"
-Cohesion: 0.22
-Nodes (9): Aceite e DoD, Administração de usuários, Baseline, escopo e não escopo, Decisões de implementação e evidências, Estado, backend, auditoria e segurança, Falhas, testes e recovery, Metadados, Propósito e resultado (+1 more)
-
-### Community 97 - "Consulta de documentos e download individual"
-Cohesion: 0.22
-Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Consulta de documentos e download individual, Dados, índices e contratos Proposed, Falhas e testes, Metadados, Propósito e resultado, Segurança, auditoria e observabilidade (+1 more)
+### Community 96 - "test_jobs.py"
+Cohesion: 0.70
+Nodes (4): django_db, test_job_migration_installs_claim_lease_target_and_idempotency_indexes(), test_policy_is_persisted_and_referenced_by_job(), test_two_postgres_workers_cannot_claim_one_job()
 
 ### Community 100 - "0001_-_durable-job-queue-and-leases.md"
 Cohesion: 0.25
 Nodes (7): Acceptance Criteria, Description, Implementation Plan, Out of Scope, References, Resolution, Tests
 
-### Community 111 - "Distribuição NF-e e manifestação"
-Cohesion: 0.25
-Nodes (8): Aceite e DoD, Decisões e contratos, Distribuição NF-e e manifestação, Estado e comportamento, Falhas, testes e recovery, Metadados, Propósito, baseline e limites, UI, autorização, segurança e auditoria
+### Community 111 - "HandlerOutcome"
+Cohesion: 0.08
+Nodes (53): AdnSimulator, build_scenario(), _code(), Coverage, DeterministicFiscalSimulator, FakeFiscalTransport, FiscalAdapter, FiscalFamily (+45 more)
 
-### Community 112 - "Distribuição NFS-e/ADN e cobertura"
-Cohesion: 0.25
-Nodes (8): Aceite e DoD, Contratos e estado Proposed, Distribuição NFS-e/ADN e cobertura, Falhas, testes e recovery, Metadados, Propósito, baseline, escopo, Regras e comportamento visível, Segurança, auditoria e observabilidade
+### Community 112 - "10. Fases detalhadas e backlog estável"
+Cohesion: 0.18
+Nodes (11): 10. Fases detalhadas e backlog estável, P0 — Fundação de projeto e isolamento seguro, P1 — Núcleo seguro, persistente e auditável, P2 — Empresas, cobertura e certificados, P3 — Jobs, scheduler, políticas e simuladores, P4 — Ingestão fiscal comum e integridade, P5 — Adaptador e fluxos NF-e, P6 — Adaptador e fluxos NFS-e/ADN (+3 more)
 
 ### Community 113 - "0000_-_ISSUE_TEMPLATE.md"
 Cohesion: 0.29
 Nodes (6): Acceptance Criteria, Description, Implementation Plan, References, Resolution, Tests
 
+### Community 117 - "Índice de implementação das specs"
+Cohesion: 0.22
+Nodes (7): P0 Fundação, Autoridade, baseline e regra de uso, Como escolher a próxima spec, Decisões Open, Blocked, Deferred e Proposed, Ordem, cobertura e dependências diretas, Paralelismo e conclusão de fase, Índice de implementação das specs
+
+### Community 118 - "Administração de usuários"
+Cohesion: 0.22
+Nodes (9): Aceite e DoD, Administração de usuários, Baseline, escopo e não escopo, Decisões de implementação e evidências, Estado, backend, auditoria e segurança, Falhas, testes e recovery, Metadados, Propósito e resultado (+1 more)
+
+### Community 119 - "Consulta de documentos e download individual"
+Cohesion: 0.22
+Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Consulta de documentos e download individual, Dados, índices e contratos Proposed, Falhas e testes, Metadados, Propósito e resultado, Segurança, auditoria e observabilidade (+1 more)
+
+### Community 120 - "Distribuição NF-e e manifestação"
+Cohesion: 0.25
+Nodes (8): Aceite e DoD, Decisões e contratos, Distribuição NF-e e manifestação, Estado e comportamento, Falhas, testes e recovery, Metadados, Propósito, baseline e limites, UI, autorização, segurança e auditoria
+
+### Community 121 - ".save"
+Cohesion: 0.50
+Nodes (3): Any, Keep the policy captured at enqueue time immutable for this job., Keep effective policy versions immutable after they are published.
+
+### Community 122 - "Distribuição NFS-e/ADN e cobertura"
+Cohesion: 0.25
+Nodes (8): Aceite e DoD, Contratos e estado Proposed, Distribuição NFS-e/ADN e cobertura, Falhas, testes e recovery, Metadados, Propósito, baseline, escopo, Regras e comportamento visível, Segurança, auditoria e observabilidade
+
 ## Knowledge Gaps
-- **531 isolated node(s):** `Meta`, `Meta`, `InitialCollectionRequestState`, `Meta`, `Meta` (+526 more)
+- **545 isolated node(s):** `Meta`, `Meta`, `InitialCollectionRequestState`, `Meta`, `Migration` (+540 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **38 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **39 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Job` connect `JobEngine` to `audit/services.py`?**
+- **Why does `Job` connect `Job` to `jobs/services.py`, `.save`, `nfx/models.py`, `HandlerOutcome`?**
+  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+- **Why does `HandlerOutcome` connect `HandlerOutcome` to `jobs/services.py`, `.as_job_outcome`, `JobEngine`, `Job`?**
   _High betweenness centrality (0.021) - this node is a cross-community bridge._
-- **Why does `load_settings()` connect `load_settings` to `certificates/services.py`, `dependencies.py`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
-- **Why does `AuditService` connect `companies/services.py` to `certificates/services.py`, `identity/services.py`, `audit/services.py`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+- **Why does `JobPolicy` connect `jobs/services.py` to `jobs/policy.py`, `nfx/models.py`, `JobEngine`, `.save`, `Job`?**
+  _High betweenness centrality (0.016) - this node is a cross-community bridge._
 - **Are the 28 inferred relationships involving `AuditService` (e.g. with `CertificateAccessDenied` and `CertificateAlreadyAssigned`) actually correct?**
   _`AuditService` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 28 inferred relationships involving `Action` (e.g. with `CertificateAccessDenied` and `CertificateAlreadyAssigned`) actually correct?**
   _`Action` has 28 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 17 inferred relationships involving `ArtifactStorageService` (e.g. with `Artifact` and `ArtifactState`) actually correct?**
   _`ArtifactStorageService` has 17 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 2 inferred relationships involving `SessionIdentity` (e.g. with `AuditService` and `Action`) actually correct?**
-  _`SessionIdentity` has 2 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Meta`, `Meta`, `InitialCollectionRequestState` to the rest of the system?**
+  _545 weakly-connected nodes found - possible documentation gaps or missing edges._

@@ -2,11 +2,11 @@
 
 from nfx.artifacts.models import Artifact
 from nfx.audit.models import AuditChain, AuditEvent
-from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
 from nfx.certificates.models import Certificate
 from nfx.collection.models import InitialCollectionRequest
+from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
 from nfx.identity.models import IdentitySession, LoginThrottle, User
-from nfx.jobs.models import Job
+from nfx.jobs.models import Job, JobPolicy
 
 __all__ = [
     "Artifact",
@@ -21,4 +21,5 @@ __all__ = [
     "LoginThrottle",
     "User",
     "Job",
+    "JobPolicy",
 ]

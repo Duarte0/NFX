@@ -4,9 +4,9 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from django.db import OperationalError
-
-from nfx.jobs.handlers import clear_handlers, register_handler
-from nfx.jobs.models import Job, JobState
+from nfx.jobs.handlers import HandlerOutcome, clear_handlers, register_handler
+from nfx.jobs.models import Job, JobOutcomeKind, JobState
+from nfx.jobs.policy import AmbiguousPolicy, create_policy, select_policy
 from nfx.jobs.services import (
     InvalidJobPayload,
     InvalidTransition,
@@ -218,3 +218,214 @@ def test_database_error_does_not_report_unsafe_progress() -> None:
             raise OperationalError("synthetic database unavailable")
 
     assert process_one(BrokenEngine(), owner="worker-a") is False  # type: ignore[arg-type]
+
+
+@pytest.mark.django_db
+def test_policy_selection_prefers_exact_scope_and_rejects_ambiguous_validity() -> None:
+    clock = FrozenClock()
+    create_policy(
+        source_scope="*",
+        flow_scope="received",
+        version=1,
+        valid_from=clock(),
+    )
+    exact = create_policy(
+        source_scope="synthetic",
+        flow_scope="received",
+        version=1,
+        valid_from=clock(),
+    )
+    assert select_policy(source="synthetic", flow="received", at=clock()).id == exact.id
+
+    create_policy(
+        source_scope="synthetic",
+        flow_scope="issued",
+        version=1,
+        valid_from=clock(),
+    )
+    create_policy(
+        source_scope="synthetic",
+        flow_scope="issued",
+        version=2,
+        valid_from=clock(),
+    )
+    with pytest.raises(AmbiguousPolicy):
+        select_policy(source="synthetic", flow="issued", at=clock())
+
+
+@pytest.mark.django_db
+def test_temporary_and_partial_outcomes_use_capped_deterministic_backoff() -> None:
+    clock = FrozenClock()
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="retry",
+        version=1,
+        valid_from=clock(),
+        retry_limit=2,
+        backoff_initial_seconds=10,
+        backoff_cap_seconds=15,
+        jitter_seconds=3,
+    )
+    engine = JobEngine(clock=clock, jitter_source=lambda _: 2)
+    job = engine.enqueue(
+        job_type="synthetic.policy",
+        logical_target="company:synthetic-policy",
+        payload={"company_id": "synthetic-policy"},
+        idempotency_key="synthetic-policy-key",
+        policy=policy,
+    )
+
+    assert engine.claim("worker-a") is not None
+    retried = engine.finalize(job.id, "worker-a", HandlerOutcome.temporary())
+    assert retried.state == JobState.QUEUED
+    assert retried.last_outcome == JobOutcomeKind.TEMPORARY
+    assert retried.scheduled_at == clock() + timedelta(seconds=12)
+
+    clock.advance(12)
+    assert engine.claim("worker-a") is not None
+    retried_again = engine.finalize(job.id, "worker-a", HandlerOutcome.partial())
+    assert retried_again.scheduled_at == clock() + timedelta(seconds=15)
+
+    clock.advance(15)
+    assert engine.claim("worker-a") is not None
+    exhausted = engine.finalize(job.id, "worker-a", HandlerOutcome.temporary())
+    assert exhausted.state == JobState.BLOCKED
+    assert exhausted.blocked_reason == "retry_exhausted"
+
+
+@pytest.mark.django_db
+def test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks() -> None:
+    clock = FrozenClock()
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="cooldown",
+        version=1,
+        valid_from=clock(),
+        retry_limit=3,
+        backoff_initial_seconds=1,
+        cooldown_seconds=5,
+    )
+    engine = JobEngine(clock=clock)
+    job = engine.enqueue(
+        job_type="synthetic.policy",
+        logical_target="company:synthetic-cooldown",
+        payload={"company_id": "synthetic-cooldown"},
+        idempotency_key="synthetic-cooldown-key",
+        policy=policy,
+    )
+    engine.claim("worker-a")
+    official_deadline = clock() + timedelta(seconds=30)
+    cooldown = engine.finalize(
+        job.id,
+        "worker-a",
+        HandlerOutcome.cooldown(cooldown_until=official_deadline),
+    )
+    assert cooldown.state == JobState.QUEUED
+    assert cooldown.scheduled_at == official_deadline
+    assert cooldown.cooldown_until == official_deadline
+
+    clock.advance(30)
+    engine.claim("worker-a")
+    blocked = engine.finalize(
+        job.id,
+        "worker-a",
+        HandlerOutcome.permanent(error_code="certificate_invalid"),
+    )
+    assert blocked.state == JobState.BLOCKED
+    assert blocked.lease_owner is None
+    assert blocked.safe_error == "certificate_invalid"
+
+
+@pytest.mark.django_db
+def test_policy_configured_cooldown_is_used_when_handler_has_no_deadline() -> None:
+    clock = FrozenClock()
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="configured-cooldown",
+        version=1,
+        valid_from=clock(),
+        cooldown_seconds=45,
+    )
+    engine = JobEngine(clock=clock)
+    job = engine.enqueue(
+        job_type="synthetic.policy",
+        logical_target="company:synthetic-configured-cooldown",
+        payload={"company_id": "synthetic-configured-cooldown"},
+        idempotency_key="synthetic-configured-cooldown-key",
+        policy=policy,
+    )
+
+    engine.claim("worker-a")
+    retried = engine.finalize(job.id, "worker-a", HandlerOutcome.cooldown())
+
+    assert retried.state == JobState.QUEUED
+    assert retried.scheduled_at == clock() + timedelta(seconds=45)
+    assert retried.cooldown_until == retried.scheduled_at
+
+
+@pytest.mark.django_db
+def test_effective_policy_cannot_change_after_job_is_scheduled() -> None:
+    clock = FrozenClock()
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="immutable",
+        version=1,
+        valid_from=clock(),
+        retry_limit=1,
+    )
+    engine = JobEngine(clock=clock)
+    job = engine.enqueue(
+        job_type="synthetic.policy",
+        logical_target="company:synthetic-immutable",
+        payload={"company_id": "synthetic-immutable"},
+        idempotency_key="synthetic-immutable-key",
+        policy=policy,
+    )
+
+    policy.retry_limit = 99
+    with pytest.raises(ValueError, match="immutable"):
+        policy.save()
+
+    replacement = create_policy(
+        source_scope="synthetic",
+        flow_scope="immutable-replacement",
+        version=1,
+        valid_from=clock(),
+    )
+    job.effective_policy = replacement
+    with pytest.raises(ValueError, match="effective job policies are immutable"):
+        job.save()
+
+    job.refresh_from_db()
+    assert job.effective_policy_id == policy.id
+    assert Job.objects.get(id=job.id).effective_policy.retry_limit == 1
+
+
+@pytest.mark.django_db
+def test_policy_job_handler_outcome_is_applied_by_worker() -> None:
+    clock = FrozenClock()
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="handler",
+        version=1,
+        valid_from=clock(),
+        retry_limit=1,
+        backoff_initial_seconds=1,
+    )
+    engine = JobEngine(clock=clock)
+    job = engine.enqueue(
+        job_type="synthetic.classified",
+        logical_target="company:synthetic-handler",
+        payload={"company_id": "synthetic-handler"},
+        idempotency_key="synthetic-handler-key",
+        policy=policy,
+    )
+    register_handler(
+        "synthetic.classified",
+        lambda _: HandlerOutcome.permanent(error_code="authorization_required"),
+    )
+
+    assert process_one(engine, owner="worker-a")
+    stored = Job.objects.get(id=job.id)
+    assert stored.state == JobState.BLOCKED
+    assert stored.last_outcome == JobOutcomeKind.PERMANENT
