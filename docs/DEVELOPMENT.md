@@ -78,3 +78,17 @@ causes zero network calls.
 or HTTP errors. It redacts sensitive fields recursively, credential-bearing URLs and sensitive query
 strings, XML/PDF payloads, bytes, and exception arguments. Never put a secret, certificate, CNPJ,
 real XML, or endpoint into a fixture.
+
+## Simuladores fiscais sintéticos (P3-03)
+
+`nfx.adapters.simulation` é a porta interna usada pelos testes antes dos adaptadores oficiais.
+`FiscalRequest` aceita somente referências seguras — fonte, família, ator, fluxo, cursor, política,
+handle abstrato de certificado e correlação — e `FiscalResponse` devolve unidades sem conteúdo,
+hashes sintéticos, cursor/NSU, cobertura, cooldown e códigos seguros. NF-e e ADN são simuladores
+independentes, com cenários gerados por seed e sequência reproduzível; `FakeFiscalTransport`
+registra a ordem das chamadas e nunca abre DNS, HTTP ou SOAP.
+
+Os cenários distinguem vazio válido, ausência de cobertura, indisponibilidade, parcial, cooldown,
+bloqueio, duplicata, conflito, payload malformado, evento sem pai e cursor repetido. O handler
+genérico transforma esses valores em `HandlerOutcome` e preserva a fronteira de lease/idempotência
+dos jobs. Fixtures não carregam XML, credenciais, tokens, certificados ou endpoints produtivos.

@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P3 — pronta após P0-04 e engine P3.
+- **Fase/status:** P3 — P3-03 concluído; P3-04 continua pendente.
 - **Backlog:** P3-03. **Dependências:** P0-04, P3-01.
 - **PRD:** SEC-007, NFR-007, NFR-008; suporta testes de BR-COLL-006, BR-INT-002, BR-INT-005. **Aceite futuro:** AC-006, AC-007, AC-008, AC-009.
 - **Arquitetura:** ADR-006; seções 10.2, 23, 24, 33, 37 e 38.
@@ -31,10 +31,25 @@ Logs do simulador incluem cenário/passo/correlação, não conteúdo integral. 
 
 ## Aceite e DoD
 
-- [ ] Cada cenário obrigatório possui fixture e expectativa documentadas.
-- [ ] Trocar fake por adapter futuro não altera casos de uso.
-- [ ] Teste não abre rede fiscal nem contém dado real.
-- [ ] Vazio, indisponível, sem cobertura, parcial e bloqueado são distinguíveis.
-- [ ] Replay é determinístico e adequado a testes de idempotência.
+- [x] Cada cenário obrigatório possui fixture e expectativa documentadas.
+- [x] Trocar fake por adapter futuro não altera casos de uso.
+- [x] Teste não abre rede fiscal nem contém dado real.
+- [x] Vazio, indisponível, sem cobertura, parcial e bloqueado são distinguíveis.
+- [x] Replay é determinístico e adequado a testes de idempotência.
 
-DoD: portas, biblioteca de cenários, fixtures, scanner/guarda e suite verdes. **Open:** endpoints/leiautes oficiais; não bloqueiam simuladores.
+DoD: portas, biblioteca de cenários, fixtures, scanner/guarda e suite direcionada verdes.
+**Implementação atual:** `backend/nfx/adapters/simulation.py` define `FiscalRequest`,
+`FiscalResponse`, unidades referenciais e o protocolo `FiscalAdapter`; `NFeSimulator` e
+`AdnSimulator` reproduzem, por seed, paginação, vazio, ausência de cobertura, duplicata,
+conflito, timeout, indisponibilidade, cooldown, bloqueio, payload malformado, evento sem pai,
+cursor repetido, parcial e interrupção/restart; o retorno usa `next_cursor` para NF-e e `next_nsu`
+para ADN. `FakeFiscalTransport` registra somente contexto
+seguro e não possui caminho de rede. `make_simulator_handler` converte a resposta tipada para
+`HandlerOutcome` sem colocar conteúdo fiscal no job. A suite cobre também a guarda de destino e
+o replay no limite PostgreSQL/jobs.
+
+Validação concluída com 33 testes unitários direcionados, `make lint`, `make test-unit` (108 testes),
+`make test-integration` (22 testes PostgreSQL/MinIO), build em perfil de teste e `make smoke` com
+web/worker/scheduler ativos. O Graphify foi atualizado com `graphify update .`; o update foi
+AST-only, sem alteração de topologia nos artefatos versionados.
+**Open:** endpoints/leiautes oficiais; não bloqueiam simuladores.

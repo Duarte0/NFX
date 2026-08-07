@@ -21,7 +21,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 9 | [x] | `p2-certificate-lifecycle-and-envelope-encryption.md` | P2 | P2-03, P2-04 (certificado/UI) | P1-05, P1-06, P2-01 |
 | 10 | [ ] | `p3-durable-jobs-leases-and-policy-engine.md` | P3 | P3-01/P3-02 implementados e validados, P3-04 pendente | P1-01, P1-05 |
 | 11 | [ ] | `p3-manual-collection-control.md` | P3 | P3-05 | P1-03, P1-05, P3-01, P3-02 |
-| 12 | [ ] | `p3-fiscal-adapter-simulation-and-fixtures.md` | P3 | P3-03 | P0-04, P3-01 |
+| 12 | [x] | `p3-fiscal-adapter-simulation-and-fixtures.md` | P3 | P3-03 concluído | P0-04, P3-01 |
 | 13 | [ ] | `p4-fiscal-document-ingestion-and-integrity.md` | P4 | P4-01, P4-02, P4-03, P4-04 | P1-01/05/06, P2-03, P3-01/03 |
 | 14 | [ ] | `p5-nfe-distribution-and-manifestation.md` | P5 | P5-01, P5-02, P5-03 | P2-03, P3-02/03, P4-02 |
 | 15 | [ ] | `p6-nfse-adn-distribution-and-coverage.md` | P6 | P6-01, P6-02 | P2-03, P3-02/03, P4-02 |
