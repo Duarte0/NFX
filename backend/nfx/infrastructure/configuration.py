@@ -26,6 +26,7 @@ KNOWN_NFX_KEYS = frozenset(
     {
         "NFX_PROFILE",
         "NFX_PROCESS",
+        "NFX_ALLOWED_HOSTS",
         "NFX_SECRET_KEY",
         "NFX_SECRET_KEY_FILE",
         "NFX_CERTIFICATE_MASTER_KEY",
@@ -47,6 +48,7 @@ class PublicSettings:
     fiscal_transport: str
     fiscal_destination: str
     fiscal_allowlist: tuple[str, ...]
+    allowed_hosts: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -153,6 +155,19 @@ def _validate_destination(value: str, field: str) -> str:
     return f"https://{parsed.hostname.lower()}{parsed.path or '/'}"
 
 
+def _allowed_hosts(values: Mapping[str, str]) -> tuple[str, ...]:
+    raw = values.get("NFX_ALLOWED_HOSTS", "127.0.0.1,localhost,testserver")
+    hosts = tuple(item.strip().lower() for item in raw.split(",") if item.strip())
+    if not hosts:
+        raise _error("NFX_ALLOWED_HOSTS")
+    for host in hosts:
+        if host == "*" or "/" in host or "://" in host or any(char.isspace() for char in host):
+            raise _error("NFX_ALLOWED_HOSTS")
+        if host.startswith(".") or host.endswith("."):
+            raise _error("NFX_ALLOWED_HOSTS")
+    return hosts
+
+
 def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
     values = os.environ if environ is None else environ
     unknown = sorted(key for key in values if key.startswith("NFX_") and key not in KNOWN_NFX_KEYS)
@@ -196,7 +211,14 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
         raise _error("explicit fiscal transport and allowlist")
 
     return Settings(
-        public=PublicSettings(profile, process, transport, destination, allowlist),
+        public=PublicSettings(
+            profile,
+            process,
+            transport,
+            destination,
+            allowlist,
+            _allowed_hosts(values),
+        ),
         secrets=SecretSettings(
             django_secret_key=_read_secret(values, "NFX_SECRET_KEY", "NFX_SECRET_KEY_FILE"),
             database_url=_validate_database_url(values.get("DATABASE_URL")),

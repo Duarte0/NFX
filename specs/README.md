@@ -30,7 +30,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 18 | [ ] | [p8-zip-export.md](p8-zip-export.md) | P8 | P8-01 | P3-01, P7-01/02; P7-03 se PDF |
 | 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | **P8-02 slice inicial implementado (issue 0018); capacidades P5–P7/P9 permanecem indisponíveis** | P3-04 + dados P2–P7 disponíveis; entrega progressiva permitida |
 | 20 | [x] | [p8-retention-eligibility.md](p8-retention-eligibility.md) | P8 | P8-03 concluído no issue 0019; PDF permanece fora | P1-05, P4-01; P7-03 somente para PDFs |
-| 21 | [ ] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 | P1-01, P1-03, P3-04 |
+| 21 | [x] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 concluído no issue 0016 | P1-01, P1-03, P3-04 |
 | 22 | [ ] | [p9-backup-and-restore.md](p9-backup-and-restore.md) | P9 | P9-02 | P1-06, P2-03, P3-04 |
 | 23 | [ ] | [p9-controlled-deletion.md](p9-controlled-deletion.md) | P9 | P9-03 | P8-03, P9-02 comprovado |
 | 24 | [ ] | [p9-hardening.md](p9-hardening.md) | P9 | P9-04 | P5–P8, P9-01/02/03 |
@@ -49,7 +49,7 @@ Uma spec ativa define o contrato verificável de uma fatia. A passagem de issues
 - Após P0, partes independentes de P1 podem avançar quando suas dependências diretas estiverem verdes.
 - Após o núcleo P1, P2 e P3 podem avançar em paralelo; dentro de P3, simuladores e controle manual seguem após a engine.
 - Após P4, P5, P6 e P7-01 podem avançar em paralelo; P5/P6 nunca compartilham cursor/NSU.
-- Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 também pode avançar após P1/P3, sem esperar todo P8.
+- Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 foi concluído no issue 0016 após P1/P3, sem esperar todo P8.
 - P9-03 depende de restore comprovado, mas esse gate não bloqueia outras specs.
 
 Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5, 1 slice; P6, 1 spec concluída; P7, 2; P8, P8-02 inicial e P8-03 concluídos, com P8-01 pendente; P9, 5. Total: 25.

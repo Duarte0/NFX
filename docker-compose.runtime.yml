@@ -1,0 +1,200 @@
+name: ${COMPOSE_PROJECT_NAME:-nfx-runtime}
+
+x-app-environment: &app-environment
+  NFX_PROFILE: runtime
+  NFX_SECRET_KEY_FILE: /run/secrets/nfx_secret_key
+  NFX_CERTIFICATE_MASTER_KEY_FILE: /run/secrets/nfx_certificate_master_key
+  NFX_ALLOWED_HOSTS: ${NFX_ALLOWED_HOSTS:-nfx.internal,localhost,127.0.0.1}
+  NFX_FISCAL_TRANSPORT: simulator
+  NFX_FISCAL_DESTINATION: simulator://empty
+  NFX_FISCAL_ALLOWLIST: simulator://empty
+  DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be supplied outside version control}
+  MINIO_ENDPOINT: http://minio:9000
+  MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER must be supplied outside version control}
+  MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD must be supplied outside version control}
+  MINIO_BUCKET: ${MINIO_BUCKET:-nfx-documentos}
+
+x-app-image: &app-image
+  image: ${NFX_APP_IMAGE:?NFX_APP_IMAGE must identify one immutable application image}
+
+services:
+  proxy:
+    image: ${NFX_PROXY_IMAGE:-nfx-inov-proxy:${NFX_VERSION:-local}}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime-proxy
+    read_only: true
+    ports:
+      - "${NFX_HTTP_BIND:-127.0.0.1}:${NFX_HTTP_PORT:-8080}:8080"
+      - "${NFX_HTTPS_BIND:-127.0.0.1}:${NFX_HTTPS_PORT:-8443}:8443"
+    volumes:
+      - ${NFX_TLS_DIR:?NFX_TLS_DIR must point to an external certificate directory}:/etc/nginx/tls:ro
+    tmpfs:
+      - /var/cache/nginx:size=16m
+      - /var/run:size=1m
+    mem_limit: 128m
+    cpus: "0.50"
+    depends_on:
+      web:
+        condition: service_healthy
+    networks:
+      - edge
+      - app
+    restart: unless-stopped
+
+  web:
+    <<: *app-image
+    command: ["python", "backend/manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
+    environment:
+      <<: *app-environment
+      NFX_PROCESS: web
+    volumes:
+      - ${NFX_SECRET_DIR:?NFX_SECRET_DIR must contain the external application secret files}:/run/secrets:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    mem_limit: 512m
+    cpus: "1.00"
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    networks:
+      - app
+      - data
+    restart: unless-stopped
+
+  worker:
+    <<: *app-image
+    command: ["python", "backend/manage.py", "worker"]
+    environment:
+      <<: *app-environment
+      NFX_PROCESS: worker
+    volumes:
+      - ${NFX_SECRET_DIR:?NFX_SECRET_DIR must contain the external application secret files}:/run/secrets:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    mem_limit: 768m
+    cpus: "1.50"
+    healthcheck:
+      test: ["CMD", "python", "backend/manage.py", "check_services"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    networks:
+      - data
+    restart: unless-stopped
+
+  scheduler:
+    <<: *app-image
+    command: ["python", "backend/manage.py", "scheduler"]
+    environment:
+      <<: *app-environment
+      NFX_PROCESS: scheduler
+    volumes:
+      - ${NFX_SECRET_DIR:?NFX_SECRET_DIR must contain the external application secret files}:/run/secrets:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    mem_limit: 256m
+    cpus: "0.50"
+    healthcheck:
+      test: ["CMD", "python", "backend/manage.py", "check_services"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    networks:
+      - data
+    restart: unless-stopped
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nfx_inov}
+      POSTGRES_USER: ${POSTGRES_USER:-nfx_inov}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be supplied outside version control}
+    volumes:
+      - postgres_runtime_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - data
+    restart: unless-stopped
+
+  minio:
+    image: ${MINIO_IMAGE:-minio/minio:RELEASE.2024-11-07T00-52-20Z}
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER must be supplied outside version control}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD must be supplied outside version control}
+    volumes:
+      - minio_runtime_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - data
+    restart: unless-stopped
+
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-minio/mc:RELEASE.2024-11-05T11-29-45Z}
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER must be supplied outside version control}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD must be supplied outside version control}
+      MINIO_BUCKET: ${MINIO_BUCKET:-nfx-documentos}
+    entrypoint: ["/bin/sh", "-ec"]
+    command: >-
+      mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}";
+      mc mb --ignore-existing local/"$${MINIO_BUCKET}";
+      mc anonymous set none local/"$${MINIO_BUCKET}"
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - data
+    restart: "no"
+
+networks:
+  edge:
+  app:
+    internal: true
+  data:
+    internal: true
+
+volumes:
+  postgres_runtime_data:
+  minio_runtime_data:

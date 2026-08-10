@@ -10,7 +10,7 @@ NFX_SETTINGS = load_settings()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = NFX_SETTINGS.secrets.django_secret_key
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "testserver"]
+ALLOWED_HOSTS = list(NFX_SETTINGS.public.allowed_hosts)
 ROOT_URLCONF = "nfx.urls"
 WSGI_APPLICATION = "nfx.wsgi.application"
 ASGI_APPLICATION = "nfx.asgi.application"
@@ -34,6 +34,8 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.Argon2PasswordHasher"]
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_HTTPONLY = False
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
 
 
 def _database_from_url(value: str) -> dict[str, object]:

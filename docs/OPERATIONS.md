@@ -12,6 +12,10 @@ endpoint ou identificador de job como label de métrica. Capacidades futuras de 
 disco, backup, documentos, quarentena e rendering são declaradas `unavailable` até que tenham
 uma implementação própria.
 
+O perfil de runtime HTTPS, a fronteira do proxy, os serviços privados, os limites e os
+procedimentos de reinício/upgrade/rollback estão documentados em
+[`docs/RUNTIME.md`](RUNTIME.md). Backup e restore continuam sendo o incremento P9-02.
+
 Worker e scheduler gravam heartbeats por identidade de processo (`component` + `process_id`).
 Restart cria uma nova evidência sem apagar o processo anterior, e atualizações concorrentes de
 identidades diferentes são independentes. Os limites são validados antes do boot por

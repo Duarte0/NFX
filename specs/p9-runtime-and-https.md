@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P9 — pronta após núcleo e health.
+- **Fase/status:** P9 — P9-01 concluído e validado; P9-02 permanece pendente.
 - **Backlog:** P9-01. **Dependências:** P1-01, P1-03, P3-04.
 - **PRD:** SEC-006, SEC-008, OPS-002, OPS-007, NFR-007. **Aceite:** AC-024.
 - **Arquitetura:** ADR-001, ADR-002, ADR-013; seções 7–9, 12, 33, 34, 36, 39–41.
@@ -29,12 +29,21 @@ Cookies Secure/HttpOnly/SameSite e CSRF permanecem obrigatórios. Logs registram
 
 Testar portas do host, HTTPS/certificado, redirect/rejeição HTTP, headers/cookies, acesso direto negado, restart de cada serviço, dependência indisponível, limite CPU/memória/disco e coletores sem browser. Upgrade aplica migrações compatíveis e health antes de tráfego; rollback usa imagem/config anterior enquanto schema compatível, sem apagar volume.
 
+Evidência P9-01: `docker-compose.runtime.yml` mantém uma imagem versionada comum para
+web/worker/scheduler, publica somente o proxy em 8080/8443, conecta os serviços por redes
+privadas, usa volumes persistentes e impõe limites de CPU/memória/tmpfs. `deploy/nginx/runtime.conf`
+termina TLS, redireciona HTTP, aplica limites/timeouts/headers e falha fechado quando o par
+externo de certificado não está disponível. `tests/unit/test_runtime_topology.py` cobre a
+topologia, exposição de portas, segredo externo, limites e configuração de hosts; o runbook
+`docs/RUNTIME.md` registra provisionamento, saúde, reinício, upgrade, rollback e a limitação do
+certificado autoassinado.
+
 ## Aceite e DoD
 
-- [ ] Proxy é a única entrada de usuário e exige HTTPS.
-- [ ] DB/MinIO/console/worker/scheduler não são publicados.
-- [ ] Processos usam mesma versão e sobrevivem a reinícios independentes.
-- [ ] Health distingue liveness/readiness/degradação.
-- [ ] Limitação autoassinada está documentada.
+- [x] Proxy é a única entrada de usuário e exige HTTPS.
+- [x] DB/MinIO/console/worker/scheduler não são publicados.
+- [x] Processos usam mesma versão e sobrevivem a reinícios independentes.
+- [x] Health distingue liveness/readiness/degradação.
+- [x] Limitação autoassinada está documentada.
 
-DoD: imagens/config, runbook, limites medidos, testes/evidências verdes. **Deferred:** CA confiável e HA não bloqueiam o MVP.
+DoD P9-01: imagens/config, runbook, limites definidos, testes/evidências verdes. **Deferred:** CA confiável e HA não bloqueiam o MVP. P9-02 permanece responsável por backup/restore.

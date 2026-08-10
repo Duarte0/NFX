@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-10 |
 | Fontes | Código/migrações, testes, PRD.md, ARCHITECTURE.md, specs/ e issues/ |
-| Status geral | Fundação, plataforma de processamento, P4-01/P4-02/P4-03/P4-04 e P8-03 concluídos e verificados; P8-01 e P7-03 permanecem pendentes. |
+| Status geral | Fundação, plataforma de processamento, P4-01/P4-02/P4-03/P4-04, P8-03 e P9-01 concluídos e verificados; P8-01, P7-03 e P9-02..P9-05 permanecem pendentes. |
 
 O código e as migrações são a baseline de implementação; testes são a evidência de comportamento verificado. PRD e arquitetura continuam a definir o comportamento pretendido. Este plano substitui a premissa anterior de que o repositório era apenas um scaffold.
 
@@ -60,7 +60,7 @@ runtime. A próxima implementação de produto continua sendo P5 follow-up/P7.
 | P7 consulta/download | **P7-01/P7-02 concluídos, issue 0015** | Busca bounded com filtros aprovados, cursor opaco, detalhe/eventos e download individual RBAC/auditado com verificação de digest/tamanho. PDF continua fora. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
 | P8 ZIP/dashboard/retenção | **P8-02 slice inicial concluído no issue 0018; P8-03 concluído no issue 0019; P8-01 pendente** | Dashboard read-only com períodos consecutivos, cards de empresas/documentos/coletas/jobs, drill-down e health Admin-only; retenção calculate-on-read com prévia metadata-only, hash de escopo e sem exclusão. ZIP assíncrono continua pendente. Ver specs P8. | Consulta/download; fontes P5–P7, rendering, disco e backup continuam capacidades ausentes; P8-03 dependeu somente das fontes P4. |
-| P9 runtime/restore/exclusão/piloto | **especificado, não implementado** | HTTPS interno, restore comprovado, exclusão somente após restore, hardening e piloto segregado. | Ver specs P9; P9-03 permanece bloqueado até P9-02. |
+| P9 runtime/restore/exclusão/piloto | **P9-01 concluído no issue 0016; P9-02/P9-03/P9-04/P9-05 pendentes** | Runtime HTTPS interno com proxy único, redes privadas, reinício independente e limites documentados; restore comprovado, exclusão somente após restore, hardening e piloto segregado continuam pendentes. | P9-03 permanece bloqueado até P9-02; P9-02 é independente do runtime. |
 
 ## Sequência executável
 
@@ -108,7 +108,7 @@ nenhum transporte oficial ou municipal foi habilitado.
 - Issue 0007 corrigiu a higiene de `.env.example`; valores que tenham sido usados fora de testes descartáveis continuam potencialmente comprometidos e devem ser rotacionados fora do repositório.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.
-- Antes de P9-03: implementar e comprovar backup/restore incluindo banco, objetos, certificado cifrado e chave necessária.
+- P9-01 entregue no issue 0016: runtime usa proxy HTTPS único, serviços internos sem portas publicadas, imagem comum por processo, volumes persistentes e runbook de upgrade/rollback. Antes de P9-03: implementar e comprovar backup/restore incluindo banco, objetos, certificado cifrado e chave necessária.
 - P8-02 inicial entregue sem materialização: agregação calculate-on-read e capacidades futuras
   permanecem `unavailable` até seus slices proprietários; ampliar cards somente após as fontes
   correspondentes existirem.
@@ -117,5 +117,5 @@ nenhum transporte oficial ou municipal foi habilitado.
 
 ## Próxima ação recomendada
 
-**Próxima passagem: issues.** As issues `0001`–`0015`, `0018` e `0019` estão concluídas; a próxima
-implementação elegível pertence a P5/P7 follow-up, P8-01 ou P9 conforme os bloqueios e a ordem do backlog.
+**Próxima passagem: issues.** As issues `0001`–`0016`, `0018` e `0019` estão concluídas; a próxima
+implementação elegível é o backup/restore P9-02 (`0017`), seguindo os bloqueios e a ordem do backlog.

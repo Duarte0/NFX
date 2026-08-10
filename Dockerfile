@@ -18,6 +18,9 @@ COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 CMD ["python", "backend/manage.py", "runserver", "0.0.0.0:8000"]
 
+FROM nginx:1.27-alpine AS runtime-proxy
+COPY deploy/nginx/runtime.conf /etc/nginx/nginx.conf
+
 FROM app AS test
 COPY requirements-dev.txt ./
 RUN python -m pip install --no-cache-dir -r requirements-dev.txt
