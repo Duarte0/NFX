@@ -10,14 +10,14 @@ install:
 	$(PYTHON) -m pip install -r requirements-dev.txt
 	npm --prefix frontend ci
 build:
-	$(PYTHON) backend/manage.py check
+	@NFX_PROFILE=test NFX_SECRET_KEY=synthetic-test-django-secret NFX_CERTIFICATE_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= DATABASE_URL=postgresql://nfx_test:nfx_test_only@127.0.0.1:5432/nfx_test MINIO_ROOT_PASSWORD=nfx-test-only-password $(PYTHON) backend/manage.py check
 	npm --prefix frontend run build
 lint:
 	$(PYTHON) -m ruff check backend tests
-	NFX_PROFILE=test NFX_SECRET_KEY=synthetic-test-django-secret NFX_CERTIFICATE_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= DATABASE_URL=postgresql://nfx_test:nfx_test_only@127.0.0.1:5432/nfx_test MINIO_ROOT_PASSWORD=nfx-test-only-password $(PYTHON) -m mypy backend
+	NFX_PROFILE=test NFX_SECRET_KEY=synthetic-test-django-secret NFX_CERTIFICATE_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= DATABASE_URL=postgresql://nfx_test:nfx_test_only@postgres:5432/nfx_test MINIO_ROOT_PASSWORD=nfx-test-only-password $(PYTHON) -m mypy backend
 	npm --prefix frontend run lint
 test-unit:
-	NFX_PROFILE=test NFX_SECRET_KEY=synthetic-test-django-secret NFX_CERTIFICATE_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= DATABASE_URL=postgresql://nfx_test:nfx_test_only@127.0.0.1:5432/nfx_test MINIO_ROOT_PASSWORD=nfx-test-only-password $(PYTHON) -m pytest tests/unit
+	NFX_PROFILE=test NFX_SECRET_KEY=synthetic-test-django-secret NFX_CERTIFICATE_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= DATABASE_URL=postgresql://nfx_test:nfx_test_only@postgres:5432/nfx_test MINIO_ROOT_PASSWORD=nfx-test-only-password $(PYTHON) -m pytest tests/unit
 test-integration:
 	./scripts/test-integration.sh
 smoke:

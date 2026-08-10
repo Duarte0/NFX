@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P0 — pronta para implementação.
+- **Fase/status:** P0 — implementação concluída e verificada, incluindo o contrato reproduzível de `make build`.
 - **Backlog:** P0-01, P0-03, P0-05.
 - **Dependências:** scaffold atual; nenhuma spec anterior.
 - **PRD:** OPS-007; suporte futuro a NFR-001, NFR-002 e NFR-005. **Aceite relacionado:** AC-023 e AC-024 serão concluídos em fases posteriores.
@@ -14,7 +14,7 @@ Criar uma base executável do monólito modular Django/DRF + React/TypeScript. U
 
 ## Baseline, escopo e não escopo
 
-Hoje existem apenas documentos, `Dockerfile` de desenvolvimento, Compose com PostgreSQL 16/MinIO e `.env.example`; não há aplicação, lockfiles, schema, migrações, testes ou CI. Esta spec cria o scaffold, convenções modulares, automação local e baseline de testes. Não cria usuários, tabelas fiscais, certificados, adapters, integração externa, proxy de runtime ou decisões finais de deploy.
+O baseline implementado é um monólito modular Django/DRF + React/TypeScript em `backend/` e `frontend/`, com dependências travadas, Compose de aplicação e de testes, comandos `web`/`worker`/`scheduler`, smoke e suites unitária e de integração isoladas. Os limites lógicos previstos existem; `documents`, `exports` e `retention` permanecem boundaries sem domínio implementado. Esta spec não inclui usuários, tabelas fiscais, certificados, adapters oficiais, integração externa, proxy de runtime ou decisões finais de deploy.
 
 ## Decisões e detalhes Proposed
 
@@ -31,7 +31,7 @@ Cada comando deve ter contrato documentado:
 
 ## Módulos, contratos e estado
 
-Criar limites lógicos para identidade, empresas, certificados, coleta, documentos/artefatos, exportações/retenção, auditoria/operação, adaptadores e infraestrutura. Nesta fase não há entidade de domínio. Configuração, relógio, IDs/correlação, banco, objetos e logging devem ser injetáveis. Nenhuma UI é proprietária de estado durável.
+Os limites lógicos de identidade, empresas, certificados, coleta, documentos/artefatos, exportações/retenção, auditoria/operação, adaptadores e infraestrutura existem e continuam sendo a fronteira entre módulos. Configuração, relógio, IDs/correlação, banco, objetos e logging devem permanecer injetáveis. Nenhuma UI é proprietária de estado durável.
 
 ## Segurança, observabilidade e falhas
 
@@ -39,16 +39,24 @@ Logs estruturados mínimos: timestamp, nível, processo, ambiente e `correlation
 
 ## Testes e evidências
 
-Matriz: instalação limpa; build backend/frontend; lint com erro proposital; teste unitário; Postgres/MinIO indisponíveis; smoke dos três processos; execução paralela de duas suites confirmando bancos/buckets distintos; teardown sem tocar desenvolvimento. Fixtures são strings/bytes sintéticos. Evidência: comandos e saídas de sucesso, matriz de processos/health e demonstração de isolamento por nomes/credenciais/volumes diferentes.
+A baseline tem `make install`, `lint`, `test-unit`, `test-integration` e `smoke`; `docker-compose.test.yml` e os scripts criam projeto, rede, volumes e bucket exclusivos por `TEST_RUN_ID`. As suites cobrem health, dependências injetáveis, configuração/redaction e os processos web/worker/scheduler. Fixtures são strings/bytes sintéticos.
+
+`make build` encapsula apenas no próprio recipe um perfil `test` e valores sintéticos já usados
+pelas validações locais. O comando executa o `manage.py check` antes do build frontend, não inicia
+serviços, não aplica migrations e não abre conexões externas. O carregador de configuração continua
+fail-closed para entradas ausentes, placeholder, malformadas, conflitantes ou capazes de produção;
+os processos de runtime continuam dependentes de segredos provisionados externamente.
 
 ## Sequência, aceite e DoD
 
 1. Fixar toolchains e dependências. 2. Criar limites de módulos. 3. Criar processos. 4. Integrar serviços de desenvolvimento/teste. 5. Adicionar build/lint/test/smoke e documentação.
 
-- [ ] Checkout limpo executa todos os comandos documentados.
-- [ ] `web`, `worker` e `scheduler` iniciam a mesma versão e têm responsabilidades distintas.
-- [ ] Falha de Postgres/MinIO impede readiness sem stack/segredo na resposta.
-- [ ] Duas execuções de teste não usam dados/volumes de desenvolvimento nem entre si.
-- [ ] Não existe código fiscal, endpoint público ou segredo real.
+- [x] `make build` encapsula e documenta um perfil/valores sintéticos locais, sem segredo versionado utilizável.
+- [x] `web`, `worker` e `scheduler` iniciam a mesma versão e têm responsabilidades distintas.
+- [x] Falha de Postgres/MinIO impede readiness sem stack/segredo na resposta.
+- [x] Duas execuções de teste não usam dados/volumes de desenvolvimento nem entre si.
+- [x] Não existe integração fiscal oficial, endpoint público ou segredo real.
 
-DoD: comandos reproduzíveis, dependências travadas, suites verdes e evidências registradas. **Assunção Proposed:** nomes físicos e ferramentas serão escolhidos nesta implementação e documentados. Sem blocker local.
+DoD: implementação, dependências travadas, suites verdes e evidências estão concluídas. **Accepted:**
+a árvore é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`; Python usa `pip`/`requirements*.txt`,
+e o frontend usa `npm`/`package-lock.json`. Sem blocker de produto.

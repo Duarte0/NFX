@@ -18,9 +18,22 @@
 
 ## Contratos dos comandos
 
-Run `make install` once in a clean Python 3.12 / Node 20 or 22 checkout. `make build` executes
-Django's import/configuration check and creates the Vite artifact without contacting PostgreSQL
-or MinIO. `make lint` checks Ruff, mypy, TypeScript and ESLint. `make test-unit` uses no services.
+Run `make install` once in a clean Python 3.12 / Node 20 or 22 checkout. It installs the pinned
+Python requirements and the frontend lockfile dependencies. `make build` is then self-contained:
+it runs Django's import/configuration check with a local `test` profile and clearly synthetic,
+non-production values, followed by the Vite artifact build. The values are scoped to that Make
+recipe, are not deployment credentials, and the check does not contact PostgreSQL, MinIO, DNS,
+HTTP/SOAP, or a fiscal transport. No service must be running and no manual secret export is
+needed for this command.
+
+`make build` is only a build-time validation profile. Web, worker, scheduler, Compose, and
+deployment commands still require externally provisioned secrets and their complete runtime
+configuration; `.env.example` remains a list of deliberately invalid placeholders. The
+configuration loader continues to fail closed for missing, placeholder, malformed, conflicting,
+or production-capable values. `make build` performs the Django check before the frontend build
+and stops on either failure; it does not start services or apply migrations.
+
+`make lint` checks Ruff, mypy, TypeScript and ESLint. `make test-unit` uses no services.
 
 `make test-integration` starts isolated PostgreSQL 16 and MinIO, waits for both, runs the
 integration suite and always removes its own containers, network and volumes. `make smoke` does
@@ -54,7 +67,35 @@ identificada, além de testes de instalação limpa, upgrade, falha e recovery. 
 preferidas até P9. Mudanças irreversíveis exigem backup/restore aplicável e uma migration corretiva
 ou backfill reiniciável; rollback nunca deve apagar dados para “consertar” schema.
 
+## Identidade e persistência fiscal (P4-01)
+
+`nfx.documents.services.persist_document` recebe somente contexto seguro, identidade fiscal
+normalizável, timestamps conscientes de fuso, uma referência de `Artifact` finalizado e uma
+referência de execução limitada. Escolhe a identidade oficial mais forte disponível; sem identidade
+suficiente retorna `quarantine` sem fabricar uma chave. A competência é derivada da emissão em
+fuso local, nunca da chegada ou da execução.
+
+O resultado é `persisted`, `replay`, `quarantine` ou `conflict`. O mesmo contexto/identidade com o
+mesmo hash retorna replay sem nova evidência; um hash diferente preserva a segunda referência e
+marca o conflito. Eventos e substituições exigem um documento pai da mesma empresa e família, e
+não alteram a competência do pai. O módulo grava apenas metadados e IDs de artefato: bytes, XML,
+PDF e conteúdo de objetos continuam sob responsabilidade de `nfx.artifacts`.
+
+P4-01 não cria execução, unidade, checkpoint, cursor/NSU, job ou transporte fiscal. Essa sequência
+fica para P4-02.
+
 ## Scope boundary
+
+## Políticas e resultados de jobs (P3-02)
+
+`JobPolicy` é versionada por escopo de fonte/fluxo e intervalo de validade. O worker captura a
+política efetiva no job, portanto uma atualização futura não reescreve o limite, backoff ou
+cooldown de trabalho já iniciado. Handlers registrados retornam `HandlerOutcome.success`,
+`.temporary`, `.cooldown`, `.permanent` ou `.partial`; resultados temporários/parciais usam o
+backoff progressivo limitado pela política, cooldown oficial usa sua própria data e falhas
+permanentes ou retry esgotado ficam `blocked` sem loop automático. Somente códigos e resultados
+referenciais seguros são persistidos; certificados, XML, tokens e erros brutos não entram no
+payload, resultado ou log.
 
 ## Configuração segura e isolamento fiscal (P0-02/P0-04)
 
@@ -79,6 +120,12 @@ or HTTP errors. It redacts sensitive fields recursively, credential-bearing URLs
 strings, XML/PDF payloads, bytes, and exception arguments. Never put a secret, certificate, CNPJ,
 real XML, or endpoint into a fixture.
 
+Copy `.env.example` only as a list of settings: its `CHANGE_ME_*` values are deliberately invalid.
+Provide `NFX_SECRET_KEY` and `NFX_CERTIFICATE_MASTER_KEY` through the process environment or their
+corresponding mounted `*_FILE` variables, exactly one source per secret. Do not commit or reuse
+secrets from prior local copies; if a value was used outside disposable testing, rotate it through
+the external secret-management process.
+
 ## Simuladores fiscais sintéticos (P3-03)
 
 `nfx.adapters.simulation` é a porta interna usada pelos testes antes dos adaptadores oficiais.
@@ -93,12 +140,6 @@ bloqueio, duplicata, conflito, payload malformado, evento sem pai e cursor repet
 genérico transforma esses valores em `HandlerOutcome` e preserva a fronteira de lease/idempotência
 dos jobs. Fixtures não carregam XML, credenciais, tokens, certificados ou endpoints produtivos.
 
-Copy `.env.example` only as a list of settings: its `CHANGE_ME_*` values are deliberately invalid.
-Provide `NFX_SECRET_KEY` and `NFX_CERTIFICATE_MASTER_KEY` through the process environment or their
-corresponding mounted `*_FILE` variables, exactly one source per secret. Do not commit or reuse
-secrets from prior local copies; if a value was used outside disposable testing, rotate it through
-the external secret-management process.
-
 ## Controle manual de coleta (P3-05)
 
 `nfx.collection.services.request_collection` é a porta server-authoritative para solicitações
@@ -112,3 +153,4 @@ As rotas são `GET /api/collections`, `GET /api/companies/<id>/collection`,
 `POST /api/companies/<id>/collection/retry/<execution_id>`. Admin/Operador podem mutar; Viewer
 recebe apenas estado operacional. Todos os pedidos, conflitos, recusas, retry e resultados usam
 auditoria append-only com códigos seguros. `empty` significa somente consulta sintética válida sem
+unidades; indisponibilidade, parcial, retry, cooldown e bloqueio permanecem estados distintos.
