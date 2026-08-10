@@ -2,8 +2,9 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
 
 from nfx.audit import views as audit_views
-from nfx.companies import views as company_views
 from nfx.certificates import views as certificate_views
+from nfx.collection import views as collection_views
+from nfx.companies import views as company_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.health import operational
@@ -40,6 +41,7 @@ urlpatterns = [
     path("api/users/password", identity_views.user_password_change),
     path("api/users/<uuid:user_id>/active", identity_views.user_active),
     path("api/audit/events", audit_views.events),
+    path("api/collections", collection_views.collections),
     path("api/companies", company_views.companies),
     path("api/companies/create", company_views.company_create),
     path("api/companies/<uuid:company_id>", company_views.company_detail),
@@ -47,6 +49,12 @@ urlpatterns = [
     path("api/companies/<uuid:company_id>/deactivate", company_views.company_deactivate),
     path("api/companies/<uuid:company_id>/flows/<str:family>", company_views.company_flow),
     path("api/companies/<uuid:company_id>/enrichment", company_views.company_enrichment),
+    path("api/companies/<uuid:company_id>/collection", collection_views.status),
+    path("api/companies/<uuid:company_id>/collection/request", collection_views.request),
+    path(
+        "api/companies/<uuid:company_id>/collection/retry/<uuid:execution_id>",
+        collection_views.retry,
+    ),
     path("api/companies/<uuid:company_id>/certificate", certificate_views.certificate_detail),
     path("api/companies/<uuid:company_id>/certificate/upload", certificate_views.certificate_upload),
 ]

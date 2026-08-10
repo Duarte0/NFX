@@ -514,8 +514,19 @@ def run_scheduler_loop(
     should_continue: Callable[[], bool] = lambda: True,
     sleep: Callable[[float], None] = time.sleep,
     heartbeat: HeartbeatService | None = None,
+    initial_processor: Callable[[], int] | None = None,
 ) -> None:
     while should_continue():
+        if initial_processor is not None:
+            try:
+                initial_processor()
+            except OperationalError:
+                safe_log(
+                    logger,
+                    "warning",
+                    "initial_collection_database_unavailable",
+                    outcome="unavailable",
+                )
         try:
             engine.recover()
         except OperationalError:

@@ -72,6 +72,22 @@ class CompanyFlow(models.Model):
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="flows")
     family = models.CharField(max_length=8, choices=FlowFamily.choices)
     state = models.CharField(max_length=10, choices=FlowState.choices, default=FlowState.ENABLED)
+    collection_state = models.CharField(max_length=16, default="idle")
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+    last_success_at = models.DateTimeField(null=True, blank=True)
+    next_scheduled_at = models.DateTimeField(null=True, blank=True)
+    cooldown_until = models.DateTimeField(null=True, blank=True)
+    blocked_reason = models.CharField(max_length=64, blank=True)
+    safe_error = models.CharField(max_length=64, blank=True)
+    progress_current = models.PositiveIntegerField(default=0)
+    progress_total = models.PositiveIntegerField(default=0)
+    active_execution = models.ForeignKey(
+        "nfx.CollectionExecution",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="active_flow_rows",
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -81,6 +97,9 @@ class CompanyFlow(models.Model):
         ]
         indexes = [
             models.Index(fields=("family", "state"), name="nfx_company_flow_state_ix"),
+            models.Index(
+                fields=("collection_state", "next_scheduled_at"), name="nfx_flow_collection_due_ix"
+            ),
         ]
 
 

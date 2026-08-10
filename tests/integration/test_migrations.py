@@ -47,6 +47,7 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx.0009_job_policies",
         "nfx.0010_process_heartbeats",
         "nfx.0011_document_documentevent_documenteventevidence_and_more",
+        "nfx.0012_companyflow_blocked_reason_and_more",
     )
     assert second.applied == ()
     assert constraints == (
@@ -125,6 +126,7 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
         "nfx.0009_job_policies",
         "nfx.0010_process_heartbeats",
         "nfx.0011_document_documentevent_documenteventevidence_and_more",
+        "nfx.0012_companyflow_blocked_reason_and_more",
     )
     assert schema_status().compatible
 
@@ -168,6 +170,7 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
             "nfx.0009_job_policies",
             "nfx.0010_process_heartbeats",
             "nfx.0011_document_documentevent_documenteventevidence_and_more",
+            "nfx.0012_companyflow_blocked_reason_and_more",
         ),
     ]
     assert schema_status().compatible

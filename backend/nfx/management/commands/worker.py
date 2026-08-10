@@ -9,6 +9,7 @@ from uuid import uuid4
 
 from django.core.management.base import BaseCommand
 
+from nfx.collection.services import ensure_collection_handler
 from nfx.infrastructure.http import configure_logging, safe_log
 from nfx.jobs.observability import HeartbeatService
 from nfx.jobs.services import JobEngine, run_worker_loop
@@ -23,6 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args: object, **options: object) -> None:
         configure_logging()
+        ensure_collection_handler()
         running = True
 
         def stop(*_: object) -> None:

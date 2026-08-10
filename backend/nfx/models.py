@@ -3,7 +3,7 @@
 from nfx.artifacts.models import Artifact
 from nfx.audit.models import AuditChain, AuditEvent
 from nfx.certificates.models import Certificate
-from nfx.collection.models import InitialCollectionRequest
+from nfx.collection.models import CollectionExecution, InitialCollectionRequest
 from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
 from nfx.identity.models import IdentitySession, LoginThrottle, User
 from nfx.jobs.models import Job, JobPolicy, ProcessHeartbeat
@@ -17,6 +17,7 @@ __all__ = [
     "EnrichmentSnapshot",
     "Certificate",
     "InitialCollectionRequest",
+    "CollectionExecution",
     "IdentitySession",
     "LoginThrottle",
     "User",

@@ -98,3 +98,17 @@ Provide `NFX_SECRET_KEY` and `NFX_CERTIFICATE_MASTER_KEY` through the process en
 corresponding mounted `*_FILE` variables, exactly one source per secret. Do not commit or reuse
 secrets from prior local copies; if a value was used outside disposable testing, rotate it through
 the external secret-management process.
+
+## Controle manual de coleta (P3-05)
+
+`nfx.collection.services.request_collection` é a porta server-authoritative para solicitações
+completas, NF-e, NFS-e, retry e o handoff automático criado após um certificado válido. A solicitação
+completa cria uma execução independente para cada família; locks e a constraint de execução ativa
+impedem duplicidade por empresa/família. O scheduler consome o handoff e o worker executa somente o
+handler sintético `collection.synthetic` até que P4 forneça ingestão durável.
+
+As rotas são `GET /api/collections`, `GET /api/companies/<id>/collection`,
+`POST /api/companies/<id>/collection/request` e
+`POST /api/companies/<id>/collection/retry/<execution_id>`. Admin/Operador podem mutar; Viewer
+recebe apenas estado operacional. Todos os pedidos, conflitos, recusas, retry e resultados usam
+auditoria append-only com códigos seguros. `empty` significa somente consulta sintética válida sem

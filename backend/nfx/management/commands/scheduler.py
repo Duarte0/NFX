@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from django.core.management.base import BaseCommand
 
+from nfx.collection.services import process_initial_collection_requests
 from nfx.infrastructure.http import configure_logging, safe_log
 from nfx.jobs.observability import HeartbeatService
 from nfx.jobs.services import JobEngine, run_scheduler_loop
@@ -38,6 +39,7 @@ class Command(BaseCommand):
                 poll_interval=cast(float, options["poll_interval"]),
                 should_continue=lambda: running,
                 heartbeat=heartbeat,
+                initial_processor=process_initial_collection_requests,
             )
         finally:
             try:
