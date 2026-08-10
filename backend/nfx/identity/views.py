@@ -4,7 +4,7 @@ import json
 from collections.abc import Callable
 from uuid import UUID
 
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponseBase, JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
@@ -122,9 +122,9 @@ def session(request: HttpRequest) -> JsonResponse:
 
 def protected(
     action: Action, *, owner_id: Callable[[HttpRequest], str | None] | None = None
-) -> Callable[[Callable[..., HttpResponse]], Callable[..., HttpResponse]]:
-    def decorator(view: Callable[..., HttpResponse]) -> Callable[..., HttpResponse]:
-        def wrapped(request: HttpRequest, *args: object, **kwargs: object) -> HttpResponse:
+) -> Callable[[Callable[..., HttpResponseBase]], Callable[..., HttpResponseBase]]:
+    def decorator(view: Callable[..., HttpResponseBase]) -> Callable[..., HttpResponseBase]:
+        def wrapped(request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseBase:
             identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME))
             if not require_authorized(
                 identity, action.value, owner_id(request) if owner_id else None

@@ -299,6 +299,30 @@ class ArtifactStorageService:
             raise ArtifactNotReadable("Artifact is not available for reading")
         return io.BytesIO(payload)
 
+    def read_verified(self, artifact_id: uuid.UUID) -> BinaryIO:
+        """Read and verify an artifact without changing its durable state.
+
+        HTTP consultation is a read-only use case. Reconciliation owns state
+        transitions for missing or divergent objects, so a failed download
+        cannot mutate the fiscal archive as a side effect.
+        """
+        artifact = Artifact.objects.get(pk=artifact_id)
+        if artifact.state != ArtifactState.FINALIZED:
+            raise ArtifactNotReadable("Artifact is not available for reading")
+        stream = self.store.read(artifact.object_key)
+        if stream is None:
+            raise ArtifactNotReadable("Artifact is not available for reading")
+        try:
+            payload = stream.read()
+        finally:
+            stream.close()
+        if (
+            len(payload) != artifact.size_bytes
+            or hashlib.sha256(payload).hexdigest() != artifact.digest
+        ):
+            raise ArtifactNotReadable("Artifact is not available for reading")
+        return io.BytesIO(payload)
+
     def _mark_problem(self, artifact: Artifact, state: str, error: str) -> None:
         Artifact.objects.filter(pk=artifact.pk, state=ArtifactState.FINALIZED).update(
             state=state, safe_error=error, updated_at=timezone.now()

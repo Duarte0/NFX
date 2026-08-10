@@ -15,6 +15,10 @@ export type DocumentItem = {
   situation: string | null;
   outcome: "persisted" | "quarantine" | "conflict";
   evidence_available: boolean;
+  xml_available: boolean;
+  pdf_available: boolean;
+  detail_url: string;
+  download_url: string | null;
   reason_code: string | null;
 };
 
@@ -38,4 +42,43 @@ export type DocumentResponse = {
     reason_code: string;
   }>;
   next_cursor: string | null;
+};
+
+export type DocumentDetail = {
+  id: string;
+  company: { id: string; name: string };
+  family: string;
+  role: string;
+  category: string;
+  source: string;
+  flow: string;
+  identity: { kind: string; value: string };
+  dates: { emitted_at: string; authorized_at: string | null; competence: string };
+  situation: string;
+  state: string;
+  collection: { origin_execution_ref: string };
+  parties: { issuer: string | null; recipient: string | null; provider: string | null };
+  value_total: number | null;
+  artifacts: Array<{
+    id: string;
+    digest_prefix: string;
+    size_bytes: number;
+    content_type: string;
+    availability: "available" | "unavailable";
+  }>;
+  events: Array<{
+    id: string;
+    family: string;
+    category: string;
+    source: string;
+    flow: string;
+    identity: string;
+    occurred_at: string;
+    situation: string;
+    relationship_type: string;
+    state: string;
+    artifacts: DocumentDetail["artifacts"];
+  }>;
+  availability: { xml: boolean; original: boolean; pdf: boolean };
+  download_url: string;
 };

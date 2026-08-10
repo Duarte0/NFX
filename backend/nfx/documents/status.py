@@ -3,12 +3,14 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import date
 from enum import StrEnum
 from typing import cast
 from uuid import UUID
 
 from django.db.models import QuerySet
 
+from nfx.artifacts.models import ArtifactState
 from nfx.collection.models import (
     CollectionExecutionState,
     IngestionOutcome,
@@ -18,7 +20,12 @@ from nfx.collection.models import (
     ReceivedUnitState,
 )
 from nfx.companies.models import CompanyFlow
-from nfx.documents.models import Document
+from nfx.documents.consultation import (
+    InvalidConsultationParams,
+    cursor_for,
+    parse_consultation_params,
+)
+from nfx.documents.models import Document, DocumentFamily
 
 _SAFE_REFERENCE = re.compile(r"^[A-Za-z0-9_.:/-]{1,64}$")
 _FAMILIES = frozenset(("nfe", "nfse"))
@@ -48,29 +55,44 @@ class CollectionStatus:
 @dataclass(frozen=True)
 class DocumentListParams:
     company_id: UUID | None = None
+    company_ids: tuple[UUID, ...] = ()
     family: str | None = None
     flow: str | None = None
+    competence_from: date | None = None
+    competence_to: date | None = None
+    emitted_from: date | None = None
+    emitted_to: date | None = None
+    direction: str | None = None
+    nfse_category: str | None = None
+    event_type: str | None = None
+    search: str | None = None
     limit: int = 50
     cursor: UUID | None = None
 
     @classmethod
     def from_query(cls, query: Mapping[str, str]) -> DocumentListParams:
-        company_id = _uuid_parameter(query.get("company_id"))
-        cursor = _uuid_parameter(query.get("cursor"))
-        family = query.get("family") or None
-        if family is not None and family not in _FAMILIES:
-            raise InvalidDocumentListParams("family is invalid")
-        flow = query.get("flow") or None
-        if flow is not None and not _SAFE_REFERENCE.fullmatch(flow):
-            raise InvalidDocumentListParams("flow is invalid")
-        raw_limit = query.get("limit", "50")
         try:
-            limit = int(raw_limit)
-        except (TypeError, ValueError) as exc:
-            raise InvalidDocumentListParams("limit is invalid") from exc
-        if not 1 <= limit <= 100:
-            raise InvalidDocumentListParams("limit is invalid")
-        return cls(company_id=company_id, family=family, flow=flow, limit=limit, cursor=cursor)
+            params = parse_consultation_params(query)
+        except InvalidConsultationParams as exc:
+            raise InvalidDocumentListParams("document query is invalid") from exc
+        cursor = UUID(params.cursor) if params.cursor else None
+        company_id = params.company_ids[0] if len(params.company_ids) == 1 else None
+        return cls(
+            company_id=company_id,
+            company_ids=params.company_ids,
+            family=params.family,
+            flow=params.flow,
+            competence_from=params.competence_from,
+            competence_to=params.competence_to,
+            emitted_from=params.emitted_from,
+            emitted_to=params.emitted_to,
+            direction=params.direction,
+            nfse_category=params.nfse_category,
+            event_type=params.event_type,
+            search=params.search,
+            limit=params.limit,
+            cursor=cursor,
+        )
 
 
 def _uuid_parameter(value: str | None) -> UUID | None:
@@ -144,15 +166,43 @@ def collection_status(
 def _scoped_documents(params: DocumentListParams) -> QuerySet[Document]:
     queryset = (
         Document.objects.select_related("company")
-        .prefetch_related("evidence")
+        .prefetch_related("evidence__artifact")
         .order_by("id")
     )
-    if params.company_id:
+    if params.company_ids:
+        queryset = queryset.filter(company_id__in=params.company_ids)
+    elif params.company_id:
         queryset = queryset.filter(company_id=params.company_id)
     if params.family:
         queryset = queryset.filter(family=params.family)
     if params.flow:
         queryset = queryset.filter(flow=params.flow)
+    if params.competence_from:
+        queryset = queryset.filter(competence__gte=params.competence_from)
+    if params.competence_to:
+        queryset = queryset.filter(competence__lte=params.competence_to)
+    if params.emitted_from:
+        queryset = queryset.filter(emitted_at__date__gte=params.emitted_from)
+    if params.emitted_to:
+        queryset = queryset.filter(emitted_at__date__lte=params.emitted_to)
+    if params.direction:
+        queryset = queryset.filter(family=DocumentFamily.NFE, role=params.direction)
+    if params.nfse_category:
+        queryset = queryset.filter(family=DocumentFamily.NFSE, category=params.nfse_category)
+    if params.event_type:
+        queryset = queryset.filter(events__category=params.event_type).distinct()
+    if params.search:
+        from django.db.models import Q
+
+        queryset = queryset.filter(
+            Q(normalized_identity__icontains=params.search)
+            | Q(identity_kind__icontains=params.search)
+            | Q(role__icontains=params.search)
+            | Q(category__icontains=params.search)
+            | Q(source__icontains=params.search)
+            | Q(flow__icontains=params.search)
+            | Q(company__legal_name__icontains=params.search)
+        )
     if params.cursor:
         queryset = queryset.filter(id__gt=params.cursor)
     return queryset
@@ -162,12 +212,16 @@ def _scoped_quarantine(params: DocumentListParams) -> QuerySet[ReceivedUnit]:
     queryset = ReceivedUnit.objects.select_related("company").filter(
         state=ReceivedUnitState.QUARANTINE, document__isnull=True
     ).order_by("id")
-    if params.company_id:
+    if params.company_ids:
+        queryset = queryset.filter(company_id__in=params.company_ids)
+    elif params.company_id:
         queryset = queryset.filter(company_id=params.company_id)
     if params.family:
         queryset = queryset.filter(family=params.family)
     if params.flow:
         queryset = queryset.filter(flow=params.flow)
+    if params.search:
+        queryset = queryset.filter(identity__icontains=params.search)
     if params.cursor:
         queryset = queryset.filter(id__gt=params.cursor)
     return queryset
@@ -190,7 +244,22 @@ def _document_payload(document: Document) -> dict[str, object]:
         "competence": document.competence.isoformat(),
         "situation": document.situation,
         "outcome": document.state,
-        "evidence_available": bool(document.evidence.all()),
+        "evidence_available": any(
+            evidence.artifact.state == ArtifactState.FINALIZED
+            and evidence.digest == evidence.artifact.digest
+            and evidence.size_bytes == evidence.artifact.size_bytes
+            and not evidence.conflicting
+            for evidence in document.evidence.all()
+        ),
+        "xml_available": any(
+            evidence.artifact.state == ArtifactState.FINALIZED
+            and evidence.artifact.detected_mime_type == "application/xml"
+            and not evidence.conflicting
+            for evidence in document.evidence.all()
+        ),
+        "pdf_available": False,
+        "detail_url": f"/api/documents/{document.id}",
+        "download_url": f"/api/documents/{document.id}/download",
         "reason_code": "content_hash_mismatch" if document.state == "conflict" else None,
     }
 
@@ -219,7 +288,9 @@ def _quarantine_payload(unit: ReceivedUnit) -> dict[str, object]:
 
 def _scope_statuses(params: DocumentListParams) -> list[dict[str, object]]:
     flows = CompanyFlow.objects.order_by("company_id", "family")
-    if params.company_id:
+    if params.company_ids:
+        flows = flows.filter(company_id__in=params.company_ids)
+    elif params.company_id:
         flows = flows.filter(company_id=params.company_id)
     if params.family:
         flows = flows.filter(family=params.family)
@@ -302,5 +373,7 @@ def list_document_status(params: DocumentListParams) -> dict[str, object]:
         "reason_code": aggregate.reason_code,
         "collection_states": statuses,
         "documents": page_rows,
-        "next_cursor": page_rows[-1]["id"] if len(rows) > params.limit else None,
+        "next_cursor": (
+            cursor_for(str(page_rows[-1]["id"])) if len(rows) > params.limit else None
+        ),
     }

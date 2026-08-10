@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -186,3 +187,103 @@ def test_document_list_paginates_deterministically_and_maps_blocked_collection()
     assert page["status"] == "blocked"
     assert page["documents"][0]["id"] == str(min(first.id, second.id))
     assert next_page["documents"][0]["id"] == str(max(first.id, second.id))
+
+
+@pytest.mark.django_db(transaction=True)
+def test_document_consultation_filters_are_conjunctive_and_cursor_is_opaque() -> None:
+    first_company = Company.objects.create(
+        cnpj="11222333000184", legal_name="Empresa Consultável"
+    )
+    second_company = Company.objects.create(
+        cnpj="11222333000185", legal_name="Outra Empresa"
+    )
+    CompanyFlow.objects.create(company=first_company, family=FlowFamily.NFE)
+    CompanyFlow.objects.create(company=second_company, family=FlowFamily.NFE)
+    first = _document(first_company, "first-filter")
+    _document(first_company, "second-filter")
+    _document(second_company, "other-filter")
+
+    response = _client().get(
+        "/api/documents",
+        [
+            ("company_id", str(first_company.id)),
+            ("company_id", str(second_company.id)),
+            ("family", "nfe"),
+            ("direction", "entrada"),
+            ("search", "consultável"),
+            ("limit", "1"),
+        ],
+    )
+
+    assert response.status_code == 200
+    assert [row["id"] for row in response.json()["documents"]] == [str(first.id)]
+    assert response.json()["next_cursor"]
+    assert response.json()["next_cursor"] != str(first.id)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_document_detail_exposes_safe_relationships_and_no_storage_key() -> None:
+    company = Company.objects.create(cnpj="11222333000186", legal_name="Detail Company")
+    CompanyFlow.objects.create(company=company, family=FlowFamily.NFE)
+    document = _document(company, "detail")
+
+    payload = _client().get(f"/api/documents/{document.id}")
+
+    assert payload.status_code == 200
+    body = payload.json()
+    assert body["identity"]["value"] == document.normalized_identity
+    assert body["availability"]["xml"] is False
+    serialized = str(body)
+    assert "object_key" not in serialized
+    assert "safe_error" not in serialized
+
+
+@pytest.mark.django_db(transaction=True)
+def test_individual_download_verifies_bytes_and_does_not_mutate_on_storage_divergence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    company = Company.objects.create(cnpj="11222333000187", legal_name="Download Company")
+    CompanyFlow.objects.create(company=company, family=FlowFamily.NFE)
+    payload = b"<synthetic>document</synthetic>"
+    artifact = _artifact("download", payload)
+    document = persist_document(
+        DocumentInput(
+            company_id=company.id,
+            family=FlowFamily.NFE,
+            role="entrada",
+            category="document",
+            source="simulator",
+            flow="distribution",
+            identity=FiscalIdentity(official_key="download-document"),
+            emitted_at=datetime(2026, 8, 9, 14, 0, tzinfo=UTC),
+            authorized_at=datetime(2026, 8, 9, 14, 1, tzinfo=UTC),
+            situation=DocumentSituation.AUTHORIZED,
+            artifact_id=artifact.id,
+            origin_execution_ref="execution-synthetic-1",
+        )
+    )
+    assert document.document_id
+
+    class MemoryStore:
+        def __init__(self, content: bytes) -> None:
+            self.content = content
+
+        def read(self, _: str) -> io.BytesIO:
+            return io.BytesIO(self.content)
+
+    store = MemoryStore(payload)
+    monkeypatch.setattr("nfx.documents.views.object_store_from_environment", lambda: store)
+    client = _client()
+
+    response = client.get(f"/api/documents/{document.document_id}/download")
+
+    assert response.status_code == 200
+    assert b"".join(response.streaming_content) == payload
+    assert "object_key" not in response.headers.get("Content-Disposition", "")
+
+    store.content = b"changed"
+    before = Artifact.objects.get(pk=artifact.id).state
+    failed = client.get(f"/api/documents/{document.document_id}/download")
+
+    assert failed.status_code == 404
+    assert Artifact.objects.get(pk=artifact.id).state == before

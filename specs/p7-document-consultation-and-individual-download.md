@@ -4,6 +4,9 @@
 
 - **Fase/status:** P7 — pronta após P4; cobertura completa cresce com P5/P6.
 - **Backlog:** P7-01, P7-02. **Dependências:** P1-03/04, P4-01/04.
+- **Implementação:** P7-01/P7-02 concluídos no issue 0015. A consulta usa filtros bounded,
+  cursor opaco assinado e detalhe seguro; o download individual revalida artefato, digest e
+  tamanho antes do streaming. PDF/DANFE/DANFSe continua no slice P7-03 bloqueado localmente.
 - **PRD:** FR-DOC-001, FR-DOC-002, FR-DOC-003, FR-DOC-004, FR-DOC-005; BR-DOC-001, BR-DOC-002; FR-ART-001; NFR-001, NFR-002, NFR-006; AUD-006. **Aceite:** AC-004, AC-005, AC-010, AC-011, AC-014.
 - **Arquitetura:** seções 14–18, 26–28, 32, 33, 36 e 37.
 
@@ -42,3 +45,17 @@ Objeto pendente/ausente/divergente não é servido e UI mantém metadado com ind
 - [ ] Consulta não altera documento/cursor/artefato.
 
 DoD: migrações/índices, contratos, UI, download, auditoria e matriz browser verdes. **Proposed:** URLs/payload/paginação e política de granularidade de auditoria de consultas.
+
+## Notas de implementação — issue 0015
+
+- `GET /api/documents` preserva os estados do contrato P4 e acrescenta empresa múltipla,
+  competência, período de emissão, família, direção NF-e, categoria NFS-e, tipo de evento e
+  busca global. O cursor de continuação é assinado e limitado ao identificador interno.
+- `GET /api/documents/<id>` retorna metadados, eventos/substituições e disponibilidade de
+  artefatos sem chaves de objeto ou payloads. `GET /api/documents/<id>/download` e
+  `GET /api/artifacts/<id>/download` servem somente evidência finalizada e verificada.
+- Consulta e download geram auditoria bounded. A verificação HTTP usa uma leitura não mutante;
+  reconciliação continua sendo a dona das transições `missing`/`divergent` do artefato.
+- O repositório não possui runner de browser; a validação de UI desta entrega é feita pelo
+  contrato React compilado/lintado e pelos estados de detalhe/download, enquanto a cobertura
+  HTTP/integridade/RBAC usa fixtures sintéticas.

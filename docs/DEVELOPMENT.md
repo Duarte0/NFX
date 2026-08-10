@@ -106,12 +106,24 @@ fica para P4-02.
 ## Consulta mínima de documentos (P4-04)
 
 `GET /api/documents` é a leitura autenticada e limitada do acervo disponível. Aceita `company_id`,
-`family`, `flow`, `limit` (1–100) e `cursor` UUID; a ordenação é determinística por ID. A resposta
+`family`, `flow`, `limit` (1–100) e cursor assinado, além dos filtros P7 bounded de competência,
+período de emissão, direção NF-e, categoria NFS-e, tipo de evento e busca global; a ordenação é determinística por ID. A resposta
 separa `valid_empty`, `unavailable`, `no_coverage`, `unknown`, `partial`, `retry` e `blocked` e
 lista somente metadados, competência, situação, resultado (`persisted`, `quarantine` ou `conflict`)
 e a disponibilidade booleana de evidência. Bytes, chaves de objeto e erros externos nunca saem por
 essa fronteira. A seção React `#documentos` mantém ramos explícitos para carregamento, vazio válido,
-degradação e cada resultado documental; ela não cria cursor, checkpoint, retry ou estado durável.
+degradação, detalhe e download; ela não cria cursor, checkpoint, retry ou estado durável.
+
+## Consulta e download individual (P7-01/P7-02)
+
+`GET /api/documents/<id>` fornece detalhe seguro, incluindo eventos/substituições e disponibilidade
+de evidência. `GET /api/documents/<id>/download` e `GET /api/artifacts/<id>/download` revalidam
+relação, estado finalizado, digest e tamanho antes de servir o conteúdo. Chaves MinIO, payloads e
+erros do provedor não atravessam a fronteira. Uma falha de leitura não muta o artefato; a
+reconciliação continua responsável por classificar objetos ausentes ou divergentes.
+
+Os três papéis autenticados podem consultar e baixar individualmente; cada leitura é autorizada
+server-side e auditada com contexto bounded. PDF permanece indisponível até a decisão do P7-03.
 
 ## Pipeline fiscal durável (P4-02)
 
