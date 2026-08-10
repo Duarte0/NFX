@@ -1,5 +1,24 @@
 # Fundação P0
 
+## Limites da arquitetura frontend
+
+O bootstrap em `frontend/src/main.tsx` somente valida o elemento `#root` e monta `App.tsx`.
+`App.tsx` é o composition root: mantém a composição do shell autenticado, a navegação por
+âncoras e a visibilidade por papel, enquanto cada funcionalidade mantém seus próprios tipos,
+contratos HTTP, estado, handlers e apresentação em `frontend/src/features/`:
+
+- `auth` — login, restauração, encerramento e shell de sessão;
+- `users`, `companies`, `certificates`, `collections`, `documents` e `audit` — um limite por
+  domínio, sem estado ou regra de negócio compartilhado entre funcionalidades;
+- `shared/http.ts` — credenciais same-origin, CSRF, serialização e erros seguros; e
+  `shared/ui/` — primitives sem regras de domínio.
+
+A direção de dependências é `App → features → shared`; funcionalidades não importam umas às
+outras, exceto a composição explícita de certificados dentro da área de empresas. O frontend
+continua sem router, biblioteca global de estado, framework de componentes ou camada de retry.
+Autorização permanece server-side, e os endpoints, payloads, mensagens, IDs de seção e estados
+visíveis das specs P1–P4 continuam sendo contratos de compatibilidade.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes

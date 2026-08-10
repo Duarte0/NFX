@@ -2,7 +2,7 @@
 
 ## Autoridade, baseline e regra de uso
 
-Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão concluídos; a higiene do template de ambiente foi verificada no issue 0007 e o contrato reproduzível de `make build` foi concluído no issue 0008.
+Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão concluídos; a higiene do template de ambiente foi verificada no issue 0007 e o contrato reproduzível de `make build` foi concluído no issue 0008. O issue 0011 concluiu a extração arquitetural transversal do frontend sem alterar o status ou o contrato de nenhuma spec P1–P4.
 
 Uma spec individual fica concluída somente quando seu próprio DoD tem evidência. Uma fase fica concluída somente quando todas as specs da fase estão concluídas; marcar uma spec não marca automaticamente a fase.
 

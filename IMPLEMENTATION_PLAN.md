@@ -27,6 +27,12 @@ O código e as migrações são a baseline de implementação; testes são a evi
 
 P4-01 adicionou a identidade e persistência base de documentos/eventos em `documents`, com referências imutáveis a artefatos. P4-02 adicionou pipeline/cursor, P4-03 adicionou a matriz durável de estados/recovery e P4-04 adicionou a API/UI mínima de status/lista; exportações, retenção e renderização continuam fora desta entrega. Simuladores são infraestrutura de teste; não implementam P5–P6.
 
+O incremento transversal de frontend do issue 0011 também está concluído: `main.tsx` é somente
+bootstrap, `App.tsx` compõe o shell e as funcionalidades, e `shared/http.ts` é a fronteira
+única para credenciais same-origin, CSRF, serialização e erros seguros. A extração preserva os
+contratos e estados visíveis P1–P4; não altera backend, banco, endpoints ou dependências de
+runtime. A próxima implementação de produto continua sendo P5/P6.
+
 ### Implementado, mas com acompanhamento documental/operacional pendente
 
 1. P1-04 está implementado e testado; a passagem de specs removeu o falso blocker Graphify de `specs/p1-user-administration.md`.
