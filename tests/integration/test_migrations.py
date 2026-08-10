@@ -46,6 +46,7 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx.0008_durable_jobs",
         "nfx.0009_job_policies",
         "nfx.0010_process_heartbeats",
+        "nfx.0011_document_documentevent_documenteventevidence_and_more",
     )
     assert second.applied == ()
     assert constraints == (
@@ -54,6 +55,34 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx_schema_contract_singleton_ck",
     )
     assert indexes == ("nfx_schema_contract_pkey", "nfx_schema_contract_updated_at_idx")
+    with connections["default"].cursor() as cursor:
+        cursor.execute(
+            "SELECT tablename, indexname FROM pg_indexes "
+            "WHERE tablename IN ('nfx_document', 'nfx_document_event', "
+            "'nfx_document_evidence', 'nfx_document_event_evidence') "
+            "ORDER BY tablename, indexname"
+        )
+        document_indexes = {(row[0], row[1]) for row in cursor.fetchall()}
+        cursor.execute(
+            "SELECT conname FROM pg_constraint "
+            "WHERE conname IN ("
+            "'nfx_document_origin_ref_ck', 'nfx_event_origin_ref_ck', "
+            "'nfx_document_evidence_artifact_uq', 'nfx_event_evidence_artifact_uq')"
+        )
+        document_constraints = {row[0] for row in cursor.fetchall()}
+    assert {
+        ("nfx_document", "nfx_document_company_comp_ix"),
+        ("nfx_document", "nfx_document_identity_ix"),
+        ("nfx_document_event", "nfx_event_parent_time_ix"),
+        ("nfx_document_evidence", "nfx_doc_evidence_digest_ix"),
+        ("nfx_document_event_evidence", "nfx_evt_evidence_digest_ix"),
+    } <= document_indexes
+    assert document_constraints == {
+        "nfx_document_origin_ref_ck",
+        "nfx_event_origin_ref_ck",
+        "nfx_document_evidence_artifact_uq",
+        "nfx_event_evidence_artifact_uq",
+    }
     assert schema_status().compatible
 
 
@@ -95,6 +124,7 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
         "nfx.0008_durable_jobs",
         "nfx.0009_job_policies",
         "nfx.0010_process_heartbeats",
+        "nfx.0011_document_documentevent_documenteventevidence_and_more",
     )
     assert schema_status().compatible
 
@@ -137,6 +167,7 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
             "nfx.0008_durable_jobs",
             "nfx.0009_job_policies",
             "nfx.0010_process_heartbeats",
+            "nfx.0011_document_documentevent_documenteventevidence_and_more",
         ),
     ]
     assert schema_status().compatible

@@ -5,7 +5,7 @@ import re
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 from uuid import UUID
 
 from django.db import IntegrityError, transaction
@@ -72,9 +72,17 @@ def normalize_cnpj(value: str) -> str:
     if normalized.isdigit():
         if len(normalized) != 14 or len(set(normalized)) == 1:
             raise InvalidCnpj("CNPJ inválido.")
-        first = sum(int(digit) * weight for digit, weight in zip(normalized[:12], (5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)))
+        first = sum(
+            int(digit) * weight
+            for digit, weight in zip(normalized[:12], (5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2))
+        )
         first_digit = (11 - first % 11) % 10
-        second = sum(int(digit) * weight for digit, weight in zip(normalized[:12] + str(first_digit), (6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)))
+        second = sum(
+            int(digit) * weight
+            for digit, weight in zip(
+                normalized[:12] + str(first_digit), (6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)
+            )
+        )
         if normalized[-2:] != f"{first_digit}{(11 - second % 11) % 10}":
             raise InvalidCnpj("CNPJ inválido.")
     return normalized
@@ -119,7 +127,9 @@ def _company(company_id: str | UUID, *, lock: bool = False) -> Company:
         raise CompanyNotFound("Empresa não encontrada.") from exc
 
 
-def create_company(*, actor: SessionIdentity, cnpj: str, legal_name: str, ip_address: str) -> Company:
+def create_company(
+    *, actor: SessionIdentity, cnpj: str, legal_name: str, ip_address: str
+) -> Company:
     _require_company_access(actor)
     normalized = normalize_cnpj(cnpj)
     name = _validated_name(legal_name)
@@ -197,7 +207,15 @@ def deactivate_company(
         company.deactivation_reason = reason
         company.deactivated_at = timezone.now()
         company.version += 1
-        company.save(update_fields=["status", "deactivation_reason", "deactivated_at", "version", "updated_at"])
+        company.save(
+            update_fields=[
+                "status",
+                "deactivation_reason",
+                "deactivated_at",
+                "version",
+                "updated_at",
+            ]
+        )
         context = _context(company)
         context["before"] = before["after"]
         AuditService().append(
@@ -264,7 +282,12 @@ def set_flow_state(
             actor_id=actor.user_id,
             actor_role=actor.role,
             ip_address=ip_address,
-            context={"company_id": str(company.id), "family": family, "before": before, "after": state},
+            context={
+                "company_id": str(company.id),
+                "family": family,
+                "before": before,
+                "after": state,
+            },
         )
         return flow
 
@@ -305,7 +328,7 @@ def _normalize_response(response: OpenCnpjResponse | object) -> OpenCnpjResponse
         if response is None:
             return OpenCnpjResponse("empty")
         return OpenCnpjResponse("malformed", error_code="resposta_nao_json")
-    if response.status == "success" and not isinstance(response.payload, (dict, list)):
+    if response.status == "success" and not isinstance(response.payload, dict | list):
         return OpenCnpjResponse("malformed", error_code="conteudo_invalido")
     return response
 
@@ -339,14 +362,14 @@ def request_enrichment(
     }
     status = status_map.get(response.status, EnrichmentStatus.UNAVAILABLE)
     payload: object = response.payload if status == EnrichmentStatus.SUCCESS else {}
-    if status == EnrichmentStatus.SUCCESS and not isinstance(payload, (dict, list)):
+    if status == EnrichmentStatus.SUCCESS and not isinstance(payload, dict | list):
         status, payload = EnrichmentStatus.MALFORMED, {}
     with transaction.atomic():
         snapshot = EnrichmentSnapshot.objects.create(
             company=company,
             requested_cnpj=company.cnpj,
             status=status,
-            payload=cast(dict | list, payload),
+            payload=cast(dict[str, Any] | list[Any], payload),
             error_code=response.error_code,
         )
         AuditService().append(
@@ -362,6 +385,11 @@ def request_enrichment(
     company_metrics.record_enrichment(status, duration_ms)
     logger.info(
         "company_public_enrichment",
-        extra={"company_id": str(company.id), "source": "opencnpj", "status": status, "duration_ms": round(duration_ms, 2)},
+        extra={
+            "company_id": str(company.id),
+            "source": "opencnpj",
+            "status": status,
+            "duration_ms": round(duration_ms, 2),
+        },
     )
     return EnrichmentResult(snapshot=snapshot, duration_ms=duration_ms)

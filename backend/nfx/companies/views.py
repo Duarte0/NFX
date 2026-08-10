@@ -77,11 +77,11 @@ def _enrichment_payload(snapshot: EnrichmentSnapshot) -> dict[str, object]:
 def _error(exc: Exception) -> JsonResponse:
     if isinstance(exc, DuplicateCompanyCnpj):
         return JsonResponse({"detail": str(exc)}, status=409)
-    if isinstance(exc, (CompanyVersionConflict, CompanyCnpjImmutable)):
+    if isinstance(exc, CompanyVersionConflict | CompanyCnpjImmutable):
         return JsonResponse({"detail": str(exc)}, status=409)
     if isinstance(exc, CompanyNotFound):
         return JsonResponse({"detail": str(exc)}, status=404)
-    if isinstance(exc, (InvalidCnpj, CompanyInactive, InvalidCompanyFlow, CompanyError)):
+    if isinstance(exc, InvalidCnpj | CompanyInactive | InvalidCompanyFlow | CompanyError):
         return JsonResponse({"detail": str(exc)}, status=400)
     return JsonResponse({"detail": "Não foi possível concluir a operação."}, status=400)
 
@@ -95,7 +95,9 @@ def companies(request: HttpRequest) -> JsonResponse:
     if status:
         queryset = queryset.filter(status=status)
     if search:
-        queryset = queryset.filter(legal_name__icontains=search) | queryset.filter(cnpj__icontains=search)
+        queryset = queryset.filter(legal_name__icontains=search) | queryset.filter(
+            cnpj__icontains=search
+        )
     try:
         limit = min(max(int(request.GET.get("limit", "50")), 1), 100)
         cursor = UUID(request.GET["cursor"]) if request.GET.get("cursor") else None
@@ -137,7 +139,9 @@ def company_create(request: HttpRequest) -> JsonResponse:
 def company_detail(request: HttpRequest, company_id: UUID) -> JsonResponse:
     if request.method == "GET":
         try:
-            company = Company.objects.prefetch_related("flows", "enrichment_snapshots").get(id=company_id)
+            company = Company.objects.prefetch_related("flows", "enrichment_snapshots").get(
+                id=company_id
+            )
         except Company.DoesNotExist:
             return _error(CompanyNotFound("Empresa não encontrada."))
         return JsonResponse({"company": _company_payload(company)})
@@ -149,7 +153,11 @@ def company_detail(request: HttpRequest, company_id: UUID) -> JsonResponse:
     assert isinstance(legal_name, str)
     version = body.get("version")
     cnpj = body.get("cnpj")
-    if not isinstance(version, int) or version < 1 or (cnpj is not None and not isinstance(cnpj, str)):
+    if (
+        not isinstance(version, int)
+        or version < 1
+        or (cnpj is not None and not isinstance(cnpj, str))
+    ):
         return JsonResponse({"detail": "Dados inválidos."}, status=400)
     try:
         company = update_company(
@@ -172,7 +180,9 @@ def company_activate(request: HttpRequest, company_id: UUID) -> JsonResponse:
     if identity is None:
         return JsonResponse({"detail": "Não autenticado."}, status=401)
     try:
-        company = activate_company(actor=identity, company_id=str(company_id), ip_address=_ip(request))
+        company = activate_company(
+            actor=identity, company_id=str(company_id), ip_address=_ip(request)
+        )
     except CompanyError as exc:
         return _error(exc)
     return JsonResponse({"company": _company_payload(company)})
@@ -184,10 +194,14 @@ def company_deactivate(request: HttpRequest, company_id: UUID) -> JsonResponse:
     body = _json_body(request)
     identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME), touch=False)
     if identity is None or body is None or body.get("confirmed") is not True:
-        return JsonResponse({"detail": "Confirmação explícita e motivo são obrigatórios."}, status=400)
+        return JsonResponse(
+            {"detail": "Confirmação explícita e motivo são obrigatórios."}, status=400
+        )
     reason = body.get("reason")
     if not isinstance(reason, str):
-        return JsonResponse({"detail": "Confirmação explícita e motivo são obrigatórios."}, status=400)
+        return JsonResponse(
+            {"detail": "Confirmação explícita e motivo são obrigatórios."}, status=400
+        )
     try:
         company = deactivate_company(
             actor=identity, company_id=str(company_id), reason=reason, ip_address=_ip(request)

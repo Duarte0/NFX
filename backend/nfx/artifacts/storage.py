@@ -20,6 +20,7 @@ from typing import BinaryIO, Protocol
 
 import boto3
 from botocore.exceptions import ClientError
+from botocore.response import StreamingBody
 from django.db import IntegrityError, transaction
 from django.db.models import Count
 from django.utils import timezone
@@ -143,7 +144,7 @@ class S3ObjectStore:
             str(response.get("ContentType", "application/octet-stream")),
         )
 
-    def read(self, object_key: str) -> BinaryIO | None:
+    def read(self, object_key: str) -> StreamingBody | BinaryIO | None:
         try:
             response = self.client.get_object(Bucket=self.bucket, Key=object_key)
         except ClientError as exc:
@@ -207,7 +208,11 @@ class ArtifactStorageService:
                 artifact.object_key, chunks, artifact.declared_mime_type, self.maximum_size
             )
             verified = self.store.head(artifact.object_key)
-            if verified is None or verified.size_bytes != written.size_bytes or verified.digest != written.digest:
+            if (
+                verified is None
+                or verified.size_bytes != written.size_bytes
+                or verified.digest != written.digest
+            ):
                 raise ArtifactError("Object storage integrity verification failed")
             finalized = self._finalize(artifact_id, written, verified)
         except Exception as exc:
@@ -242,7 +247,10 @@ class ArtifactStorageService:
             with transaction.atomic():
                 artifact = Artifact.objects.select_for_update().get(pk=artifact_id)
                 if artifact.state == ArtifactState.FINALIZED:
-                    if artifact.digest == written.digest and artifact.size_bytes == written.size_bytes:
+                    if (
+                        artifact.digest == written.digest
+                        and artifact.size_bytes == written.size_bytes
+                    ):
                         return artifact
                     raise ArtifactConflict("Finalized artifact metadata conflicts with retry")
                 if artifact.state != ArtifactState.PENDING:
@@ -261,9 +269,15 @@ class ArtifactStorageService:
                 logical_key=Artifact.objects.get(pk=artifact_id).logical_key,
                 state=ArtifactState.FINALIZED,
             ).first()
-            if existing and existing.digest == written.digest and existing.size_bytes == written.size_bytes:
+            if (
+                existing
+                and existing.digest == written.digest
+                and existing.size_bytes == written.size_bytes
+            ):
                 return existing
-            raise ArtifactConflict("A different finalized artifact already owns this logical key") from exc
+            raise ArtifactConflict(
+                "A different finalized artifact already owns this logical key"
+            ) from exc
 
     def open_verified(self, artifact_id: uuid.UUID) -> BinaryIO:
         artifact = Artifact.objects.get(pk=artifact_id)
@@ -277,7 +291,10 @@ class ArtifactStorageService:
             payload = stream.read()
         finally:
             stream.close()
-        if len(payload) != artifact.size_bytes or hashlib.sha256(payload).hexdigest() != artifact.digest:
+        if (
+            len(payload) != artifact.size_bytes
+            or hashlib.sha256(payload).hexdigest() != artifact.digest
+        ):
             self._mark_problem(artifact, ArtifactState.DIVERGENT, "Object integrity diverged")
             raise ArtifactNotReadable("Artifact is not available for reading")
         return io.BytesIO(payload)
@@ -289,7 +306,9 @@ class ArtifactStorageService:
 
     def reconcile(self) -> ReconciliationReport:
         referenced = set(Artifact.objects.values_list("object_key", flat=True))
-        orphan_objects = sum(1 for key in self.store.list_keys(self.object_prefix) if key not in referenced)
+        orphan_objects = sum(
+            1 for key in self.store.list_keys(self.object_prefix) if key not in referenced
+        )
         pending = Artifact.objects.filter(state=ArtifactState.PENDING).count()
         missing = divergent = 0
         for artifact in Artifact.objects.filter(state=ArtifactState.FINALIZED).iterator():
@@ -305,7 +324,9 @@ class ArtifactStorageService:
     def metrics(self, pending_age: timedelta = timedelta(hours=1)) -> ArtifactMetrics:
         threshold = timezone.now() - pending_age
         states = dict(
-            Artifact.objects.values("state").annotate(total=Count("id")).values_list("state", "total")
+            Artifact.objects.values("state")
+            .annotate(total=Count("id"))
+            .values_list("state", "total")
         )
         referenced = set(Artifact.objects.values_list("object_key", flat=True))
         return ArtifactMetrics(
@@ -315,5 +336,7 @@ class ArtifactStorageService:
             ).count(),
             missing=states.get(ArtifactState.MISSING, 0),
             divergent=states.get(ArtifactState.DIVERGENT, 0),
-            orphan_objects=sum(1 for key in self.store.list_keys(self.object_prefix) if key not in referenced),
+            orphan_objects=sum(
+                1 for key in self.store.list_keys(self.object_prefix) if key not in referenced
+            ),
         )

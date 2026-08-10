@@ -30,7 +30,9 @@ class Artifact(models.Model):
     size_bytes = models.BigIntegerField(null=True, blank=True)
     declared_mime_type = models.CharField(max_length=255)
     detected_mime_type = models.CharField(max_length=255, blank=True)
-    state = models.CharField(max_length=16, choices=ArtifactState.choices, default=ArtifactState.PENDING)
+    state = models.CharField(
+        max_length=16, choices=ArtifactState.choices, default=ArtifactState.PENDING
+    )
     version = models.PositiveIntegerField(default=1)
     safe_error = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
