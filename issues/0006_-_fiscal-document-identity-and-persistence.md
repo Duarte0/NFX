@@ -2,12 +2,12 @@
 id: 0006
 title: "Implement fiscal document identity and persistence foundation"
 type: feature
-status: open
+status: closed
 priority: critical
 phase: P4
 created_at: 2026-08-09
 updated_at: 2026-08-09
-closed_at: ~
+closed_at: 2026-08-09
 related_issues: [0003]
 blocked_by: []
 affects:
@@ -89,7 +89,7 @@ This issue creates the P4-01 foundation only. P4-02 will own page/unit/checkpoin
 - [x] The implementation does not advance a cursor, checkpoint, job, or collection execution as a side effect; P4-02 remains the owner of that sequencing.
 - [x] Focused unit, integration, migration, concurrency, and redaction tests pass, and the configured `make lint`, `make test-unit`, `make test-integration`, and synthetic smoke/validation commands pass.
 - [x] Relevant documentation, `IMPLEMENTATION_PLAN.md`, the P4 spec/`specs/README.md`, and Graphify are synchronized according to repository conventions.
-- [ ] The issue is closed only after its Resolution records the implementation/evidence, `IMPLEMENTATION_PLAN.md` is synced, and all changes are committed in one focused commit.
+- [x] The issue is closed only after its Resolution records the implementation/evidence, `IMPLEMENTATION_PLAN.md` is synced, and all changes are committed in one focused commit.
 
 ## References
 
@@ -123,17 +123,15 @@ Validation performed:
 - `python -m pytest tests/unit/test_document_identity.py tests/integration/test_documents.py tests/integration/test_migrations.py` — 15 passed.
 - Targeted Ruff and mypy checks — passed.
 
-Repository validation completed, but closure is blocked:
+Repository validation completed:
 
 - `make lint` — Ruff, mypy, TypeScript, and ESLint passed.
 - `make test-unit` — 126 passed.
 - `make test-integration` — isolated PostgreSQL/MinIO run, 29 passed.
+- `make build` with the repository's documented synthetic test profile — Django check and frontend build passed.
 - `make smoke` — isolated service startup, migration, and web/worker/scheduler liveness passed.
 - `graphify update .` — code graph rebuilt and the new document boundary is queryable.
 
-Completion blocker: `IMPLEMENTATION_PLAN.md`, `specs/README.md`, and generated Graphify outputs
-had unrelated pre-existing working-tree changes before this issue was selected. Their current
-files cannot be staged as a focused issue-0006 commit without bundling those changes. The
-implementation and tests remain in the working tree; after the pre-existing documentation and
-Graphify edits are separated or committed by their owner, stage this issue's files and create the
-required single focused commit, then close the issue.
+The plain `make build` invocation still fails closed when `NFX_PROFILE` is absent; this is the
+separate reproducible-build contract tracked by issue 0008. The configured synthetic build path
+passes and no production credentials, fiscal endpoints, or non-ephemeral data were used.
