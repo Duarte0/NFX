@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P8 — pronta; exclusão permanece desabilitada.
+- **Fase/status:** P8 — P8-03 implementada e verificada; exclusão permanece desabilitada.
 - **Backlog:** P8-03. **Dependências:** P1-05, P4-01 e P7-03 para incluir PDFs existentes.
 - **PRD:** RET-001, RET-002, RET-003, RET-004, RET-007, RET-008; AUD-006. **Aceite:** AC-015 parcial e AC-014.
 - **Arquitetura:** seções 14, 28, 31, 37, 40 e 41.
@@ -19,7 +19,7 @@ P4 fornece datas e vínculos fiscais; P7 fornece artefatos. Esta spec cria cálc
 
 NF-e: 132 meses completos desde autorização; 15/08/2026 → 15/08/2037. NFS-e: ano de emissão + cinco anos-calendário, elegível em 1º de janeiro do sexto ano seguinte; qualquer data de 2026 → 01/01/2032. Empresa/usuário desativado ou certificado expirado/substituído não muda prazo. Nunca há exclusão automática.
 
-Retenção é dona da elegibilidade/decisão. **Proposed:** regra versionada, data-base, `eligible_at`, cálculo em, estado e prévia com ID/hash/versão do escopo; índices por família/elegibilidade/estado. Pode calcular sob demanda ou persistir, mas resultado persistido deve ser recalculável e detectar mudança de artefato. A prévia enumera documento, eventos, original/XML, PDFs e derivados sem copiar conteúdo.
+Retenção é dona da elegibilidade/decisão. **Proposed:** regra versionada, data-base, `eligible_at`, cálculo em, estado e prévia com ID/hash/versão do escopo; índices por família/elegibilidade/estado. A implementação calcula sob demanda com `retention-v1`, `scope-v1` e hash SHA-256 do escopo de evidências; mudanças de evidência invalidam o hash sem reescrever fatos fiscais. A prévia enumera documento, eventos e original/XML sem copiar conteúdo; PDFs/derivados ficam para P7-03.
 
 ## Contratos, UI e autorização
 
@@ -35,10 +35,10 @@ Relógio congelado: instante anterior/exato/posterior dos exemplos; mês com 28/
 
 ## Aceite e DoD
 
-- [ ] Exemplos AC-015 resultam exatamente nas datas exigidas.
-- [ ] Nenhum papel exclui durante P8.
-- [ ] Prévia estável enumera todos os vínculos sem conteúdo fiscal.
-- [ ] Mudança de escopo invalida prévia antiga.
-- [ ] Estado externo da empresa/certificado não altera retenção.
+- [x] Exemplos AC-015 resultam exatamente nas datas exigidas.
+- [x] Nenhum papel exclui durante P8.
+- [x] Prévia estável enumera todos os vínculos sem conteúdo fiscal.
+- [x] Mudança de escopo invalida prévia antiga.
+- [x] Estado externo da empresa/certificado não altera retenção.
 
-DoD: regra, migração/backfill se usado, contratos/UI, auditoria e testes de fronteira verdes. **Proposed:** persistir ou calcular e mecanismo de hash da prévia.
+DoD: regra, contratos/UI, auditoria, métricas e testes de fronteira verdes. Não houve migration/backfill: o cálculo-on-read é recalculável. Evidência: `backend/nfx/retention/services.py`/`views.py`, `frontend/src/features/retention/`, `tests/unit/test_retention.py`, `tests/integration/test_retention.py`, validações Ruff/mypy/TypeScript/ESLint e suite isolada de integração (61 testes).

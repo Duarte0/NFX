@@ -10,6 +10,7 @@ from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.health import operational
 from nfx.operations.views import dashboard
+from nfx.retention import views as retention_views
 
 
 def index(_: HttpRequest) -> HttpResponse:
@@ -49,6 +50,9 @@ urlpatterns = [
     path("api/documents/<uuid:document_id>", document_views.detail),
     path("api/documents/<uuid:document_id>/download", document_views.download_document),
     path("api/artifacts/<uuid:artifact_id>/download", document_views.download_artifact),
+    path("api/retention/documents", retention_views.documents),
+    path("api/retention/documents/<uuid:document_id>", retention_views.detail),
+    path("api/retention/documents/<uuid:document_id>/preview", retention_views.preview),
     path("api/companies", company_views.companies),
     path("api/companies/create", company_views.company_create),
     path("api/companies/<uuid:company_id>", company_views.company_detail),

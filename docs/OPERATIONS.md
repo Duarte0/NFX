@@ -32,3 +32,16 @@ Detalhes de dependências, processos e backlog operacional aparecem no dashboard
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por
 URL direta. O endpoint não cria snapshots, jobs, auditoria adicional, cache ou migração.
+
+## Retenção (P8-03)
+
+A tela `#retencao` e as rotas `/api/retention/documents*` são exclusivamente administrativas e
+somente de leitura. A decisão `retained`, `eligible` ou `non_executable` é recalculada sob demanda
+com `retention-v1`; o operador deve tratar `non_executable` como bloqueio e corrigir a evidência
+antes de qualquer futura operação. A resposta não contém payload fiscal nem chave de objeto.
+
+A prévia é um inventário de metadados, não uma autorização de exclusão. Seu `scope-v1` inclui as
+referências, digests, tamanhos, versões e estados dos originais/XML e vínculos de eventos. Se a
+evidência mudar, a tentativa com o hash anterior retorna `409` e a prévia deve ser gerada de novo.
+Não existe comando, rota, job ou cleanup de exclusão nesta entrega; PDF/DANFE/DANFSe permanece
+dependente da decisão P7-03 e exclusão controlada depende do restore comprovado de P9-02.

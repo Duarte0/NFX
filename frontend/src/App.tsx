@@ -6,8 +6,9 @@ import { CompaniesSection } from "./features/companies/CompaniesSection";
 import { DocumentsSection } from "./features/documents/DocumentsSection";
 import { DashboardSection } from "./features/dashboard/DashboardSection";
 import { UsersSection } from "./features/users/UsersSection";
+import { RetentionSection } from "./features/retention/RetentionSection";
 
-type Section = "dashboard" | "documents" | "companies" | "collections" | "users" | "audit";
+type Section = "dashboard" | "documents" | "companies" | "collections" | "users" | "audit" | "retention";
 
 function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedContext) {
   const [loadRequests, setLoadRequests] = useState<Record<Section, number>>({
@@ -17,6 +18,7 @@ function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedConte
     collections: 0,
     users: 0,
     audit: 0,
+    retention: 0,
   });
   const canManage = user.role !== "visualizador";
   const isAdmin = user.role === "administrador";
@@ -47,6 +49,7 @@ function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedConte
           <>
             <a href="#usuarios" onClick={() => requestLoad("users")}>Usuários</a>
             <a href="#auditoria" onClick={() => requestLoad("audit")}>Auditoria</a>
+            <a href="#retencao" onClick={() => requestLoad("retention")}>Retenção</a>
           </>
         )}
       </nav>
@@ -57,6 +60,7 @@ function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedConte
       <CollectionsSection canManage={canManage} loadSignal={loadRequests.collections} notify={notify} />
       {isAdmin && <UsersSection loadSignal={loadRequests.users} notify={notify} />}
       {isAdmin && <AuditSection loadSignal={loadRequests.audit} notify={notify} />}
+      {isAdmin && <RetentionSection loadSignal={loadRequests.retention} notify={notify} />}
     </main>
   );
 }

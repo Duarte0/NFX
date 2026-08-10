@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-10 |
 | Fontes | Código/migrações, testes, PRD.md, ARCHITECTURE.md, specs/ e issues/ |
-| Status geral | Fundação e plataforma de processamento concluídas e verificadas; P4-01/P4-02/P4-03 de ingestão e o contrato mínimo P4-04 concluídos. |
+| Status geral | Fundação, plataforma de processamento, P4-01/P4-02/P4-03/P4-04 e P8-03 concluídos e verificados; P8-01 e P7-03 permanecem pendentes. |
 
 O código e as migrações são a baseline de implementação; testes são a evidência de comportamento verificado. PRD e arquitetura continuam a definir o comportamento pretendido. Este plano substitui a premissa anterior de que o repositório era apenas um scaffold.
 
@@ -59,7 +59,7 @@ runtime. A próxima implementação de produto continua sendo P5 follow-up/P7.
 | P6 NFS-e/ADN | **P6-01/P6-02 concluídos, issue 0014** | Adapter semântico simulator-only, cobertura versionada, distribuição por ator/fluxo/NSU, tomada/prestada/eventos/substituições, handoff ao P4, auditoria/métricas/UI segura; sem integrações municipais ou transporte oficial. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
 | P7 consulta/download | **P7-01/P7-02 concluídos, issue 0015** | Busca bounded com filtros aprovados, cursor opaco, detalhe/eventos e download individual RBAC/auditado com verificação de digest/tamanho. PDF continua fora. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
-| P8 ZIP/dashboard/retenção | **P8-02 slice inicial concluído no issue 0018; P8-01/P8-03 pendentes** | Dashboard read-only com períodos consecutivos, cards de empresas/documentos/coletas/jobs, drill-down, estados explícitos e health Admin-only; ZIP assíncrono e prévia de elegibilidade sem exclusão continuam pendentes. Ver specs P8. | Consulta/download; fontes P5–P7, rendering, disco e backup continuam capacidades ausentes; retenção depende P4. |
+| P8 ZIP/dashboard/retenção | **P8-02 slice inicial concluído no issue 0018; P8-03 concluído no issue 0019; P8-01 pendente** | Dashboard read-only com períodos consecutivos, cards de empresas/documentos/coletas/jobs, drill-down e health Admin-only; retenção calculate-on-read com prévia metadata-only, hash de escopo e sem exclusão. ZIP assíncrono continua pendente. Ver specs P8. | Consulta/download; fontes P5–P7, rendering, disco e backup continuam capacidades ausentes; P8-03 dependeu somente das fontes P4. |
 | P9 runtime/restore/exclusão/piloto | **especificado, não implementado** | HTTPS interno, restore comprovado, exclusão somente após restore, hardening e piloto segregado. | Ver specs P9; P9-03 permanece bloqueado até P9-02. |
 
 ## Sequência executável
@@ -104,7 +104,7 @@ nenhum transporte oficial ou municipal foi habilitado.
 
 ## Trabalho de specs e operação que resta
 
-- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01 foi implementado no issue 0013, P6-01/P6-02 no issue 0014 e P5-02/P5-03 continuam pendentes. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; os boundaries vazios de `documents`, `exports` e `retention` são intencionais.
+- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01 foi implementado no issue 0013, P6-01/P6-02 no issue 0014, P8-03 no issue 0019 e P5-02/P5-03 continuam pendentes. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; `exports` permanece boundary sem implementação e `retention` agora tem seu slice P8-03.
 - Issue 0007 corrigiu a higiene de `.env.example`; valores que tenham sido usados fora de testes descartáveis continuam potencialmente comprometidos e devem ser rotacionados fora do repositório.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.
@@ -112,8 +112,10 @@ nenhum transporte oficial ou municipal foi habilitado.
 - P8-02 inicial entregue sem materialização: agregação calculate-on-read e capacidades futuras
   permanecem `unavailable` até seus slices proprietários; ampliar cards somente após as fontes
   correspondentes existirem.
+- P8-03 entregue sem materialização: retenção calcula sob demanda com regra/versionamento e
+  escopo hashável; PDF permanece P7-03 e exclusão permanece bloqueada por P9-02.
 
 ## Próxima ação recomendada
 
-**Próxima passagem: issues.** As issues `0001`–`0014` estão concluídas; a próxima
-implementação elegível pertence ao caminho P5/P7 conforme os bloqueios e a ordem do backlog.
+**Próxima passagem: issues.** As issues `0001`–`0015`, `0018` e `0019` estão concluídas; a próxima
+implementação elegível pertence a P5/P7 follow-up, P8-01 ou P9 conforme os bloqueios e a ordem do backlog.

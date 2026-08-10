@@ -253,3 +253,17 @@ As rotas são `GET /api/collections`, `GET /api/companies/<id>/collection`,
 recebe apenas estado operacional. Todos os pedidos, conflitos, recusas, retry e resultados usam
 auditoria append-only com códigos seguros. `empty` significa somente consulta sintética válida sem
 unidades; indisponibilidade, parcial, retry, cooldown e bloqueio permanecem estados distintos.
+
+## Retenção e prévia administrativa (P8-03)
+
+`GET /api/retention/documents` calcula decisões sob demanda com a regra versionada `retention-v1`:
+NF-e completa 132 meses civis desde a autorização; NFS-e torna-se elegível em 1º de janeiro do
+sexto ano após a emissão. `as_of` congela a data de cálculo para testes e inspeções.
+
+`GET /api/retention/documents/<id>` detalha a decisão e
+`GET /api/retention/documents/<id>/preview` enumera somente IDs, datas, prefixos de digest,
+tamanhos, tipos e disponibilidade de evidências originais/XML e eventos relacionados. A prévia
+usa `scope-v1` e hash estável; passar um hash antigo retorna `409` quando o escopo mudou. Bytes,
+chaves de objeto, credenciais e erros de storage nunca atravessam a fronteira. Todos os três
+endpoints são Administrator-only, auditados com contexto redigido e bounded, e não criam jobs,
+alteram registros fiscais ou autorizam exclusão. PDF/DANFE/DANFSe continua no P7-03.

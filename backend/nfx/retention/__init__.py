@@ -1,1 +1,1 @@
-"""Retention boundary (no domain implementation in P0)."""
+"""Read-only retention eligibility and administrative preview boundary."""
