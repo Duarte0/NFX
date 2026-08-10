@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P4 — P4-01/P4-02/P4-04 implementados; P4-03 pendente.
+- **Fase/status:** P4 — P4-01/P4-02/P4-03/P4-04 implementados.
 - **Backlog:** P4-01, P4-02, P4-03, P4-04.
 - **Dependências:** P1-01/05/06, P2-03, P3-01/03.
 - **PRD:** BR-INT-001, BR-INT-002, BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; BR-COLL-006, BR-COLL-008, BR-COLL-009; FR-DOC-001, FR-DOC-005; NFR-004, NFR-005, NFR-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009, AC-017.
@@ -30,7 +30,7 @@ Mesmo identity+hash é replay e não duplica. Identity igual+hash diferente pres
 
 Issue 0006 implementa a base relacional e a porta `nfx.documents`: documentos e eventos usam identidade externa normalizada com contexto de empresa/família/papel/fonte/fluxo, competência derivada da emissão e evidências referenciadas por `Artifact`. A migração aditiva `0011_document_documentevent_documenteventevidence_and_more` cria constraints e índices; replay, conflito com hashes divergentes, quarentena por identidade insuficiente, vínculos de evento e corrida de unicidade são cobertos por testes unitários e de integração.
 
-Esta evidência não marca a spec P4 como concluída: unidade recebida, checkpoint, cursor/NSU, reconciliador, API/UI e a matriz completa de falhas continuam pertencendo a P4-02–P4-04.
+Esta evidência cobre somente P4-01: unidade recebida, checkpoint, cursor/NSU, reconciliador, API/UI e a matriz de falhas pertencem às evidências P4-02, P4-03 e P4-04 abaixo.
 
 ## Evidência de implementação P4-02
 
@@ -45,8 +45,11 @@ simulador sem transporte oficial.
 
 Os testes de integração cobrem instalação da migration, replay, falha de objeto e recuperação,
 quarentena, hash divergente com ambas as evidências, cursor stale/repetido, página vazia e NSU
-ADN. P4-03 (matriz de estados de falha/decisão operacional) continua aberto; P4-04 foi implementado
-como contrato de leitura sobre esses estados existentes.
+ADN. P4-03 adiciona a migration `0014_ingestion_failure_state_contract` e campos bounded
+`outcome`/`recovery` em execução, página e unidade. A classificação compartilhada distingue vazio
+válido, ausência de cobertura, indisponibilidade, falha temporária, cooldown, bloqueio permanente,
+malformado, parcial, quarentena e conflito; somente unidades terminais e páginas válidas podem
+avançar cursor/NSU. P4-04 consome essa classificação como contrato de leitura.
 
 ## Contratos, frontend e autorização
 
@@ -62,8 +65,8 @@ mesmo envelope limitado, sem bytes, chaves de objeto ou erros externos. A respos
 `valid_empty`, `unavailable`, `no_coverage`, `unknown`, `partial`, `retry` e `blocked`; a UI possui
 ramificações explícitas para carregando, vazio válido, indisponibilidade, sem cobertura, estado
 desconhecido, degradação, persistido, quarentena, conflito, parcial, retry e bloqueio. A leitura
-não grava documentos, artefatos, jobs, coletas ou cursores e deixa P4-03 como dona da matriz de
-falhas operacional.
+não grava documentos, artefatos, jobs, coletas ou cursores e consome a matriz de falhas
+operacional persistida pela coleta.
 
 ## Segurança, auditoria e observabilidade
 
@@ -75,10 +78,23 @@ Injetar falha antes/depois de objeto, transação, checkpoint e cursor; restart/
 
 ## Aceite e DoD
 
-- [ ] Cursor/NSU só avança após tratamento durável de toda unidade.
-- [ ] Retry/replay não duplica documento, evento ou progresso.
-- [ ] Conflito/quarentena preservam evidência sem sobrescrita.
-- [ ] Estados vazios/degradados são semanticamente distintos.
-- [ ] Reconciliador converge após cada ponto de falha exercitado.
+- [x] Cursor/NSU só avança após tratamento durável de toda unidade.
+- [x] Retry/replay não duplica documento, evento ou progresso.
+- [x] Conflito/quarentena preservam evidência sem sobrescrita.
+- [x] Estados vazios/degradados são semanticamente distintos.
+- [x] Reconciliador converge após cada ponto de falha exercitado.
+
+### Evidência P4-03
+
+- [x] Outcome/recovery finitos são persistidos sem payload, segredo, chave de objeto ou exceção bruta.
+- [x] Vazio válido, ausência de cobertura, indisponibilidade, retry, cooldown, bloqueio, malformado,
+  parcial, quarentena e conflito possuem estados/reasons distintos e não avançam cursor/NSU quando
+  a página não tem tratamento terminal permitido.
+- [x] Reprocessamento de uma página temporária pode reutilizar a posição somente quando a resposta
+  mudou; páginas completas, bloqueadas e em revisão não são ressuscitadas por replay implícito.
+- [x] A leitura P4-04 usa `page.outcome` para não converter cobertura, fonte indisponível,
+  quarentena ou conflito em `valid_empty`.
+- [x] Integração cobre migration `0014`, matriz de respostas, retry no mesmo posicionamento,
+  objeto indisponível, reconciliação, quarentena, conflito, stale/repeated cursor e no false progress.
 
 DoD: migrações, portas, pipeline, UI mínima, telemetria/auditoria e matriz de fault injection verdes. **Proposed:** esquema/contratos físicos; implementação decide localmente sob estes invariantes.

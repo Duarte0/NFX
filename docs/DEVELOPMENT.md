@@ -104,6 +104,21 @@ pendentes ou falhas após interrupção; o reconciliador não apaga objetos nem 
 uma página incompleta. Checkpoints NF-e (`nfe`) e ADN (`adn`) são independentes. Transportes
 oficiais e payloads fiscais brutos continuam fora do escopo.
 
+## Matriz de falhas de ingestão (P4-03)
+
+`classify_page_response` é a classificação única da resposta do simulador. Ela persiste
+`outcome` e `recovery` bounded em execução, página e unidade, mantendo separados `valid_empty`,
+`no_coverage`, `unavailable`, `temporary_failure`, `cooldown`, `permanent_failure`, `malformed`,
+`partial`, `quarantine` e `conflict`. `IngestionPageState` expõe os estados operacionais sem
+reutilizar `empty` para uma fonte indisponível ou sem cobertura.
+
+Somente páginas vazias válidas ou com todas as unidades em tratamento terminal avançam cursor/NSU.
+Falhas de objeto/persistência ficam em retry, falhas de posição pedem reconciliação, bloqueios não
+são ressuscitados por replay implícito e quarentena/conflito preservam as referências de evidência.
+O contrato de status P4-04 lê `page.outcome`; não adicione um mapeamento paralelo em adaptadores,
+views ou na UI. A migration `0014_ingestion_failure_state_contract` é aditiva e não reescreve o
+histórico fiscal.
+
 ## Scope boundary
 
 ## Políticas e resultados de jobs (P3-02)

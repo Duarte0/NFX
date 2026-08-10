@@ -48,6 +48,30 @@ def test_collection_status_does_not_infer_success_from_documents() -> None:
     assert result.code == DocumentStatusCode.UNKNOWN
 
 
+@pytest.mark.parametrize(
+    ("page_outcome", "expected"),
+    [
+        ("no_coverage", DocumentStatusCode.NO_COVERAGE),
+        ("unavailable", DocumentStatusCode.UNAVAILABLE),
+        ("temporary_failure", DocumentStatusCode.RETRY),
+        ("quarantine", DocumentStatusCode.UNKNOWN),
+        ("conflict", DocumentStatusCode.UNKNOWN),
+    ],
+)
+def test_status_consumes_the_persisted_page_outcome_without_inference(
+    page_outcome: str, expected: DocumentStatusCode
+) -> None:
+    result = collection_status(
+        collection_state="idle",
+        page_coverage="available",
+        page_state="complete",
+        page_outcome=page_outcome,
+        has_documents=False,
+    )
+
+    assert result.code == expected
+
+
 def test_document_list_params_are_bounded_and_cursor_is_validated() -> None:
     assert DocumentListParams.from_query({"limit": "25", "family": "nfe"}).limit == 25
 

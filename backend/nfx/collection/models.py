@@ -50,6 +50,11 @@ class IngestionPageState(models.TextChoices):
     PENDING = "pending", "Pending"
     COMPLETE = "complete", "Complete"
     EMPTY = "empty", "Valid empty"
+    NO_COVERAGE = "no_coverage", "No coverage"
+    UNAVAILABLE = "unavailable", "Unavailable"
+    RETRY = "retry", "Retryable"
+    COOLDOWN = "cooldown", "Cooldown"
+    BLOCKED = "blocked", "Blocked"
     PARTIAL = "partial", "Partial"
     FAILED = "failed", "Failed"
 
@@ -61,6 +66,35 @@ class ReceivedUnitState(models.TextChoices):
     QUARANTINE = "quarantine", "Quarantine"
     CONFLICT = "conflict", "Conflict"
     FAILED = "failed", "Failed"
+
+
+class IngestionOutcome(models.TextChoices):
+    """Finite safe vocabulary shared by adapter, page, unit, and collection records."""
+
+    SUCCESS = "success", "Success"
+    VALID_EMPTY = "valid_empty", "Valid empty"
+    NO_COVERAGE = "no_coverage", "No coverage"
+    UNAVAILABLE = "unavailable", "Unavailable"
+    TEMPORARY_FAILURE = "temporary_failure", "Temporary failure"
+    COOLDOWN = "cooldown", "Cooldown"
+    PERMANENT_FAILURE = "permanent_failure", "Permanent failure"
+    MALFORMED = "malformed", "Malformed"
+    UNKNOWN = "unknown", "Unknown"
+    PARTIAL = "partial", "Partial"
+    QUARANTINE = "quarantine", "Quarantine"
+    CONFLICT = "conflict", "Conflict"
+
+
+class IngestionRecovery(models.TextChoices):
+    """Actionability of a safe outcome; this is not a second cursor state machine."""
+
+    NONE = "none", "No action"
+    RETRY = "retry", "Retry"
+    COOLDOWN = "cooldown", "Wait for cooldown"
+    BLOCKED = "blocked", "Blocked"
+    QUARANTINE = "quarantine", "Quarantine review"
+    CONFLICT_REVIEW = "conflict_review", "Conflict review"
+    RECONCILE = "reconcile", "Reconcile position"
 
 
 INGESTION_TERMINAL_UNIT_STATES = (
@@ -143,6 +177,16 @@ class CollectionExecution(models.Model):
         max_length=16,
         choices=CollectionExecutionState.choices,
         default=CollectionExecutionState.QUEUED,
+    )
+    outcome = models.CharField(
+        max_length=32,
+        choices=IngestionOutcome.choices,
+        default=IngestionOutcome.UNKNOWN,
+    )
+    recovery = models.CharField(
+        max_length=24,
+        choices=IngestionRecovery.choices,
+        default=IngestionRecovery.NONE,
     )
     correlation_id = models.CharField(max_length=128)
     safe_summary = models.JSONField(default=dict)
@@ -246,6 +290,16 @@ class IngestionPage(models.Model):
     adapter_outcome = models.CharField(max_length=32)
     coverage = models.CharField(max_length=16)
     state = models.CharField(max_length=16, choices=IngestionPageState.choices)
+    outcome = models.CharField(
+        max_length=32,
+        choices=IngestionOutcome.choices,
+        default=IngestionOutcome.UNKNOWN,
+    )
+    recovery = models.CharField(
+        max_length=24,
+        choices=IngestionRecovery.choices,
+        default=IngestionRecovery.NONE,
+    )
     safe_error = models.CharField(max_length=64, blank=True)
     unit_count = models.PositiveIntegerField(default=0)
     finalized_at = models.DateTimeField(null=True, blank=True)
@@ -318,6 +372,16 @@ class ReceivedUnit(models.Model):
         related_name="received_units",
     )
     state = models.CharField(max_length=16, choices=ReceivedUnitState.choices)
+    outcome = models.CharField(
+        max_length=32,
+        choices=IngestionOutcome.choices,
+        default=IngestionOutcome.UNKNOWN,
+    )
+    recovery = models.CharField(
+        max_length=24,
+        choices=IngestionRecovery.choices,
+        default=IngestionRecovery.NONE,
+    )
     safe_reason = models.CharField(max_length=64, blank=True)
     attempts = models.PositiveIntegerField(default=0)
     first_seen_at = models.DateTimeField(auto_now_add=True)

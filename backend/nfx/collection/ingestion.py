@@ -26,8 +26,10 @@ from nfx.collection.models import (
     INGESTION_TERMINAL_UNIT_STATES,
     CollectionExecution,
     IngestionCheckpoint,
+    IngestionOutcome,
     IngestionPage,
     IngestionPageState,
+    IngestionRecovery,
     ReceivedUnit,
     ReceivedUnitState,
 )
@@ -48,6 +50,7 @@ _FAILURE_RESPONSE_OUTCOMES = {
     FiscalOutcome.TIMEOUT,
     FiscalOutcome.COOLDOWN,
     FiscalOutcome.BLOCKED,
+    FiscalOutcome.CONFLICT,
     FiscalOutcome.MALFORMED,
     FiscalOutcome.EVENT_WITHOUT_PARENT,
     FiscalOutcome.REPEATED_CURSOR,
@@ -122,6 +125,17 @@ class IngestionResult:
     next_cursor: str | None
     next_nsu: str | None
     safe_reason: str = ""
+    outcome: IngestionOutcome = IngestionOutcome.UNKNOWN
+    recovery: IngestionRecovery = IngestionRecovery.NONE
+
+
+@dataclass(frozen=True)
+class IngestionClassification:
+    page_state: IngestionPageState
+    outcome: IngestionOutcome
+    recovery: IngestionRecovery
+    reason: str
+    can_advance: bool
 
 
 DocumentMetadataFactory = Callable[[FiscalUnit, IngestionContext], IngestionDocumentMetadata]
@@ -156,6 +170,150 @@ def _safe_reason(value: str) -> str:
     return "ingestion_failure"
 
 
+def classify_page_response(response: FiscalResponse) -> IngestionClassification:
+    """Map one untrusted adapter response to the finite P4-03 contract."""
+    reason = _safe_reason(response.error_code or response.outcome.value)
+    if response.outcome in {FiscalOutcome.SUCCESS, FiscalOutcome.DUPLICATE}:
+        state = IngestionPageState.COMPLETE if response.units else IngestionPageState.EMPTY
+        return IngestionClassification(
+            state,
+            IngestionOutcome.SUCCESS if response.units else IngestionOutcome.VALID_EMPTY,
+            IngestionRecovery.NONE,
+            "" if response.units else "query_valid_empty",
+            True,
+        )
+    if response.outcome == FiscalOutcome.EMPTY:
+        return IngestionClassification(
+            IngestionPageState.EMPTY,
+            IngestionOutcome.VALID_EMPTY,
+            IngestionRecovery.NONE,
+            "query_valid_empty",
+            True,
+        )
+    if response.outcome == FiscalOutcome.NO_COVERAGE:
+        return IngestionClassification(
+            IngestionPageState.NO_COVERAGE,
+            IngestionOutcome.NO_COVERAGE,
+            IngestionRecovery.NONE,
+            reason,
+            False,
+        )
+    if response.outcome == FiscalOutcome.UNAVAILABLE:
+        return IngestionClassification(
+            IngestionPageState.UNAVAILABLE,
+            IngestionOutcome.UNAVAILABLE,
+            IngestionRecovery.RETRY,
+            reason,
+            False,
+        )
+    if response.outcome in {FiscalOutcome.TIMEOUT, FiscalOutcome.REPEATED_CURSOR}:
+        return IngestionClassification(
+            IngestionPageState.RETRY,
+            IngestionOutcome.TEMPORARY_FAILURE,
+            IngestionRecovery.RECONCILE
+            if response.outcome == FiscalOutcome.REPEATED_CURSOR
+            else IngestionRecovery.RETRY,
+            reason,
+            False,
+        )
+    if response.outcome == FiscalOutcome.COOLDOWN:
+        return IngestionClassification(
+            IngestionPageState.COOLDOWN,
+            IngestionOutcome.COOLDOWN,
+            IngestionRecovery.COOLDOWN,
+            reason,
+            False,
+        )
+    if response.outcome == FiscalOutcome.BLOCKED:
+        return IngestionClassification(
+            IngestionPageState.BLOCKED,
+            IngestionOutcome.PERMANENT_FAILURE,
+            IngestionRecovery.BLOCKED,
+            reason,
+            False,
+        )
+    if response.outcome == FiscalOutcome.PARTIAL:
+        return IngestionClassification(
+            IngestionPageState.PARTIAL,
+            IngestionOutcome.PARTIAL,
+            IngestionRecovery.RETRY,
+            reason,
+            False,
+        )
+    if response.outcome == FiscalOutcome.EVENT_WITHOUT_PARENT:
+        return IngestionClassification(
+            IngestionPageState.FAILED,
+            IngestionOutcome.QUARANTINE,
+            IngestionRecovery.QUARANTINE,
+            reason,
+            False,
+        )
+    if response.outcome in {FiscalOutcome.MALFORMED, FiscalOutcome.CONFLICT}:
+        return IngestionClassification(
+            IngestionPageState.FAILED,
+            IngestionOutcome.MALFORMED
+            if response.outcome == FiscalOutcome.MALFORMED
+            else IngestionOutcome.CONFLICT,
+            IngestionRecovery.QUARANTINE
+            if response.outcome == FiscalOutcome.MALFORMED
+            else IngestionRecovery.CONFLICT_REVIEW,
+            reason,
+            False,
+        )
+    return IngestionClassification(
+        IngestionPageState.FAILED,
+        IngestionOutcome.UNKNOWN,
+        IngestionRecovery.RECONCILE,
+        "unknown_outcome",
+        False,
+    )
+
+
+def classify_unit_treatments(unit_states: tuple[UnitOutcome, ...]) -> IngestionClassification:
+    """Classify a fully processed page without weakening terminal unit semantics."""
+    if any(state in {UnitOutcome.PENDING, UnitOutcome.FAILED} for state in unit_states):
+        return IngestionClassification(
+            IngestionPageState.PARTIAL,
+            IngestionOutcome.PARTIAL,
+            IngestionRecovery.RETRY,
+            "unit_pending",
+            False,
+        )
+    if UnitOutcome.CONFLICT in unit_states:
+        return IngestionClassification(
+            IngestionPageState.COMPLETE,
+            IngestionOutcome.CONFLICT,
+            IngestionRecovery.CONFLICT_REVIEW,
+            "content_hash_mismatch",
+            True,
+        )
+    if UnitOutcome.QUARANTINE in unit_states:
+        return IngestionClassification(
+            IngestionPageState.COMPLETE,
+            IngestionOutcome.QUARANTINE,
+            IngestionRecovery.QUARANTINE,
+            "quarantined",
+            True,
+        )
+    return IngestionClassification(
+        IngestionPageState.COMPLETE,
+        IngestionOutcome.SUCCESS,
+        IngestionRecovery.NONE,
+        "",
+        True,
+    )
+
+
+def _unit_classification(treatment: UnitOutcome) -> tuple[IngestionOutcome, IngestionRecovery]:
+    if treatment in {UnitOutcome.PERSISTED, UnitOutcome.REPLAY}:
+        return IngestionOutcome.SUCCESS, IngestionRecovery.NONE
+    if treatment == UnitOutcome.QUARANTINE:
+        return IngestionOutcome.QUARANTINE, IngestionRecovery.QUARANTINE
+    if treatment == UnitOutcome.CONFLICT:
+        return IngestionOutcome.CONFLICT, IngestionRecovery.CONFLICT_REVIEW
+    return IngestionOutcome.TEMPORARY_FAILURE, IngestionRecovery.RETRY
+
+
 class FiscalIngestionService:
     def __init__(
         self,
@@ -175,13 +333,22 @@ class FiscalIngestionService:
         self._validate_response_position(context, response)
         page, created = self._register_page(context, response)
         if not created:
-            return self._result_for_page(page)
-        if page.state == IngestionPageState.FAILED:
+            if not self._can_resume_page(page, response):
+                return self._result_for_page(page)
+            self._prepare_page_retry(page, response)
+            page.refresh_from_db()
+        response_classification = classify_page_response(response)
+        if page.state == IngestionPageState.FAILED and created:
             return self._result_for_page(page)
 
         if response.outcome in _FAILURE_RESPONSE_OUTCOMES:
-            return self._finish_failed_page(
-                page, _safe_reason(response.error_code or response.outcome.value)
+            return self._finish_page(
+                page,
+                response_classification.page_state,
+                [],
+                response_classification.reason,
+                outcome=response_classification.outcome,
+                recovery=response_classification.recovery,
             )
 
         unit_states: list[UnitOutcome] = []
@@ -191,13 +358,23 @@ class FiscalIngestionService:
 
         page.refresh_from_db()
         if response.outcome == FiscalOutcome.PARTIAL:
-            return self._finish_page(
-                page, IngestionPageState.PARTIAL, unit_states, "partial_response"
+            response_classification = IngestionClassification(
+                IngestionPageState.PARTIAL,
+                IngestionOutcome.PARTIAL,
+                IngestionRecovery.RETRY,
+                "partial_response",
+                False,
             )
-        if any(state == UnitOutcome.FAILED for state in unit_states):
-            return self._finish_page(page, IngestionPageState.PARTIAL, unit_states, "unit_pending")
-        state = IngestionPageState.EMPTY if not response.units else IngestionPageState.COMPLETE
-        return self._finish_page(page, state, unit_states)
+        elif response.units:
+            response_classification = classify_unit_treatments(tuple(unit_states))
+        return self._finish_page(
+            page,
+            response_classification.page_state,
+            unit_states,
+            response_classification.reason,
+            outcome=response_classification.outcome,
+            recovery=response_classification.recovery,
+        )
 
     def reconcile(self, *, unit_id: UUID | str | None = None) -> int:
         query = ReceivedUnit.objects.filter(
@@ -236,6 +413,12 @@ class FiscalIngestionService:
                     page,
                     target,
                     [UnitOutcome(state) for state in states],
+                    outcome=classify_unit_treatments(
+                        tuple(UnitOutcome(state) for state in states)
+                    ).outcome,
+                    recovery=classify_unit_treatments(
+                        tuple(UnitOutcome(state) for state in states)
+                    ).recovery,
                 )
         for page in IngestionPage.objects.filter(
             state__in=(IngestionPageState.PENDING, IngestionPageState.PARTIAL)
@@ -247,22 +430,28 @@ class FiscalIngestionService:
                 and page.adapter_outcome != FiscalOutcome.PARTIAL.value
             ):
                 target = (
-                    IngestionPageState.EMPTY
-                    if not page.unit_count
-                    else IngestionPageState.COMPLETE
+                    IngestionPageState.EMPTY if not page.unit_count else IngestionPageState.COMPLETE
                 )
                 self._finish_page(
                     page,
                     target,
                     [UnitOutcome(state) for state in states],
+                    outcome=classify_unit_treatments(
+                        tuple(UnitOutcome(state) for state in states)
+                    ).outcome,
+                    recovery=classify_unit_treatments(
+                        tuple(UnitOutcome(state) for state in states)
+                    ).recovery,
                 )
         return repaired
 
     def _register_page(
         self, context: IngestionContext, response: FiscalResponse
     ) -> tuple[IngestionPage, bool]:
-        page_key = f"cursor:{context.request_cursor}" if context.request_cursor else (
-            f"nsu:{context.request_nsu}" if context.request_nsu else "initial"
+        page_key = (
+            f"cursor:{context.request_cursor}"
+            if context.request_cursor
+            else (f"nsu:{context.request_nsu}" if context.request_nsu else "initial")
         )
         try:
             with transaction.atomic():
@@ -281,11 +470,16 @@ class FiscalIngestionService:
                 requested = (
                     context.request_cursor if context.family == "nfe" else context.request_nsu
                 )
+                classification = classify_page_response(response)
                 safe_error = ""
                 state = IngestionPageState.PENDING
+                outcome = classification.outcome
+                recovery = classification.recovery
                 if expected != (requested or ""):
                     state = IngestionPageState.FAILED
                     safe_error = "stale_cursor" if requested else "checkpoint_position_mismatch"
+                    outcome = IngestionOutcome.TEMPORARY_FAILURE
+                    recovery = IngestionRecovery.RECONCILE
                 page = IngestionPage.objects.create(
                     company_id=context.company_id,
                     execution_id=context.execution_id,
@@ -299,6 +493,8 @@ class FiscalIngestionService:
                     adapter_outcome=response.outcome.value,
                     coverage=response.coverage.value,
                     state=state,
+                    outcome=outcome,
+                    recovery=recovery,
                     safe_error=safe_error,
                     unit_count=len(response.units),
                 )
@@ -313,6 +509,34 @@ class FiscalIngestionService:
                 page_key=page_key,
             )
             return page, False
+
+    def _can_resume_page(self, page: IngestionPage, response: FiscalResponse) -> bool:
+        """Allow a changed source result only while the page is not durably complete."""
+        if page.state in {IngestionPageState.COMPLETE, IngestionPageState.EMPTY}:
+            return False
+        if page.recovery not in {
+            IngestionRecovery.RETRY,
+            IngestionRecovery.RECONCILE,
+            IngestionRecovery.NONE,
+        }:
+            return False
+        return page.adapter_outcome != response.outcome.value
+
+    def _prepare_page_retry(self, page: IngestionPage, response: FiscalResponse) -> None:
+        classification = classify_page_response(response)
+        IngestionPage.objects.filter(pk=page.pk).update(
+            adapter_outcome=response.outcome.value,
+            coverage=response.coverage.value,
+            next_cursor=response.next_cursor or "",
+            next_nsu=response.next_nsu or "",
+            state=IngestionPageState.PENDING,
+            outcome=classification.outcome,
+            recovery=classification.recovery,
+            safe_error="",
+            unit_count=len(response.units),
+            finalized_at=None,
+            updated_at=self.clock(),
+        )
 
     def _register_unit(
         self, page: IngestionPage, context: IngestionContext, unit: FiscalUnit
@@ -338,9 +562,7 @@ class FiscalIngestionService:
                     received.save(update_fields=["state", "safe_reason", "updated_at"])
                 return received
         except IntegrityError:
-            return ReceivedUnit.objects.select_for_update().get(
-                page=page, identity=unit.identity
-            )
+            return ReceivedUnit.objects.select_for_update().get(page=page, identity=unit.identity)
 
     def _process_unit(
         self, received: ReceivedUnit, context: IngestionContext, unit: FiscalUnit
@@ -357,7 +579,12 @@ class FiscalIngestionService:
         try:
             artifact = self._ensure_artifact(received, context, unit)
         except Exception:
-            self._fail_unit(received, "object_unavailable")
+            self._fail_unit(
+                received,
+                "object_unavailable",
+                outcome=IngestionOutcome.UNAVAILABLE,
+                recovery=IngestionRecovery.RETRY,
+            )
             return UnitOutcome.FAILED
 
         try:
@@ -375,7 +602,14 @@ class FiscalIngestionService:
                     .first()
                 )
                 if parent is None:
-                    self._finish_unit(received, artifact, UnitOutcome.QUARANTINE, "parent_missing")
+                    self._finish_unit(
+                        received,
+                        artifact,
+                        UnitOutcome.QUARANTINE,
+                        "parent_missing",
+                        outcome=IngestionOutcome.QUARANTINE,
+                        recovery=IngestionRecovery.QUARANTINE,
+                    )
                     return UnitOutcome.QUARANTINE
                 metadata = IngestionDocumentMetadata(
                     **{**metadata.__dict__, "parent_document_id": parent.document_id}
@@ -400,14 +634,32 @@ class FiscalIngestionService:
             )
             persisted = persist_document(data)
         except InvalidDocumentInput:
-            self._fail_unit(received, "document_input_invalid")
+            self._finish_unit(
+                received,
+                artifact,
+                UnitOutcome.QUARANTINE,
+                "document_input_invalid",
+                outcome=IngestionOutcome.MALFORMED,
+                recovery=IngestionRecovery.QUARANTINE,
+            )
+            return UnitOutcome.QUARANTINE
+        except Exception:
+            self._fail_unit(
+                received,
+                "document_persistence_unavailable",
+                outcome=IngestionOutcome.TEMPORARY_FAILURE,
+                recovery=IngestionRecovery.RETRY,
+            )
             return UnitOutcome.FAILED
         outcome = UnitOutcome(persisted.status.value)
+        unit_outcome, recovery = _unit_classification(outcome)
         self._finish_unit(
             received,
             artifact,
             outcome,
             persisted.reason_code or "",
+            outcome=unit_outcome,
+            recovery=recovery,
             document_id=persisted.document_id,
             event_id=persisted.event_id,
         )
@@ -442,16 +694,20 @@ class FiscalIngestionService:
         self,
         received: ReceivedUnit,
         artifact: Artifact,
-        outcome: UnitOutcome,
+        treatment: UnitOutcome,
         reason: str = "",
         *,
+        outcome: IngestionOutcome | None = None,
+        recovery: IngestionRecovery = IngestionRecovery.NONE,
         document_id: UUID | None = None,
         event_id: UUID | None = None,
     ) -> None:
         now = self.clock()
         values: dict[str, object] = {
             "artifact_id": artifact.id,
-            "state": outcome.value,
+            "state": treatment.value,
+            "outcome": outcome or _unit_classification(treatment)[0],
+            "recovery": recovery or _unit_classification(treatment)[1],
             "safe_reason": _safe_reason(reason) if reason else "",
             "terminal_at": now,
             "updated_at": now,
@@ -462,15 +718,31 @@ class FiscalIngestionService:
             values["event_id"] = event_id
         ReceivedUnit.objects.filter(pk=received.pk).update(**values)
 
-    def _fail_unit(self, received: ReceivedUnit, reason: str) -> None:
+    def _fail_unit(
+        self,
+        received: ReceivedUnit,
+        reason: str,
+        *,
+        outcome: IngestionOutcome = IngestionOutcome.TEMPORARY_FAILURE,
+        recovery: IngestionRecovery = IngestionRecovery.RETRY,
+    ) -> None:
         ReceivedUnit.objects.filter(pk=received.pk).update(
             state=ReceivedUnitState.FAILED,
+            outcome=outcome,
+            recovery=recovery,
             safe_reason=_safe_reason(reason),
             updated_at=self.clock(),
         )
 
     def _finish_failed_page(self, page: IngestionPage, reason: str) -> IngestionResult:
-        return self._finish_page(page, IngestionPageState.FAILED, [], reason)
+        return self._finish_page(
+            page,
+            IngestionPageState.FAILED,
+            [],
+            reason,
+            outcome=IngestionOutcome.UNKNOWN,
+            recovery=IngestionRecovery.RECONCILE,
+        )
 
     def _finish_page(
         self,
@@ -478,13 +750,47 @@ class FiscalIngestionService:
         state: IngestionPageState,
         unit_states: list[UnitOutcome],
         reason: str = "",
+        *,
+        outcome: IngestionOutcome = IngestionOutcome.UNKNOWN,
+        recovery: IngestionRecovery = IngestionRecovery.NONE,
     ) -> IngestionResult:
         advanced = False
+        persisted_outcome = outcome
+        persisted_recovery = recovery
         with transaction.atomic():
             page = IngestionPage.objects.select_for_update().get(pk=page.pk)
-            if page.state == IngestionPageState.FAILED and page.safe_error:
+            if (
+                page.state
+                in {
+                    IngestionPageState.FAILED,
+                    IngestionPageState.NO_COVERAGE,
+                    IngestionPageState.UNAVAILABLE,
+                    IngestionPageState.RETRY,
+                    IngestionPageState.COOLDOWN,
+                    IngestionPageState.BLOCKED,
+                }
+                and page.safe_error
+            ):
                 return self._result_for_page(page)
             if state in {IngestionPageState.COMPLETE, IngestionPageState.EMPTY}:
+                durable_states = tuple(page.units.values_list("state", flat=True))
+                if page.unit_count != len(durable_states) or not all(
+                    unit_state in INGESTION_TERMINAL_UNIT_STATES for unit_state in durable_states
+                ):
+                    page.state = IngestionPageState.PARTIAL
+                    page.outcome = IngestionOutcome.PARTIAL
+                    page.recovery = IngestionRecovery.RETRY
+                    page.safe_error = "unit_pending"
+                    page.save(
+                        update_fields=[
+                            "state",
+                            "outcome",
+                            "recovery",
+                            "safe_error",
+                            "updated_at",
+                        ]
+                    )
+                    return self._result_for_page(page)
                 checkpoint = IngestionCheckpoint.objects.select_for_update().get(
                     company_id=page.company_id, family=page.family, flow=page.flow
                 )
@@ -492,12 +798,18 @@ class FiscalIngestionService:
                 requested = page.request_cursor if page.family == "nfe" else page.request_nsu
                 if expected != requested:
                     page.state = IngestionPageState.FAILED
+                    persisted_outcome = IngestionOutcome.TEMPORARY_FAILURE
+                    persisted_recovery = IngestionRecovery.RECONCILE
                     page.safe_error = "stale_checkpoint"
-                    page.save(update_fields=["state", "safe_error", "updated_at"])
+                    page.save(
+                        update_fields=["state", "outcome", "recovery", "safe_error", "updated_at"]
+                    )
                     return self._result_for_page(page)
                 if page.family == "nfe":
                     if page.next_cursor == requested:
                         page.state = IngestionPageState.FAILED
+                        persisted_outcome = IngestionOutcome.TEMPORARY_FAILURE
+                        persisted_recovery = IngestionRecovery.RECONCILE
                         page.safe_error = "repeated_cursor"
                     else:
                         checkpoint.cursor = page.next_cursor
@@ -505,6 +817,8 @@ class FiscalIngestionService:
                 else:
                     if page.next_nsu == requested:
                         page.state = IngestionPageState.FAILED
+                        persisted_outcome = IngestionOutcome.TEMPORARY_FAILURE
+                        persisted_recovery = IngestionRecovery.RECONCILE
                         page.safe_error = "repeated_nsu"
                     else:
                         checkpoint.nsu = page.next_nsu
@@ -517,7 +831,18 @@ class FiscalIngestionService:
             else:
                 page.state = state
                 page.safe_error = _safe_reason(reason) if reason else ""
-            page.save(update_fields=["state", "safe_error", "finalized_at", "updated_at"])
+            page.outcome = persisted_outcome
+            page.recovery = persisted_recovery
+            page.save(
+                update_fields=[
+                    "state",
+                    "outcome",
+                    "recovery",
+                    "safe_error",
+                    "finalized_at",
+                    "updated_at",
+                ]
+            )
             self._audit(page, "advanced" if advanced else page.state, page.safe_error)
         return IngestionResult(
             page_id=page.id,
@@ -527,6 +852,8 @@ class FiscalIngestionService:
             next_cursor=page.next_cursor or None,
             next_nsu=page.next_nsu or None,
             safe_reason=page.safe_error,
+            outcome=IngestionOutcome(page.outcome),
+            recovery=IngestionRecovery(page.recovery),
         )
 
     def _result_for_page(self, page: IngestionPage) -> IngestionResult:
@@ -542,6 +869,8 @@ class FiscalIngestionService:
             next_cursor=page.next_cursor or None,
             next_nsu=page.next_nsu or None,
             safe_reason=page.safe_error,
+            outcome=IngestionOutcome(page.outcome),
+            recovery=IngestionRecovery(page.recovery),
         )
 
     def _unit_from_record(self, unit: ReceivedUnit) -> FiscalUnit:
@@ -643,9 +972,13 @@ def ingest_collection_response(
 
         outcome = (
             JobOutcomeKind.SUCCESS
-            if result.page_state in {IngestionPageState.COMPLETE, IngestionPageState.EMPTY}
+            if result.outcome in {IngestionOutcome.SUCCESS, IngestionOutcome.VALID_EMPTY}
+            else JobOutcomeKind.COOLDOWN
+            if result.outcome == IngestionOutcome.COOLDOWN
+            else JobOutcomeKind.PERMANENT
+            if result.outcome == IngestionOutcome.PERMANENT_FAILURE
             else JobOutcomeKind.PARTIAL
-            if result.page_state == IngestionPageState.PARTIAL
+            if result.outcome == IngestionOutcome.PARTIAL
             else JobOutcomeKind.TEMPORARY
         )
         reconcile_collection_job(
@@ -657,6 +990,9 @@ def ingest_collection_response(
                 "next_cursor": result.next_cursor,
                 "next_nsu": result.next_nsu,
                 "coverage": response.coverage.value,
+                "ingestion_outcome": result.outcome.value,
+                "ingestion_recovery": result.recovery.value,
+                "ingestion_reason": result.safe_reason,
             },
         )
     return result

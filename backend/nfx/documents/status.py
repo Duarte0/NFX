@@ -11,6 +11,7 @@ from django.db.models import QuerySet
 
 from nfx.collection.models import (
     CollectionExecutionState,
+    IngestionOutcome,
     IngestionPage,
     IngestionPageState,
     ReceivedUnit,
@@ -87,8 +88,28 @@ def collection_status(
     page_coverage: str | None,
     page_state: str | None,
     has_documents: bool,
+    page_outcome: str | None = None,
 ) -> CollectionStatus:
     """Map existing durable collection/page states without creating frontend state."""
+    if page_outcome == IngestionOutcome.NO_COVERAGE:
+        return CollectionStatus(DocumentStatusCode.NO_COVERAGE, "coverage_none")
+    if page_outcome == IngestionOutcome.UNAVAILABLE:
+        return CollectionStatus(DocumentStatusCode.UNAVAILABLE, "source_unavailable")
+    if page_outcome in {
+        IngestionOutcome.TEMPORARY_FAILURE,
+        IngestionOutcome.COOLDOWN,
+    }:
+        return CollectionStatus(DocumentStatusCode.RETRY, "collection_retry")
+    if page_outcome == IngestionOutcome.PARTIAL:
+        return CollectionStatus(DocumentStatusCode.PARTIAL, "collection_partial")
+    if page_outcome == IngestionOutcome.PERMANENT_FAILURE:
+        return CollectionStatus(DocumentStatusCode.BLOCKED, "collection_blocked")
+    if page_outcome == IngestionOutcome.MALFORMED:
+        return CollectionStatus(DocumentStatusCode.UNKNOWN, "payload_quarantine")
+    if page_outcome == IngestionOutcome.QUARANTINE:
+        return CollectionStatus(DocumentStatusCode.UNKNOWN, "quarantine_review")
+    if page_outcome == IngestionOutcome.CONFLICT:
+        return CollectionStatus(DocumentStatusCode.UNKNOWN, "conflict_review")
     if collection_state == CollectionExecutionState.BLOCKED:
         return CollectionStatus(DocumentStatusCode.BLOCKED, "collection_blocked")
     if collection_state in {
@@ -223,6 +244,7 @@ def _scope_statuses(params: DocumentListParams) -> list[dict[str, object]]:
             page_coverage=page_coverage,
             page_state=page_state,
             has_documents=scoped_documents.exists(),
+            page_outcome=page.outcome if page else None,
         )
         statuses.append(
             {

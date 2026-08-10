@@ -47,6 +47,8 @@ def _execution_payload(execution: CollectionExecution) -> dict[str, object]:
         "requested_scope": execution.requested_scope,
         "origin": execution.origin,
         "state": execution.state,
+        "outcome": execution.outcome,
+        "recovery": execution.recovery,
         "safe_summary": execution.safe_summary,
         "safe_error": execution.safe_error,
         "correlation_id": execution.correlation_id,

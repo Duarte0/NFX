@@ -20,6 +20,8 @@ from nfx.collection.models import (
     CollectionExecutionState,
     CollectionOrigin,
     CollectionScope,
+    IngestionOutcome,
+    IngestionRecovery,
     InitialCollectionRequest,
     InitialCollectionRequestState,
 )
@@ -337,7 +339,16 @@ def request_collection(
 
 
 def _safe_summary(result: Mapping[str, Any]) -> dict[str, bool | int | str]:
-    allowed = {"query_valid", "unit_count", "coverage", "next_cursor", "next_nsu"}
+    allowed = {
+        "query_valid",
+        "unit_count",
+        "coverage",
+        "next_cursor",
+        "next_nsu",
+        "ingestion_outcome",
+        "ingestion_recovery",
+        "ingestion_reason",
+    }
     summary: dict[str, bool | int | str] = {}
     for key in allowed:
         value = result.get(key)
@@ -365,6 +376,36 @@ def reconcile_collection_job(
             return execution
         execution.safe_summary = summary
         execution.safe_error = ""
+        raw_ingestion_outcome = summary.get("ingestion_outcome")
+        raw_ingestion_recovery = summary.get("ingestion_recovery")
+        try:
+            execution.outcome = IngestionOutcome(str(raw_ingestion_outcome))
+        except (TypeError, ValueError):
+            execution.outcome = (
+                IngestionOutcome.VALID_EMPTY
+                if outcome == JobOutcomeKind.SUCCESS and summary.get("unit_count", 0) == 0
+                else IngestionOutcome.SUCCESS
+                if outcome == JobOutcomeKind.SUCCESS
+                else IngestionOutcome.PARTIAL
+                if outcome == JobOutcomeKind.PARTIAL
+                else IngestionOutcome.COOLDOWN
+                if outcome == JobOutcomeKind.COOLDOWN
+                else IngestionOutcome.PERMANENT_FAILURE
+                if outcome == JobOutcomeKind.PERMANENT
+                else IngestionOutcome.TEMPORARY_FAILURE
+            )
+        try:
+            execution.recovery = IngestionRecovery(str(raw_ingestion_recovery))
+        except (TypeError, ValueError):
+            execution.recovery = (
+                IngestionRecovery.COOLDOWN
+                if outcome == JobOutcomeKind.COOLDOWN
+                else IngestionRecovery.BLOCKED
+                if outcome == JobOutcomeKind.PERMANENT
+                else IngestionRecovery.RETRY
+                if outcome in {JobOutcomeKind.PARTIAL, JobOutcomeKind.TEMPORARY}
+                else IngestionRecovery.NONE
+            )
         execution.started_at = execution.started_at or current
         flow.last_attempt_at = flow.last_attempt_at or current
         terminal = False
@@ -447,6 +488,8 @@ def reconcile_collection_job(
         execution.save(
             update_fields=[
                 "state",
+                "outcome",
+                "recovery",
                 "safe_summary",
                 "safe_error",
                 "started_at",

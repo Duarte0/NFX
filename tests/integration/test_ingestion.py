@@ -16,7 +16,14 @@ from nfx.collection.ingestion import (
     ingest_page,
     reconcile_ingestion,
 )
-from nfx.collection.models import IngestionCheckpoint, ReceivedUnit, ReceivedUnitState
+from nfx.collection.models import (
+    IngestionCheckpoint,
+    IngestionOutcome,
+    IngestionPage,
+    IngestionRecovery,
+    ReceivedUnit,
+    ReceivedUnitState,
+)
 from nfx.companies.models import Company
 from nfx.documents.models import Document, DocumentEvidence
 from nfx.documents.services import FiscalIdentity
@@ -182,6 +189,117 @@ def test_quarantine_is_terminal_but_stale_and_repeated_positions_do_not_advance(
     assert stale.safe_reason == "stale_cursor"
     assert IngestionCheckpoint.objects.get(company=company, family="nfe").cursor == "cursor:1"
 
+
+@pytest.mark.django_db(transaction=True)
+@pytest.mark.parametrize(
+    ("outcome", "expected_state", "expected_outcome", "expected_recovery"),
+    [
+        (
+            FiscalOutcome.NO_COVERAGE,
+            IngestionPageState.NO_COVERAGE,
+            IngestionOutcome.NO_COVERAGE,
+            IngestionRecovery.NONE,
+        ),
+        (
+            FiscalOutcome.UNAVAILABLE,
+            IngestionPageState.UNAVAILABLE,
+            IngestionOutcome.UNAVAILABLE,
+            IngestionRecovery.RETRY,
+        ),
+        (
+            FiscalOutcome.TIMEOUT,
+            IngestionPageState.RETRY,
+            IngestionOutcome.TEMPORARY_FAILURE,
+            IngestionRecovery.RETRY,
+        ),
+        (
+            FiscalOutcome.COOLDOWN,
+            IngestionPageState.COOLDOWN,
+            IngestionOutcome.COOLDOWN,
+            IngestionRecovery.COOLDOWN,
+        ),
+        (
+            FiscalOutcome.BLOCKED,
+            IngestionPageState.BLOCKED,
+            IngestionOutcome.PERMANENT_FAILURE,
+            IngestionRecovery.BLOCKED,
+        ),
+        (
+            FiscalOutcome.CONFLICT,
+            IngestionPageState.FAILED,
+            IngestionOutcome.CONFLICT,
+            IngestionRecovery.CONFLICT_REVIEW,
+        ),
+        (
+            FiscalOutcome.MALFORMED,
+            IngestionPageState.FAILED,
+            IngestionOutcome.MALFORMED,
+            IngestionRecovery.QUARANTINE,
+        ),
+        (
+            FiscalOutcome.REPEATED_CURSOR,
+            IngestionPageState.RETRY,
+            IngestionOutcome.TEMPORARY_FAILURE,
+            IngestionRecovery.RECONCILE,
+        ),
+    ],
+)
+def test_response_failure_matrix_is_durable_and_does_not_advance(
+    company: Company,
+    storage: tuple[ArtifactStorageService, MemoryObjectStore],
+    outcome: FiscalOutcome,
+    expected_state: IngestionPageState,
+    expected_outcome: IngestionOutcome,
+    expected_recovery: IngestionRecovery,
+) -> None:
+    artifact_service, _ = storage
+    response = FiscalResponse(
+        outcome,
+        next_cursor="cursor:unsafe",
+        cooldown_until=(
+            datetime(2026, 8, 10, tzinfo=UTC) if outcome == FiscalOutcome.COOLDOWN else None
+        ),
+        error_code="source_unavailable" if outcome == FiscalOutcome.UNAVAILABLE else "",
+    )
+
+    result = ingest_page(artifact_service, _context(company), response)
+    page = IngestionPage.objects.get(id=result.page_id)
+
+    assert result.page_state == expected_state
+    assert result.outcome == expected_outcome
+    assert result.recovery == expected_recovery
+    assert page.outcome == expected_outcome
+    assert page.recovery == expected_recovery
+    assert result.advanced is False
+    assert not IngestionCheckpoint.objects.get(company=company, family="nfe").cursor
+
+
+@pytest.mark.django_db(transaction=True)
+def test_unavailable_page_can_retry_with_same_position_and_then_advance(
+    company: Company, storage: tuple[ArtifactStorageService, MemoryObjectStore]
+) -> None:
+    artifact_service, _ = storage
+    unavailable = ingest_page(
+        artifact_service,
+        _context(company),
+        FiscalResponse(FiscalOutcome.UNAVAILABLE, next_cursor="cursor:ignored"),
+    )
+    assert unavailable.outcome == IngestionOutcome.UNAVAILABLE
+
+    unit = _unit(identity="synthetic:after-retry")
+    recovered = ingest_page(
+        artifact_service,
+        _context(company),
+        FiscalResponse(FiscalOutcome.SUCCESS, units=(unit,), next_cursor="cursor:1"),
+        metadata_factory=_metadata,
+    )
+
+    assert recovered.page_id == unavailable.page_id
+    assert recovered.page_state == IngestionPageState.COMPLETE
+    assert recovered.advanced is True
+    assert recovered.outcome == IngestionOutcome.SUCCESS
+    assert IngestionCheckpoint.objects.get(company=company, family="nfe").cursor == "cursor:1"
+
     repeated = ingest_page(
         artifact_service,
         _context(company, cursor="cursor:1"),
@@ -189,6 +307,8 @@ def test_quarantine_is_terminal_but_stale_and_repeated_positions_do_not_advance(
     )
     assert repeated.page_state == IngestionPageState.FAILED
     assert repeated.safe_reason == "repeated_cursor"
+    assert repeated.outcome == IngestionOutcome.TEMPORARY_FAILURE
+    assert repeated.recovery == IngestionRecovery.RECONCILE
     assert IngestionCheckpoint.objects.get(company=company, family="nfe").cursor == "cursor:1"
 
 
