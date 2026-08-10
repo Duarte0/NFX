@@ -10,6 +10,9 @@ from nfx.adapters.nfe import (
     NFeFollowUpError,
     NFeFollowUpScenarioName,
     NFeFollowUpSimulator,
+    NFeManifestationRequest,
+    NFeManifestationSimulator,
+    NFeManifestationType,
     NFeScienceRequest,
     build_nfe_followup_scenario,
 )
@@ -105,4 +108,56 @@ def test_followup_contract_rejects_sensitive_context_and_unsafe_xml() -> None:
                 correlation_id="correlation:xml-1",
                 science_correlation_id="correlation:missing",
             )
+        )
+
+
+def test_manifestation_contract_is_bounded_and_replays_without_a_second_call() -> None:
+    request = NFeManifestationRequest(
+        company_id=uuid4(),
+        document_id=uuid4(),
+        flow=NFeFlow.RECEIVED,
+        manifestation_type=NFeManifestationType.SCIENCE_OF_OPERATION,
+        source="synthetic",
+        actor="actor:synthetic-001",
+        policy_reference="policy:synthetic-v1",
+        certificate_handle="certificate:synthetic-001",
+        correlation_id="correlation:manifestation-1",
+        idempotency_reference="idempotency:manifestation-1",
+    )
+    simulator = NFeManifestationSimulator()
+
+    first = simulator.manifest(request)
+    second = simulator.manifest(request)
+
+    assert first == second
+    assert first.manifestation_type == NFeManifestationType.SCIENCE_OF_OPERATION
+    assert simulator.calls() == ("manifestation",)
+
+
+def test_manifestation_rejects_unsupported_type_and_production_context() -> None:
+    with pytest.raises(Exception):
+        NFeManifestationRequest(
+            company_id=uuid4(),
+            document_id=uuid4(),
+            flow=NFeFlow.RECEIVED,
+            manifestation_type="unsupported",
+            source="synthetic",
+            actor="actor:synthetic-001",
+            policy_reference="policy:synthetic-v1",
+            certificate_handle="certificate:synthetic-001",
+            correlation_id="correlation:manifestation-1",
+            idempotency_reference="idempotency:manifestation-1",
+        )
+    with pytest.raises(Exception):
+        NFeManifestationRequest(
+            company_id=uuid4(),
+            document_id=uuid4(),
+            flow=NFeFlow.RECEIVED,
+            manifestation_type=NFeManifestationType.SCIENCE_OF_OPERATION,
+            source="production",
+            actor="actor:synthetic-001",
+            policy_reference="policy:synthetic-v1",
+            certificate_handle="certificate:synthetic-001",
+            correlation_id="correlation:manifestation-1",
+            idempotency_reference="idempotency:manifestation-1",
         )

@@ -627,6 +627,294 @@ class NFeEventRequest:
             _followup_reference(name, value)
 
 
+class NFeManifestationType(StrEnum):
+    SCIENCE_OF_OPERATION = "science_of_operation"
+
+
+class NFeManifestationScenarioName(StrEnum):
+    ACCEPTED = "accepted"
+    DENIED = "denied"
+    UNAVAILABLE = "unavailable"
+    TIMEOUT = "timeout"
+    COOLDOWN = "cooldown"
+    BLOCKED = "blocked"
+    MALFORMED = "malformed"
+    UNKNOWN = "unknown"
+    CONFLICT = "conflict"
+
+
+@dataclass(frozen=True)
+class NFeManifestationRequest:
+    company_id: UUID | str
+    document_id: UUID | str
+    flow: NFeFlow | str
+    manifestation_type: NFeManifestationType | str
+    source: str
+    actor: str
+    policy_reference: str
+    certificate_handle: str
+    correlation_id: str
+    idempotency_reference: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "company_id", _document_id(self.company_id))
+        object.__setattr__(self, "document_id", _document_id(self.document_id))
+        object.__setattr__(self, "flow", _flow(self.flow))
+        try:
+            manifestation_type = (
+                self.manifestation_type
+                if isinstance(self.manifestation_type, NFeManifestationType)
+                else NFeManifestationType(self.manifestation_type)
+            )
+        except (TypeError, ValueError) as exc:
+            raise NFeFollowUpError("NF-e manifestation type is unsupported") from exc
+        for name, value in (
+            ("source", self.source),
+            ("actor", self.actor),
+            ("policy reference", self.policy_reference),
+            ("certificate handle", self.certificate_handle),
+            ("correlation", self.correlation_id),
+            ("idempotency reference", self.idempotency_reference),
+        ):
+            _followup_reference(name, value)
+        if self.source != "synthetic":
+            raise NFeFollowUpError("NF-e manifestation source is not simulator-only")
+        object.__setattr__(self, "manifestation_type", manifestation_type)
+
+
+@dataclass(frozen=True)
+class NFeManifestationResult:
+    company_id: UUID
+    document_id: UUID
+    flow: NFeFlow
+    manifestation_type: NFeManifestationType
+    outcome: FiscalOutcome
+    result_code: str
+    correlation_id: str
+    submitted_at: datetime
+    cooldown_until: datetime | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.company_id, UUID) or not isinstance(self.document_id, UUID):
+            raise NFeFollowUpError("NF-e manifestation identity is invalid")
+        if not isinstance(self.flow, NFeFlow):
+            raise NFeFollowUpError("NF-e manifestation flow is invalid")
+        if not isinstance(self.manifestation_type, NFeManifestationType):
+            raise NFeFollowUpError("NF-e manifestation type is invalid")
+        if not isinstance(self.outcome, FiscalOutcome):
+            raise NFeFollowUpError("NF-e manifestation outcome is invalid")
+        _followup_reference("result code", self.result_code)
+        _followup_reference("correlation", self.correlation_id)
+        if self.submitted_at.tzinfo is None or self.submitted_at.utcoffset() is None:
+            raise NFeFollowUpError("NF-e manifestation timestamp is invalid")
+        if self.outcome == FiscalOutcome.COOLDOWN and self.cooldown_until is None:
+            raise NFeFollowUpError("NF-e manifestation cooldown is missing")
+
+    def as_job_outcome(self, manifestation_id: UUID | None = None) -> Any:
+        from nfx.jobs.handlers import HandlerOutcome
+
+        result: dict[str, str] = {
+            "document_id": str(self.document_id),
+            "flow": self.flow.value,
+            "manifestation_type": self.manifestation_type.value,
+            "outcome": self.outcome.value,
+            "result_code": self.result_code,
+            "correlation_id": self.correlation_id,
+        }
+        if manifestation_id is not None:
+            result["manifestation_id"] = str(manifestation_id)
+        if self.outcome == FiscalOutcome.SUCCESS:
+            return HandlerOutcome.success(result)
+        if self.outcome == FiscalOutcome.COOLDOWN:
+            return HandlerOutcome.cooldown(
+                cooldown_until=self.cooldown_until,
+                error_code=self.result_code,
+                result=result,
+            )
+        if self.outcome in {FiscalOutcome.UNAVAILABLE, FiscalOutcome.TIMEOUT}:
+            return HandlerOutcome.temporary(error_code=self.result_code, result=result)
+        if self.outcome == FiscalOutcome.BLOCKED:
+            return HandlerOutcome.permanent(error_code=self.result_code, result=result)
+        return HandlerOutcome.partial(error_code=self.result_code, result=result)
+
+
+@dataclass(frozen=True)
+class NFeManifestationScenario:
+    name: NFeManifestationScenarioName
+    outcome: FiscalOutcome
+    result_code: str
+    cooldown_until: datetime | None = None
+
+
+@dataclass(frozen=True)
+class NFeManifestationMetricsSnapshot:
+    manifestations: int
+    outcomes: Mapping[str, int]
+    manifestations_by_flow: Mapping[str, int]
+
+
+class NFeManifestationMetrics:
+    def __init__(self) -> None:
+        self._lock = Lock()
+        self._manifestations = 0
+        self._outcomes: Counter[str] = Counter()
+        self._by_flow: Counter[str] = Counter()
+
+    def record(self, result: NFeManifestationResult) -> None:
+        with self._lock:
+            self._manifestations += 1
+            self._outcomes[result.outcome.value] += 1
+            self._by_flow[result.flow.value] += 1
+
+    def snapshot(self) -> NFeManifestationMetricsSnapshot:
+        with self._lock:
+            return NFeManifestationMetricsSnapshot(
+                manifestations=self._manifestations,
+                outcomes=dict(self._outcomes),
+                manifestations_by_flow=dict(self._by_flow),
+            )
+
+
+nfe_manifestation_metrics = NFeManifestationMetrics()
+
+
+def build_nfe_manifestation_scenario(
+    name: NFeManifestationScenarioName | str = NFeManifestationScenarioName.ACCEPTED,
+) -> NFeManifestationScenario:
+    try:
+        selected = (
+            name
+            if isinstance(name, NFeManifestationScenarioName)
+            else NFeManifestationScenarioName(name)
+        )
+    except (TypeError, ValueError) as exc:
+        raise NFeFollowUpError("unknown NF-e manifestation scenario") from exc
+    outcomes = {
+        NFeManifestationScenarioName.ACCEPTED: (FiscalOutcome.SUCCESS, "accepted"),
+        NFeManifestationScenarioName.DENIED: (FiscalOutcome.BLOCKED, "denied"),
+        NFeManifestationScenarioName.UNAVAILABLE: (FiscalOutcome.UNAVAILABLE, "unavailable"),
+        NFeManifestationScenarioName.TIMEOUT: (FiscalOutcome.TIMEOUT, "timeout"),
+        NFeManifestationScenarioName.COOLDOWN: (FiscalOutcome.COOLDOWN, "cooldown"),
+        NFeManifestationScenarioName.BLOCKED: (FiscalOutcome.BLOCKED, "blocked"),
+        NFeManifestationScenarioName.MALFORMED: (FiscalOutcome.MALFORMED, "malformed"),
+        NFeManifestationScenarioName.UNKNOWN: (FiscalOutcome.UNKNOWN, "unknown"),
+        NFeManifestationScenarioName.CONFLICT: (FiscalOutcome.CONFLICT, "conflict"),
+    }
+    outcome, result_code = outcomes[selected]
+    return NFeManifestationScenario(
+        name=selected,
+        outcome=outcome,
+        result_code=result_code,
+        cooldown_until=(
+            datetime(2030, 1, 1, tzinfo=UTC) if outcome == FiscalOutcome.COOLDOWN else None
+        ),
+    )
+
+
+class NFeManifestationSimulator:
+    """Deterministic simulator for one idempotent manifestation side effect."""
+
+    family = FiscalFamily.NFE
+
+    def __init__(
+        self, scenario: NFeManifestationScenario | NFeManifestationScenarioName | str = "accepted"
+    ) -> None:
+        self.scenario = (
+            scenario
+            if isinstance(scenario, NFeManifestationScenario)
+            else build_nfe_manifestation_scenario(scenario)
+        )
+        self._lock = Lock()
+        self._results: dict[
+            tuple[UUID, UUID, NFeFlow, NFeManifestationType, str], NFeManifestationResult
+        ] = {}
+        self._calls: list[str] = []
+
+    def manifest(self, request: NFeManifestationRequest) -> NFeManifestationResult:
+        key = (
+            UUID(str(request.company_id)),
+            UUID(str(request.document_id)),
+            _flow(request.flow),
+            NFeManifestationType(request.manifestation_type),
+            request.idempotency_reference,
+        )
+        with self._lock:
+            if key not in self._results:
+                self._results[key] = NFeManifestationResult(
+                    company_id=key[0],
+                    document_id=key[1],
+                    flow=key[2],
+                    manifestation_type=key[3],
+                    outcome=self.scenario.outcome,
+                    result_code=self.scenario.result_code,
+                    correlation_id=request.correlation_id,
+                    submitted_at=datetime.now(UTC),
+                    cooldown_until=self.scenario.cooldown_until,
+                )
+                self._calls.append("manifestation")
+            return self._results[key]
+
+    def calls(self) -> tuple[str, ...]:
+        with self._lock:
+            return tuple(self._calls)
+
+
+class NFeManifestationAdapter:
+    """Validate manifestation semantics and expose only safe simulator results."""
+
+    def __init__(
+        self,
+        transport: NFeManifestationSimulator,
+        *,
+        audit: AuditCallback | None = None,
+        metrics: NFeManifestationMetrics | None = None,
+    ) -> None:
+        if getattr(transport, "family", None) != FiscalFamily.NFE:
+            raise NFeFollowUpError("NF-e manifestation transport family is invalid")
+        self.transport = transport
+        self.audit = audit
+        self.metrics = metrics or nfe_manifestation_metrics
+
+    def manifest(self, request: NFeManifestationRequest) -> NFeManifestationResult:
+        if not isinstance(request, NFeManifestationRequest):
+            raise NFeFollowUpError("NF-e manifestation request is invalid")
+        self._emit("manifestation_started", request)
+        result = self.transport.manifest(request)
+        if (
+            result.company_id != UUID(str(request.company_id))
+            or result.document_id != UUID(str(request.document_id))
+            or result.flow != NFeFlow(request.flow)
+            or result.manifestation_type != NFeManifestationType(request.manifestation_type)
+        ):
+            raise NFeFollowUpError("NF-e manifestation identity is inconsistent")
+        self.metrics.record(result)
+        self._emit("manifestation_completed", request, result)
+        return result
+
+    def _emit(
+        self,
+        event: str,
+        request: NFeManifestationRequest,
+        result: NFeManifestationResult | None = None,
+    ) -> None:
+        payload: dict[str, str] = {
+            "event": event,
+            "flow": NFeFlow(request.flow).value,
+            "outcome": result.outcome.value if result else "",
+            "reason": result.result_code if result else "",
+        }
+        safe_log(
+            logger,
+            "info",
+            "nfe_manifestation",
+            outcome=payload["outcome"] or event,
+            reason=payload["reason"],
+            result={"flow": payload["flow"], "outcome": payload["outcome"]},
+        )
+        if self.audit is not None:
+            self.audit(payload)
+
+
 @dataclass(frozen=True)
 class NFeFollowUpScenario:
     name: NFeFollowUpScenarioName
@@ -903,9 +1191,16 @@ def _ensure_followup_artifact(
 class NFeFollowUpService:
     """Authorization, job handoff, and P4-owned persistence for P5-02."""
 
-    def __init__(self, adapter: NFeFollowUpAdapter, storage: Any | None = None) -> None:
+    def __init__(
+        self,
+        adapter: NFeFollowUpAdapter,
+        storage: Any | None = None,
+        manifestation_adapter: NFeManifestationAdapter | None = None,
+    ) -> None:
         self.adapter = adapter
         self.storage = storage
+        if manifestation_adapter is not None:
+            self._manifestation_adapter = manifestation_adapter
 
     @classmethod
     def from_runtime(cls) -> NFeFollowUpService:
@@ -1138,6 +1433,294 @@ class NFeFollowUpService:
             metadata_factory=metadata,
         )
 
+    @staticmethod
+    def _validate_manifestation_company(request: NFeManifestationRequest) -> Any:
+        from nfx.certificates.models import Certificate, CertificateState
+        from nfx.certificates.services import certificate_status
+        from nfx.companies.models import Company, CompanyFlow, CompanyStatus, FlowFamily, FlowState
+
+        company = Company.objects.filter(id=request.company_id, status=CompanyStatus.ACTIVE).first()
+        if company is None:
+            raise NFeFollowUpError("company is inactive")
+        flow = CompanyFlow.objects.filter(company=company, family=FlowFamily.NFE).first()
+        if flow is None or flow.state != FlowState.ENABLED:
+            raise NFeFollowUpError("NF-e flow is unavailable")
+        certificate = (
+            Certificate.objects.filter(company=company, state=CertificateState.CURRENT)
+            .order_by("-activated_at")
+            .first()
+        )
+        if certificate is None or certificate_status(certificate) not in {
+            "valido",
+            "proximo_vencimento",
+        }:
+            raise NFeFollowUpError("certificate is unavailable")
+        return company
+
+    @staticmethod
+    def _manifestation_parent(request: NFeManifestationRequest) -> tuple[Any | None, str | None]:
+        from nfx.documents.models import Document, DocumentFamily
+
+        document = Document.objects.filter(id=request.document_id).first()
+        if document is None:
+            return None, "parent_missing"
+        if (
+            document.company_id != request.company_id
+            or document.family != DocumentFamily.NFE
+            or document.flow != NFeFlow(request.flow).value
+        ):
+            return None, "parent_incompatible"
+        return document, None
+
+    def enqueue_manifestation(
+        self, request: NFeManifestationRequest, actor: Any, *, policy: Any = None
+    ) -> Any:
+        from django.db import transaction
+        from django.utils import timezone
+
+        from nfx.documents.models import NFeManifestation, NFeManifestationState
+        from nfx.identity.policy import Action, authorize
+        from nfx.jobs.policy import select_policy
+        from nfx.jobs.services import JobEngine
+
+        if actor is None or not authorize(
+            actor.role, Action.CONTROL_COLLECTIONS, actor_id=actor.user_id
+        ):
+            raise NFeFollowUpError("manifestation control access required")
+        if not isinstance(request, NFeManifestationRequest):
+            raise NFeFollowUpError("NF-e manifestation request is invalid")
+        self._validate_manifestation_company(request)
+        flow = NFeFlow(request.flow)
+        manifestation_type = NFeManifestationType(request.manifestation_type)
+        effective_policy = policy or select_policy(
+            source=request.source, flow="nfe", at=timezone.now()
+        )
+        idempotency_key = (
+            f"nfe:manifestation:{request.company_id}:{request.document_id}:"
+            f"{flow.value}:{manifestation_type.value}:"
+            f"{request.idempotency_reference}"
+        )
+        with transaction.atomic():
+            existing = NFeManifestation.objects.select_for_update().filter(
+                idempotency_key=idempotency_key
+            ).first()
+            if existing is not None:
+                if existing.job_id is None:
+                    raise NFeFollowUpError("manifestation record is incomplete")
+                return existing.job
+            manifestation = NFeManifestation.objects.create(
+                company_id=request.company_id,
+                target_document_id=request.document_id,
+                flow=flow.value,
+                manifestation_type=manifestation_type.value,
+                source=request.source,
+                policy_reference=request.policy_reference,
+                certificate_reference=request.certificate_handle,
+                correlation_id=request.correlation_id,
+                idempotency_reference=request.idempotency_reference,
+                idempotency_key=idempotency_key,
+                state=NFeManifestationState.QUEUED,
+            )
+            job = JobEngine().enqueue(
+                job_type="nfe.manifestation",
+                logical_target=f"document:{request.document_id}",
+                payload={
+                    "operation": "manifestation",
+                    "manifestation_id": str(manifestation.id),
+                    "company_id": str(request.company_id),
+                    "document_id": str(request.document_id),
+                    "flow": flow.value,
+                    "manifestation_type": manifestation_type.value,
+                    "source": request.source,
+                    "actor": request.actor,
+                    "actor_id": actor.user_id,
+                    "policy_reference": request.policy_reference,
+                    "certificate_handle": request.certificate_handle,
+                    "correlation_id": request.correlation_id,
+                    "idempotency_reference": request.idempotency_reference,
+                },
+                idempotency_key=idempotency_key,
+                scheduled_at=timezone.now(),
+                policy=effective_policy,
+            )
+            manifestation.job = job
+            manifestation.save(update_fields=["job", "updated_at"])
+            return job
+
+    def _save_manifestation_state(
+        self,
+        manifestation: Any,
+        *,
+        state: str,
+        result: Mapping[str, str] | None = None,
+        outcome: str = "",
+        result_code: str = "",
+        document: Any | None = None,
+        submitted_at: datetime | None = None,
+    ) -> None:
+        from django.db import transaction
+        from django.utils import timezone
+
+        from nfx.audit.services import AuditService
+
+        values = dict(result or {})
+        with transaction.atomic():
+            if document is not None:
+                manifestation.document = document
+            manifestation.state = state
+            manifestation.outcome = outcome
+            manifestation.result_code = result_code
+            manifestation.safe_result = values
+            manifestation.submitted_at = submitted_at
+            manifestation.completed_at = timezone.now()
+            manifestation.save(
+                update_fields=[
+                    "document",
+                    "state",
+                    "outcome",
+                    "result_code",
+                    "safe_result",
+                    "submitted_at",
+                    "completed_at",
+                    "updated_at",
+                ]
+            )
+            AuditService().append(
+                action="nfe.manifestation",
+                entity_type="nfe_manifestation",
+                entity_id=str(manifestation.id),
+                result=state,
+                reason=result_code,
+                correlation_id=manifestation.correlation_id,
+                context={
+                    "company_id": str(manifestation.company_id),
+                    "document_id": str(manifestation.target_document_id),
+                    "flow": manifestation.flow,
+                    "manifestation_type": manifestation.manifestation_type,
+                    "outcome": outcome,
+                },
+            )
+
+    def handle_manifestation_job(self, job: Any) -> Any:
+        from nfx.documents.models import NFeManifestation, NFeManifestationState
+        from nfx.jobs.handlers import HandlerOutcome
+
+        payload = job.payload
+        manifestation = NFeManifestation.objects.get(id=payload["manifestation_id"])
+        if manifestation.state == NFeManifestationState.ACCEPTED:
+            return HandlerOutcome.success(manifestation.safe_result)
+        if manifestation.state in {
+            NFeManifestationState.DENIED,
+            NFeManifestationState.BLOCKED,
+            NFeManifestationState.QUARANTINED,
+            NFeManifestationState.CONFLICT,
+        }:
+            return HandlerOutcome.permanent(
+                error_code=manifestation.result_code or manifestation.state,
+                result=manifestation.safe_result,
+            )
+        request = NFeManifestationRequest(
+            company_id=payload["company_id"],
+            document_id=payload["document_id"],
+            flow=payload["flow"],
+            manifestation_type=payload["manifestation_type"],
+            source=payload["source"],
+            actor=payload["actor"],
+            policy_reference=payload["policy_reference"],
+            certificate_handle=payload["certificate_handle"],
+            correlation_id=payload["correlation_id"],
+            idempotency_reference=payload["idempotency_reference"],
+        )
+        try:
+            self._validate_manifestation_company(request)
+            parent, parent_reason = self._manifestation_parent(request)
+            if parent_reason:
+                self._save_manifestation_state(
+                    manifestation,
+                    state=NFeManifestationState.QUARANTINED,
+                    outcome="quarantined",
+                    result_code=parent_reason,
+                    result={
+                        "document_id": str(request.document_id),
+                        "flow": NFeFlow(request.flow).value,
+                        "state": NFeManifestationState.QUARANTINED,
+                    },
+                )
+                return HandlerOutcome.permanent(
+                    error_code=parent_reason, result=manifestation.safe_result
+                )
+            assert parent is not None
+            result = self.manifestation_adapter.manifest(request)
+            safe_result = {
+                "manifestation_id": str(manifestation.id),
+                "document_id": str(result.document_id),
+                "flow": result.flow.value,
+                "manifestation_type": result.manifestation_type.value,
+                "outcome": result.outcome.value,
+                "result_code": result.result_code,
+                "correlation_id": result.correlation_id,
+                "submitted_at": result.submitted_at.isoformat(),
+            }
+            if result.outcome == FiscalOutcome.SUCCESS:
+                state = NFeManifestationState.ACCEPTED
+            elif result.outcome == FiscalOutcome.COOLDOWN:
+                state = NFeManifestationState.COOLDOWN
+            elif result.outcome in {FiscalOutcome.UNAVAILABLE, FiscalOutcome.TIMEOUT}:
+                state = NFeManifestationState.RETRY
+            elif result.outcome == FiscalOutcome.BLOCKED:
+                state = (
+                    NFeManifestationState.DENIED
+                    if result.result_code == "denied"
+                    else NFeManifestationState.BLOCKED
+                )
+            elif result.outcome == FiscalOutcome.CONFLICT:
+                state = NFeManifestationState.CONFLICT
+            else:
+                state = NFeManifestationState.QUARANTINED
+            self._save_manifestation_state(
+                manifestation,
+                state=state,
+                result=safe_result,
+                outcome=result.outcome.value,
+                result_code=result.result_code,
+                document=parent,
+                submitted_at=result.submitted_at,
+            )
+            if state == NFeManifestationState.ACCEPTED:
+                return HandlerOutcome.success(safe_result)
+            if state == NFeManifestationState.COOLDOWN:
+                return HandlerOutcome.cooldown(
+                    cooldown_until=result.cooldown_until,
+                    error_code=result.result_code,
+                    result=safe_result,
+                )
+            if state == NFeManifestationState.RETRY:
+                return HandlerOutcome.temporary(error_code=result.result_code, result=safe_result)
+            if state == NFeManifestationState.QUARANTINED:
+                return HandlerOutcome.partial(error_code=result.result_code, result=safe_result)
+            return HandlerOutcome.permanent(error_code=result.result_code, result=safe_result)
+        except NFeFollowUpError:
+            self._save_manifestation_state(
+                manifestation,
+                state=NFeManifestationState.BLOCKED,
+                outcome="blocked",
+                result_code="manifestation_rejected",
+                result={"manifestation_id": str(manifestation.id), "state": "blocked"},
+            )
+            return HandlerOutcome.permanent(
+                error_code="manifestation_rejected", result=manifestation.safe_result
+            )
+
+    @property
+    def manifestation_adapter(self) -> NFeManifestationAdapter:
+        adapter = getattr(self, "_manifestation_adapter", None)
+        if adapter is None:
+            raise NFeFollowUpError("NF-e manifestation adapter is not configured")
+        return cast(NFeManifestationAdapter, adapter)
+
+    def configure_manifestation(self, adapter: NFeManifestationAdapter) -> None:
+        self._manifestation_adapter = adapter
+
 
 def ensure_nfe_followup_handler(service: NFeFollowUpService | None = None) -> None:
     from nfx.jobs.handlers import register_handler
@@ -1145,3 +1728,6 @@ def ensure_nfe_followup_handler(service: NFeFollowUpService | None = None) -> No
     configured = service or NFeFollowUpService.from_runtime()
     register_handler("nfe.science", configured.handle_science_job)
     register_handler("nfe.complete_xml", configured.handle_xml_job)
+    if not hasattr(configured, "_manifestation_adapter"):
+        configured.configure_manifestation(NFeManifestationAdapter(NFeManifestationSimulator()))
+    register_handler("nfe.manifestation", configured.handle_manifestation_job)

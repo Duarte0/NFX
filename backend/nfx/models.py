@@ -12,7 +12,13 @@ from nfx.collection.models import (
     ReceivedUnit,
 )
 from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
-from nfx.documents.models import Document, DocumentEvent, DocumentEventEvidence, DocumentEvidence
+from nfx.documents.models import (
+    Document,
+    DocumentEvent,
+    DocumentEventEvidence,
+    DocumentEvidence,
+    NFeManifestation,
+)
 from nfx.identity.models import IdentitySession, LoginThrottle, User
 from nfx.jobs.models import Job, JobPolicy, ProcessHeartbeat
 
@@ -41,4 +47,5 @@ __all__ = [
     "DocumentEvidence",
     "DocumentEvent",
     "DocumentEventEvidence",
+    "NFeManifestation",
 ]

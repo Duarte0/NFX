@@ -2,14 +2,14 @@
 
 ## Metadados
 
-- **Fase/status:** P5 — P5-01/P5-02 implementados com simulador; P5-03 permanece pendente. Conexão real permanece localmente Open.
+- **Fase/status:** P5 — P5-01/P5-02/P5-03 implementados com simulador; conexão real permanece localmente Open.
 - **Backlog:** P5-01, P5-02, P5-03. **Dependências:** P2-03, P3-02, P3-03, P4-02.
 - **PRD:** FR-NFE-001, FR-NFE-002, FR-NFE-003, FR-NFE-004; BR-NFE-001, BR-NFE-002, BR-NFE-003; BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009.
 - **Arquitetura:** ADR-006/007; seções 10.2, 14, 19, 22, 23, 25, 28, 32, 33, 37, 38 e 40.
 
 ## Propósito, baseline e limites
 
-Implementar adapter NF-e independente para recebida/entrada, emitida/saída, eventos, XML completo e Ciência da Operação, sempre via ingestão P4. Baseline possui portas/simuladores, jobs, A1 e pipeline; não possui SOAP/serviço oficial. Não incluir NFC-e/CT-e, upload manual, endpoints fixos ou produção antes de homologação.
+Implementar adapter NF-e independente para recebida/entrada, emitida/saída, eventos, XML completo e Ciência da Operação, sempre via ingestão P4 quando houver documento/evento. A manifestação P5-03 possui registro próprio ligado ao documento NF-e, mas reutiliza jobs, política, auditoria e fronteiras P3/P4. Baseline possui portas/simuladores, jobs, A1 e pipeline; não possui SOAP/serviço oficial. Não incluir NFC-e/CT-e, upload manual, endpoints fixos ou produção antes de homologação.
 
 ## Decisões e contratos
 
@@ -31,11 +31,11 @@ Timeout/indisponível → retry; cooldown → agenda; A1 permanente → bloqueio
 
 ## Aceite e DoD
 
-- [ ] Entrada/saída têm cursores e progresso independentes.
-- [ ] Original precede classificação e avanço de cursor.
-- [ ] Manifestação/documento/evento não duplicam em retry.
-- [ ] XML completo e eventos mantêm vínculos explícitos.
-- [ ] Produção permanece bloqueada sem política/homologação.
+- [x] Entrada/saída têm cursores e progresso independentes.
+- [x] Original precede classificação e avanço de cursor.
+- [x] Manifestação/documento/evento não duplicam em retry.
+- [x] XML completo e eventos mantêm vínculos explícitos.
+- [x] Produção permanece bloqueada sem política/homologação.
 
 DoD simulada: adapter, políticas, jobs, estados/UI, auditoria e contratos verdes. **Blocker local:** detalhes oficiais Open bloqueiam somente transporte real/homologação, não domínio nem simulador.
 
@@ -66,5 +66,20 @@ O original da resposta é finalizado e vinculado ao `Document` antes da validaç
 é um `fiscal_xml` adicional e nunca substitui o original. Eventos usam a ingestão P4 com escopo de
 follow-up, vínculo explícito ao pai compatível, quarentena segura para pai ausente e replay pelo
 reconciliador quando o pai chega depois. Deduplicação é por correlação/documento/operação; auditoria,
-resultados e logs carregam somente IDs, contagens, fluxos e códigos bounded. XML, eventos, manifestação
-P5-03 e transporte oficial continuam separados: P5-03 permanece pendente e transporte real Open.
+resultados e logs carregam somente IDs, contagens, fluxos e códigos bounded. XML, eventos e transporte
+oficial continuam separados; transporte real permanece Open.
+
+## Evidência do incremento P5-03 (issue 0022)
+
+`NFeManifestationRequest`/`NFeManifestationResult` aceitam somente Ciência da Operação, referências
+bounded e a fonte `synthetic`; `NFeManifestationSimulator` mantém o efeito por empresa, NF-e,
+fluxo, tipo e referência de idempotência, replayando o resultado sem segunda chamada. O adapter e
+o serviço expõem somente códigos, IDs, fluxo, tipo, timestamp e correlação seguros.
+
+`NFeManifestation` é um registro aditivo na migration `0017_nfe_manifestation`, com referência
+opcional ao documento e o UUID alvo preservado para pai ausente. `nfe.manifestation` reutiliza o
+lease/policy/retry/cooldown/block de P3; antes da chamada o worker revalida empresa ativa, fluxo,
+certificado e pai NF-e compatível. O resultado aceito vincula exatamente um pai sem alterar
+competência ou situação; pai ausente/incompatível fica `quarantined` e não chama o simulador.
+Replays retornam o mesmo job/registro e o mesmo efeito, sem novos documentos, eventos, artefatos,
+cursores ou auditorias de manifestação. Transporte oficial e homologação continuam Open.

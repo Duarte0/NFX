@@ -4,6 +4,7 @@ import hashlib
 import io
 from collections.abc import Iterable, Iterator
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import pytest
 from django.contrib.auth.hashers import make_password
@@ -14,8 +15,14 @@ from nfx.adapters.nfe import (
     NFeFollowUpScenarioName,
     NFeFollowUpService,
     NFeFollowUpSimulator,
+    NFeManifestationAdapter,
+    NFeManifestationRequest,
+    NFeManifestationScenarioName,
+    NFeManifestationSimulator,
+    NFeManifestationType,
     NFeScienceRequest,
     build_nfe_followup_scenario,
+    build_nfe_manifestation_scenario,
     ensure_nfe_followup_handler,
 )
 from nfx.adapters.simulation import FiscalOutcome, FiscalResponse
@@ -24,7 +31,12 @@ from nfx.certificates.models import Certificate, CertificateState
 from nfx.collection.ingestion import IngestionContext, ingest_page, reconcile_ingestion
 from nfx.collection.models import ReceivedUnit, ReceivedUnitState
 from nfx.companies.models import Company, CompanyFlow, CompanyStatus, FlowFamily
-from nfx.documents.models import Document, DocumentEvent, DocumentEvidence
+from nfx.documents.models import (
+    Document,
+    DocumentEvent,
+    DocumentEvidence,
+    NFeManifestation,
+)
 from nfx.documents.services import DocumentInput, FiscalIdentity, persist_document
 from nfx.identity.models import Role, User
 from nfx.identity.services import SessionIdentity
@@ -137,6 +149,23 @@ def _request(company: Company, document: Document, correlation: str) -> NFeScien
     )
 
 
+def _manifestation_request(
+    company: Company, document_id: object, correlation: str, idempotency: str
+) -> NFeManifestationRequest:
+    return NFeManifestationRequest(
+        company_id=company.id,
+        document_id=document_id,
+        flow=NFeFlow.RECEIVED,
+        manifestation_type=NFeManifestationType.SCIENCE_OF_OPERATION,
+        source="synthetic",
+        actor="actor:synthetic-001",
+        policy_reference="policy:synthetic-v1",
+        certificate_handle="certificate:synthetic-001",
+        correlation_id=correlation,
+        idempotency_reference=idempotency,
+    )
+
+
 @pytest.mark.django_db(transaction=True)
 def test_permitted_science_enqueues_xml_and_persists_original_before_xml(
     company: Company, storage: ArtifactStorageService
@@ -239,3 +268,101 @@ def test_event_is_linked_and_event_before_parent_is_replayed_safely(
     _parent(company, storage, missing_unit.parent_identity or "")
     assert reconcile_ingestion(storage) == 1
     assert DocumentEvent.objects.filter(parent_document__company=company).count() == 2
+
+
+@pytest.mark.django_db(transaction=True)
+def test_manifestation_is_idempotent_and_links_one_nf_e(
+    company: Company, storage: ArtifactStorageService
+) -> None:
+    parent = _parent(company, storage, "synthetic:nfe:651:first")
+    actor_user = User.objects.create(
+        email="manifestation@example.test",
+        name="Synthetic operator",
+        role=Role.OPERATOR,
+        password_hash=make_password("synthetic-password"),
+    )
+    actor = SessionIdentity(str(actor_user.id), actor_user.email, actor_user.name, actor_user.role)
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="nfe",
+        version=1,
+        valid_from=NOW - timedelta(days=1),
+        retry_limit=2,
+    )
+    simulator = NFeManifestationSimulator(
+        build_nfe_manifestation_scenario(NFeManifestationScenarioName.ACCEPTED)
+    )
+    service = NFeFollowUpService(
+        NFeFollowUpAdapter(
+            NFeFollowUpSimulator(
+                build_nfe_followup_scenario(NFeFollowUpScenarioName.DENIED, seed=653)
+            )
+        ),
+        storage,
+        manifestation_adapter=NFeManifestationAdapter(simulator),
+    )
+    request = _manifestation_request(
+        company, parent.id, "correlation:manifestation-651", "idempotency:manifestation-651"
+    )
+
+    first = service.enqueue_manifestation(request, actor, policy=policy)
+    replay = service.enqueue_manifestation(request, actor, policy=policy)
+    assert first.id == replay.id
+
+    ensure_nfe_followup_handler(service)
+    assert process_one(JobEngine(), owner="worker-manifestation") is True
+    manifestation = NFeManifestation.objects.get(id=first.payload["manifestation_id"])
+    assert manifestation.state == "accepted"
+    assert manifestation.document_id == parent.id
+    assert manifestation.safe_result["manifestation_id"] == str(manifestation.id)
+    assert simulator.calls() == ("manifestation",)
+    assert NFeManifestation.objects.count() == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_manifestation_missing_parent_is_quarantined_without_transport_call(
+    company: Company, storage: ArtifactStorageService
+) -> None:
+    missing_id = uuid4()
+    actor_user = User.objects.create(
+        email="manifestation-missing@example.test",
+        name="Synthetic operator",
+        role=Role.OPERATOR,
+        password_hash=make_password("synthetic-password"),
+    )
+    actor = SessionIdentity(str(actor_user.id), actor_user.email, actor_user.name, actor_user.role)
+    policy = create_policy(
+        source_scope="synthetic",
+        flow_scope="nfe",
+        version=1,
+        valid_from=NOW - timedelta(days=1),
+        retry_limit=2,
+    )
+    simulator = NFeManifestationSimulator()
+    service = NFeFollowUpService(
+        NFeFollowUpAdapter(
+            NFeFollowUpSimulator(
+                build_nfe_followup_scenario(NFeFollowUpScenarioName.DENIED, seed=659)
+            )
+        ),
+        storage,
+        manifestation_adapter=NFeManifestationAdapter(simulator),
+    )
+    job = service.enqueue_manifestation(
+        _manifestation_request(
+            company,
+            missing_id,
+            "correlation:manifestation-659",
+            "idempotency:manifestation-659",
+        ),
+        actor,
+        policy=policy,
+    )
+
+    ensure_nfe_followup_handler(service)
+    assert process_one(JobEngine(), owner="worker-manifestation") is True
+    manifestation = NFeManifestation.objects.get(id=job.payload["manifestation_id"])
+    assert manifestation.state == "quarantined"
+    assert manifestation.result_code == "parent_missing"
+    assert manifestation.document_id is None
+    assert simulator.calls() == ()

@@ -29,6 +29,17 @@ class DocumentRelationship(models.TextChoices):
     SUBSTITUTION = "substitution", "Substitution"
 
 
+class NFeManifestationState(models.TextChoices):
+    QUEUED = "queued", "Queued"
+    ACCEPTED = "accepted", "Accepted"
+    DENIED = "denied", "Denied"
+    RETRY = "retry", "Retry"
+    COOLDOWN = "cooldown", "Cooldown"
+    BLOCKED = "blocked", "Blocked"
+    QUARANTINED = "quarantined", "Quarantined"
+    CONFLICT = "conflict", "Conflict"
+
+
 class Document(models.Model):
     """Fiscal identity and metadata; payload bytes remain owned by artifacts."""
 
@@ -166,4 +177,70 @@ class DocumentEventEvidence(models.Model):
         ]
         indexes = [
             models.Index(fields=("event", "digest"), name="nfx_evt_evidence_digest_ix"),
+        ]
+
+
+class NFeManifestation(models.Model):
+    """Durable safe result for one simulator-backed NF-e manifestation."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="nfe_manifestations"
+    )
+    document = models.ForeignKey(
+        Document,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="nfe_manifestations",
+    )
+    target_document_id = models.UUIDField()
+    flow = models.CharField(max_length=16)
+    manifestation_type = models.CharField(max_length=32)
+    source = models.CharField(max_length=64)
+    policy_reference = models.CharField(max_length=128)
+    certificate_reference = models.CharField(max_length=128)
+    correlation_id = models.CharField(max_length=128)
+    idempotency_reference = models.CharField(max_length=128)
+    idempotency_key = models.CharField(max_length=255, unique=True, editable=False)
+    state = models.CharField(max_length=16, choices=NFeManifestationState.choices)
+    outcome = models.CharField(max_length=32, blank=True)
+    result_code = models.CharField(max_length=64, blank=True)
+    safe_result = models.JSONField(default=dict)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    job = models.OneToOneField(
+        "nfx.Job",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="nfe_manifestation",
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "nfx_nfe_manifestation"
+        indexes = [
+            models.Index(fields=("company", "flow", "state"), name="nfx_nfe_manifest_state_ix"),
+            models.Index(fields=("target_document_id", "flow"), name="nfx_nfe_manifest_target_ix"),
+            models.Index(fields=("correlation_id",), name="nfx_nfe_manifest_corr_ix"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(flow__in=("received", "issued")),
+                name="nfx_nfe_manifest_flow_ck",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(manifestation_type="science_of_operation"),
+                name="nfx_nfe_manifest_type_ck",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source__regex=r"^[A-Za-z0-9_.:/-]{1,64}$"),
+                name="nfx_nfe_manifest_source_ck",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(idempotency_reference__regex=r"^[A-Za-z0-9_.:/-]{1,128}$"),
+                name="nfx_nfe_manifest_idempotency_ref_ck",
+            ),
         ]

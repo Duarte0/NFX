@@ -242,8 +242,12 @@ Ciência, XML completo e eventos. `nfe.science` é um job próprio; somente Ciê
 é evidência adicional (`fiscal_xml`) do mesmo `Document`. Eventos passam pelo `ingest_page` de P4 em
 um escopo de follow-up sem cursor de distribuição; pai incompatível/ausente fica em quarentena e o
 reconciliador pode vinculá-lo depois sem alterar competência, situação ou identidade do pai.
-As fixtures rejeitam destino/credencial sensíveis, limitam MIME/tamanho/declarações XML e mantêm
-auditoria/resultados sem payloads. P5-03 (manifestação) e qualquer transporte oficial permanecem fora.
+P5-03 adiciona `NFeManifestationRequest`/`Result` e `NFeManifestationSimulator`, persistência
+`NFeManifestation` na migration `0017`, e o job `nfe.manifestation`. O serviço autoriza o pedido,
+revalida empresa, fluxo, certificado e pai no worker, usa a mesma chave de idempotência no simulador
+e no job, e grava somente resultado bounded; pai ausente/incompatível fica `quarantined` sem chamada
+de transporte. As fixtures rejeitam destino/credencial sensíveis, limitam MIME/tamanho/declarações XML
+e mantêm auditoria/resultados sem payloads. Transporte Portal Nacional/SEFAZ e homologação permanecem fora.
 
 ## Controle manual de coleta (P3-05)
 
