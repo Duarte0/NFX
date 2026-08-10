@@ -37,6 +37,7 @@ KNOWN_NFX_KEYS = frozenset(
         "NFX_WORKER_HEARTBEAT_TIMEOUT_SECONDS",
         "NFX_SCHEDULER_HEARTBEAT_TIMEOUT_SECONDS",
         "NFX_JOB_BACKLOG_DELAY_SECONDS",
+        "NFX_BACKUP_ROOT",
     }
 )
 
@@ -64,6 +65,7 @@ class OperationalSettings:
     worker_heartbeat_timeout_seconds: int
     scheduler_heartbeat_timeout_seconds: int
     job_backlog_delay_seconds: int
+    backup_root: str
 
 
 @dataclass(frozen=True)
@@ -138,6 +140,14 @@ def _duration_seconds(values: Mapping[str, str], name: str, default: int) -> int
     if not 1 <= parsed <= 86400:
         raise _error(name)
     return parsed
+
+
+def _backup_root(values: Mapping[str, str]) -> str:
+    value = values.get("NFX_BACKUP_ROOT", "/var/backups/nfx")
+    path = Path(value)
+    if not path.is_absolute() or path == Path("/") or ".." in path.parts:
+        raise _error("NFX_BACKUP_ROOT")
+    return str(path)
 
 
 def _validate_destination(value: str, field: str) -> str:
@@ -237,5 +247,6 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
             job_backlog_delay_seconds=_duration_seconds(
                 values, "NFX_JOB_BACKLOG_DELAY_SECONDS", 300
             ),
+            backup_root=_backup_root(values),
         ),
     )

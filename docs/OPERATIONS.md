@@ -12,6 +12,37 @@ endpoint ou identificador de job como label de métrica. Capacidades futuras de 
 disco, backup, documentos, quarentena e rendering são declaradas `unavailable` até que tenham
 uma implementação própria.
 
+## Backup e restore comprovados (P9-02)
+
+O backup local é escrito em `NFX_BACKUP_ROOT` (por padrão `/var/backups/nfx`) e captura uma
+serialização lógica determinística do PostgreSQL, todos os objetos finalizados, referências de
+configuração e probes A1 somente cifrados. Cada conjunto tem estado durável, manifesto versionado,
+hash, tamanhos e contagens; falha de banco, objeto, chave, espaço ou interrupção fica `failed` ou
+`partial` e não substitui nenhum conjunto anterior. A chave mestre nunca entra em manifesto, log,
+auditoria ou argumento de processo.
+
+Use os comandos abaixo somente no host local autorizado:
+
+```sh
+python backend/manage.py backup --kind daily --idempotency-key daily:YYYY-MM-DD
+python backend/manage.py restore_backup BACKUP_ID \
+  --target-root /var/lib/nfx/restore/isolated-YYYY-MM-DD \
+  --runtime-root /var/lib/nfx/runtime
+```
+
+O restore exige um destino absoluto e explicitamente isolado, fora do runtime e dos volumes ativos;
+configuração ausente ou ambígua falha fechado. Ele verifica manifesto, dump, tamanhos, hashes,
+contagens, vínculos, auditoria/jobs/cursors e descriptografia A1 sintética sem alterar volumes
+vivos. A evidência segura fica no registro de restore e no `restore-report.json`, sem payloads,
+senhas, chaves ou caminhos expostos na API.
+
+Administradores consultam `GET /api/backups/status` ou `GET /api/backups`; os demais papéis recebem
+negação sem revelar existência ou localização. A seleção conserva independentemente 7 diários,
+4 semanais e 12 mensais. Expiração remove somente diretórios de backup expirados, nunca o acervo
+fiscal. `/var/backups/nfx` no mesmo host é uma limitação Accepted: não cobre perda física,
+ransomware ou recuperação de desastre; recuperação material e destino fisicamente separado devem
+ser protegidos fora do repositório.
+
 O perfil de runtime HTTPS, a fronteira do proxy, os serviços privados, os limites e os
 procedimentos de reinício/upgrade/rollback estão documentados em
 [`docs/RUNTIME.md`](RUNTIME.md). Backup e restore continuam sendo o incremento P9-02.

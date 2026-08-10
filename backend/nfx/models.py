@@ -2,6 +2,7 @@
 
 from nfx.artifacts.models import Artifact
 from nfx.audit.models import AuditChain, AuditEvent
+from nfx.backup.models import BackupSet, RestoreOperation
 from nfx.certificates.models import Certificate
 from nfx.collection.models import (
     CollectionExecution,
@@ -19,6 +20,8 @@ __all__ = [
     "Artifact",
     "AuditChain",
     "AuditEvent",
+    "BackupSet",
+    "RestoreOperation",
     "Company",
     "CompanyFlow",
     "EnrichmentSnapshot",

@@ -2,6 +2,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
 
 from nfx.audit import views as audit_views
+from nfx.backup import views as backup_views
 from nfx.certificates import views as certificate_views
 from nfx.collection import views as collection_views
 from nfx.companies import views as company_views
@@ -33,6 +34,8 @@ urlpatterns = [
     path("health/ready", ready),
     path("health/operational", operational),
     path("api/dashboard", dashboard),
+    path("api/backups/status", backup_views.status),
+    path("api/backups", backup_views.backups),
     path("api/auth/csrf", identity_views.csrf),
     path("api/auth/login", identity_views.login),
     path("api/auth/logout", identity_views.logout),

@@ -40,6 +40,9 @@ def test_runtime_compose_has_private_services_and_one_published_proxy() -> None:
     assert "NFX_APP_IMAGE" in str(next(iter(app_images)))
     assert services["postgres"]["volumes"]
     assert services["minio"]["volumes"]
+    for name in ("web", "worker", "scheduler"):
+        assert services[name]["environment"]["NFX_BACKUP_ROOT"] == "/var/backups/nfx"
+        assert "/var/backups/nfx" in str(services[name]["volumes"])
 
     for name in ("web", "worker", "scheduler"):
         assert services[name]["healthcheck"]

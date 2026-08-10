@@ -2,6 +2,7 @@ name: ${COMPOSE_PROJECT_NAME:-nfx-runtime}
 
 x-app-environment: &app-environment
   NFX_PROFILE: runtime
+  NFX_BACKUP_ROOT: /var/backups/nfx
   NFX_SECRET_KEY_FILE: /run/secrets/nfx_secret_key
   NFX_CERTIFICATE_MASTER_KEY_FILE: /run/secrets/nfx_certificate_master_key
   NFX_ALLOWED_HOSTS: ${NFX_ALLOWED_HOSTS:-nfx.internal,localhost,127.0.0.1}
@@ -51,6 +52,7 @@ services:
       NFX_PROCESS: web
     volumes:
       - ${NFX_SECRET_DIR:?NFX_SECRET_DIR must contain the external application secret files}:/run/secrets:ro
+      - ${NFX_BACKUP_DIR:?NFX_BACKUP_DIR must point to a protected backup directory}:/var/backups/nfx
     read_only: true
     tmpfs:
       - /tmp:size=64m
@@ -82,6 +84,7 @@ services:
       NFX_PROCESS: worker
     volumes:
       - ${NFX_SECRET_DIR:?NFX_SECRET_DIR must contain the external application secret files}:/run/secrets:ro
+      - ${NFX_BACKUP_DIR:?NFX_BACKUP_DIR must point to a protected backup directory}:/var/backups/nfx
     read_only: true
     tmpfs:
       - /tmp:size=64m
@@ -112,6 +115,7 @@ services:
       NFX_PROCESS: scheduler
     volumes:
       - ${NFX_SECRET_DIR:?NFX_SECRET_DIR must contain the external application secret files}:/run/secrets:ro
+      - ${NFX_BACKUP_DIR:?NFX_BACKUP_DIR must point to a protected backup directory}:/var/backups/nfx
     read_only: true
     tmpfs:
       - /tmp:size=64m

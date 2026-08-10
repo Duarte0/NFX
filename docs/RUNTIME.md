@@ -17,7 +17,7 @@ docker compose -f docker-compose.runtime.yml build proxy
 scripts/generate-runtime-certificate.sh /var/lib/nfx/tls
 ```
 
-Forneça, por ambiente seguro, `NFX_APP_IMAGE`, `NFX_TLS_DIR`, `NFX_SECRET_DIR`, `DATABASE_URL`,
+Forneça, por ambiente seguro, `NFX_APP_IMAGE`, `NFX_TLS_DIR`, `NFX_SECRET_DIR`, `NFX_BACKUP_DIR`, `DATABASE_URL`,
 `POSTGRES_PASSWORD`, `MINIO_ROOT_USER` e `MINIO_ROOT_PASSWORD`. `NFX_SECRET_DIR` deve conter
 somente os arquivos `nfx_secret_key` e `nfx_certificate_master_key`, montados como
 `/run/secrets` somente leitura. O Compose falha fechado quando qualquer valor obrigatório está
@@ -63,6 +63,11 @@ reiniciando somente o proxy após validar os arquivos.
 O certificado autoassinado cifra o tráfego, mas gera aviso de confiança no navegador. CA interna,
 alta disponibilidade, acesso externo e backup fisicamente separado são decisões futuras; o
 backup local no mesmo host é uma limitação aceita do MVP.
+
+`NFX_BACKUP_DIR` é montado somente como a área protegida `/var/backups/nfx` dos processos da
+aplicação. O diretório deve existir fora do repositório, ter permissões restritas e ser incluído
+no procedimento administrativo de cópia/proteção. Não monte volumes de runtime como destino de
+restore: use um destino isolado separado e os guards do comando `restore_backup`.
 
 Os limites escolhidos são verificados com `docker compose ps`/health e `docker stats
 --no-stream` durante o smoke operacional; uma carga sintética de health e uma reinicialização de

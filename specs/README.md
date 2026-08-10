@@ -31,7 +31,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | **P8-02 slice inicial implementado (issue 0018); capacidades P5–P7/P9 permanecem indisponíveis** | P3-04 + dados P2–P7 disponíveis; entrega progressiva permitida |
 | 20 | [x] | [p8-retention-eligibility.md](p8-retention-eligibility.md) | P8 | P8-03 concluído no issue 0019; PDF permanece fora | P1-05, P4-01; P7-03 somente para PDFs |
 | 21 | [x] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 concluído no issue 0016 | P1-01, P1-03, P3-04 |
-| 22 | [ ] | [p9-backup-and-restore.md](p9-backup-and-restore.md) | P9 | P9-02 | P1-06, P2-03, P3-04 |
+| 22 | [x] | [p9-backup-and-restore.md](p9-backup-and-restore.md) | P9 | P9-02 concluído no issue 0017 | P1-06, P2-03, P3-04 |
 | 23 | [ ] | [p9-controlled-deletion.md](p9-controlled-deletion.md) | P9 | P9-03 | P8-03, P9-02 comprovado |
 | 24 | [ ] | [p9-hardening.md](p9-hardening.md) | P9 | P9-04 | P5–P8, P9-01/02/03 |
 | 25 | [ ] | [p9-internal-pilot-and-homologation.md](p9-internal-pilot-and-homologation.md) | P9 | P9-05 | P5, P6, P8, P9-01..04 |
@@ -58,7 +58,8 @@ Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P
 
 - **Open/Blocked local:** biblioteca DANFE/DANFSe bloqueia somente P7-03.
 - **Open:** endpoints, envelopes, limites e leiautes vigentes bloqueiam somente transports reais/homologação P5/P6; simuladores/domínio continuam implementáveis.
-- **Blocked local:** P9-03 só habilita exclusão após evidência P9-02.
+- **Blocked local:** P9-03 só habilita exclusão após evidência P9-02; o issue 0017 registrou
+  captura/restore sintético isolado e habilita a próxima especificação sem implementar exclusão.
 - **Deferred:** CA confiável, backup fisicamente separado e broker/escalonamento horizontal; nenhum bloqueia o MVP definido.
 - **Accepted exceptions:** TLS autoassinado e backup local permanecem riscos explícitos.
 - **Proposed:** nomes físicos, schemas/payloads/URLs, ferramentas, thresholds e políticas não definidos nas fontes podem ser decididos na sessão dona da spec, desde que documentados e testados contra seus invariantes.

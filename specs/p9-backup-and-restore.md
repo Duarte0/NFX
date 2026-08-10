@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P9 — pronta; restore comprovado é pré-requisito apenas da exclusão.
+- **Fase/status:** P9 — P9-02 concluído; restore comprovado é pré-requisito apenas da exclusão.
 - **Backlog:** P9-02. **Dependências:** P1-06, P2-03, P3-04.
 - **PRD:** OPS-BKP-001, OPS-BKP-002, OPS-BKP-003, OPS-BKP-004, OPS-BKP-005, OPS-BKP-006; BR-BKP-001, SEC-009. **Aceite:** AC-015, AC-016.
 - **Arquitetura:** ADR-008, ADR-012; seções 17, 25, 27, 35, 36, 37, 40 e 41.
@@ -29,10 +29,13 @@ Dataset totalmente sintético cobre DB, original, PDF, cursor, auditoria e A1. T
 
 ## Aceite e DoD
 
-- [ ] Backup diário inclui todos os componentes e manifesto verificável.
-- [ ] Retenção 7/4/12 é determinística e independente da retenção fiscal.
-- [ ] Restore isolado comprova vínculos, hashes, cursor e decrypt.
-- [ ] Admin vê falha/atraso; demais papéis não veem detalhes.
-- [ ] Limitação de host único é explícita.
+- [x] Backup diário inclui todos os componentes e manifesto verificável.
+- [x] Retenção 7/4/12 é determinística e independente da retenção fiscal.
+- [x] Restore isolado comprova vínculos, hashes, cursor e decrypt.
+- [x] Admin vê falha/atraso; demais papéis não veem detalhes.
+- [x] Limitação de host único é explícita.
 
-DoD: jobs/commands, schema operacional, runbook, dashboard hooks e exercício completo verde. **Deferred:** destino fisicamente separado.
+DoD: commands, schema operacional, runbook, status administrativo e exercício sintético verde.
+O arquivo `database.dump` é uma captura lógica determinística do PostgreSQL, sem credenciais em
+argumentos; o formato físico de um dump externo permanece uma decisão operacional futura.
+**Deferred:** destino fisicamente separado.
