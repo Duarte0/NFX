@@ -86,6 +86,8 @@ class IngestionContext:
     request_cursor: str | None = None
     request_nsu: str | None = None
     execution_id: UUID | str | None = None
+    page_key: str | None = None
+    document_flow: str | None = None
 
     def validate(self) -> None:
         try:
@@ -103,6 +105,10 @@ class IngestionContext:
         for position in (self.request_cursor, self.request_nsu):
             if position is not None and not _REFERENCE.fullmatch(position):
                 raise IngestionError("request continuation is invalid")
+        operation_reference: str | None
+        for operation_reference in (self.page_key, self.document_flow):
+            if operation_reference is not None and not _REFERENCE.fullmatch(operation_reference):
+                raise IngestionError("ingestion operation reference is invalid")
 
 
 @dataclass(frozen=True)
@@ -157,7 +163,7 @@ def _document_family(family: str) -> str:
 
 def _default_metadata(unit: FiscalUnit, context: IngestionContext) -> IngestionDocumentMetadata:
     return IngestionDocumentMetadata(
-        emitted_at=timezone.now(),
+        emitted_at=unit.occurred_at or timezone.now(),
         identity=FiscalIdentity(external_id=unit.identity),
         category=unit.kind,
         parent_document_id=None,
@@ -394,6 +400,11 @@ class FiscalIngestionService:
         )
         if unit_id is not None:
             query = query.filter(id=unit_id)
+        query = query | ReceivedUnit.objects.filter(
+            state=ReceivedUnitState.QUARANTINE,
+            safe_reason="parent_missing",
+            **({"id": unit_id} if unit_id is not None else {}),
+        )
         repaired = 0
         for unit in query.select_related("page", "company").order_by("first_seen_at"):
             page = unit.page
@@ -406,6 +417,11 @@ class FiscalIngestionService:
                 request_cursor=page.request_cursor or None,
                 request_nsu=page.request_nsu or None,
                 execution_id=page.execution_id,
+                document_flow=(
+                    unit.flow.removesuffix(":followup")
+                    if unit.flow.endswith(":followup")
+                    else unit.flow
+                ),
             )
             result = self._process_unit(unit, context, self._unit_from_record(unit))
             if result != UnitOutcome.FAILED:
@@ -460,7 +476,7 @@ class FiscalIngestionService:
     def _register_page(
         self, context: IngestionContext, response: FiscalResponse
     ) -> tuple[IngestionPage, bool]:
-        page_key = (
+        page_key = context.page_key or (
             f"cursor:{context.request_cursor}"
             if context.request_cursor
             else (f"nsu:{context.request_nsu}" if context.request_nsu else "initial")
@@ -582,6 +598,10 @@ class FiscalIngestionService:
         if (
             received.state in INGESTION_TERMINAL_UNIT_STATES
             and received.content_hash == unit.content_hash
+            and not (
+                received.state == ReceivedUnitState.QUARANTINE
+                and received.safe_reason == "parent_missing"
+            )
         ):
             return UnitOutcome(received.state)
         now = self.clock()
@@ -613,7 +633,32 @@ class FiscalIngestionService:
                     .order_by("first_seen_at")
                     .first()
                 )
-                if parent is None:
+                if parent is None and unit.parent_identity:
+                    from nfx.documents.models import Document
+                    from nfx.documents.services import select_strongest_identity
+
+                    try:
+                        normalized_parent = select_strongest_identity(
+                            FiscalIdentity(external_id=unit.parent_identity)
+                        ).value
+                    except InvalidDocumentInput:
+                        normalized_parent = ""
+                    parent_document = (
+                        Document.objects.filter(
+                            company_id=context.company_id,
+                            family=_document_family(context.family),
+                            flow=context.document_flow or context.flow,
+                            normalized_identity=normalized_parent,
+                        )
+                        .order_by("created_at")
+                        .first()
+                        if normalized_parent
+                        else None
+                    )
+                    parent_document_id = parent_document.id if parent_document is not None else None
+                else:
+                    parent_document_id = parent.document_id if parent is not None else None
+                if parent is None and parent_document_id is None:
                     self._finish_unit(
                         received,
                         artifact,
@@ -624,7 +669,7 @@ class FiscalIngestionService:
                     )
                     return UnitOutcome.QUARANTINE
                 metadata = IngestionDocumentMetadata(
-                    **{**metadata.__dict__, "parent_document_id": parent.document_id}
+                    **{**metadata.__dict__, "parent_document_id": parent_document_id}
                 )
             data = DocumentInput(
                 company_id=context.company_id,
@@ -632,7 +677,7 @@ class FiscalIngestionService:
                 role=metadata.role,
                 category=metadata.category,
                 source=context.source,
-                flow=context.flow,
+                flow=context.document_flow or context.flow,
                 identity=metadata.identity,
                 emitted_at=metadata.emitted_at,
                 authorized_at=metadata.authorized_at,
@@ -818,7 +863,10 @@ class FiscalIngestionService:
                     )
                     return self._result_for_page(page)
                 if page.family == "nfe":
-                    if page.next_cursor == requested:
+                    if not page.next_cursor:
+                        page.state = state
+                        page.finalized_at = self.clock()
+                    elif page.next_cursor == requested:
                         page.state = IngestionPageState.FAILED
                         persisted_outcome = IngestionOutcome.TEMPORARY_FAILURE
                         persisted_recovery = IngestionRecovery.RECONCILE

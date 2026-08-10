@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P5 — P5-01 implementado com simulador; P5-02/P5-03 permanecem pendentes. Conexão real permanece localmente Open.
+- **Fase/status:** P5 — P5-01/P5-02 implementados com simulador; P5-03 permanece pendente. Conexão real permanece localmente Open.
 - **Backlog:** P5-01, P5-02, P5-03. **Dependências:** P2-03, P3-02, P3-03, P4-02.
 - **PRD:** FR-NFE-001, FR-NFE-002, FR-NFE-003, FR-NFE-004; BR-NFE-001, BR-NFE-002, BR-NFE-003; BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009.
 - **Arquitetura:** ADR-006/007; seções 10.2, 14, 19, 22, 23, 25, 28, 32, 33, 37, 38 e 40.
@@ -52,3 +52,19 @@ quarentena, checkpoint e cursor continuam sob propriedade P4. Testes unitários 
 posições, sensibilidade, envelopes/outcomes e concorrência; a integração cobre persistência em
 objeto, documentos e checkpoints independentes. XML completo, eventos, manifestação, jobs
 específicos e transporte Portal Nacional/SEFAZ continuam fora deste incremento.
+
+## Evidência do incremento P5-02 (issue 0020)
+
+`nfx.adapters.nfe` fornece contratos bounded para `NFeScienceRequest`, `NFeCompleteXmlRequest` e
+`NFeEventRequest`, com `NFeFollowUpSimulator` determinístico. Ciência é uma operação própria e
+somente resultado permitido libera XML; respostas negadas, transitórias, cooldown, bloqueadas,
+malformadas ou desconhecidas não fazem chamada de XML. Os jobs `nfe.science` e
+`nfe.complete_xml` reutilizam leases/policies P3 e revalidam empresa, documento NF-e, fluxo e
+certificado antes da execução.
+
+O original da resposta é finalizado e vinculado ao `Document` antes da validação XML; XML completo
+é um `fiscal_xml` adicional e nunca substitui o original. Eventos usam a ingestão P4 com escopo de
+follow-up, vínculo explícito ao pai compatível, quarentena segura para pai ausente e replay pelo
+reconciliador quando o pai chega depois. Deduplicação é por correlação/documento/operação; auditoria,
+resultados e logs carregam somente IDs, contagens, fluxos e códigos bounded. XML, eventos, manifestação
+P5-03 e transporte oficial continuam separados: P5-03 permanece pendente e transporte real Open.

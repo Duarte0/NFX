@@ -117,6 +117,53 @@ class DocumentPersistenceResult:
     reason_code: str | None = None
 
 
+@dataclass(frozen=True)
+class EvidenceAttachmentResult:
+    status: DocumentPersistenceStatus
+    evidence_id: UUID
+
+
+def attach_document_evidence(
+    document_id: UUID | str, artifact_id: UUID | str
+) -> EvidenceAttachmentResult:
+    """Attach a finalized artifact without changing document identity or status."""
+    artifact = _artifact(artifact_id)
+    try:
+        document_uuid = UUID(str(document_id))
+    except (TypeError, ValueError, AttributeError) as exc:
+        raise InvalidDocumentInput("Document reference is invalid") from exc
+    with transaction.atomic():
+        document = Document.objects.select_for_update().filter(pk=document_uuid).first()
+        if document is None:
+            raise InvalidDocumentInput("Document is unavailable")
+        existing = DocumentEvidence.objects.filter(
+            document=document, artifact=artifact
+        ).first()
+        if existing is not None:
+            return EvidenceAttachmentResult(DocumentPersistenceStatus.REPLAY, existing.id)
+        evidence = DocumentEvidence.objects.create(
+            document=document,
+            artifact=artifact,
+            digest=artifact.digest,
+            size_bytes=_artifact_size(artifact),
+        )
+        AuditService().append(
+            action="document.evidence_attached",
+            entity_type="document",
+            entity_id=str(document.id),
+            result=DocumentPersistenceStatus.PERSISTED.value,
+            reason="followup_evidence",
+            correlation_id=document.correlation_id,
+            context={
+                "family": document.family,
+                "source": document.source,
+                "flow": document.flow,
+                "artifact_digest_prefix": artifact.digest[:16],
+            },
+        )
+        return EvidenceAttachmentResult(DocumentPersistenceStatus.PERSISTED, evidence.id)
+
+
 def _validate_reference(value: str) -> str:
     if not isinstance(value, str) or not _SAFE_REFERENCE.fullmatch(value):
         raise InvalidDocumentInput("Document reference is invalid")

@@ -55,7 +55,7 @@ runtime. A próxima implementação de produto continua sendo P5 follow-up/P7.
 
 | Marco | Status | Resultado e critérios | Dependências |
 |---|---|---|---|
-| P5 NF-e | **P5-01 concluído, issue 0013; P5-02/P5-03 pendentes** | Porta semântica e simulador NF-e bounded para entrada/saída, com histórico/posição independente, auditoria/métricas seguras e handoff à ingestão P4. XML/eventos, manifestação e transporte real continuam fora; transporte real permanece Open até homologação. Ver `p5-nfe-distribution-and-manifestation.md`. | P4-02, P2-03, P3-02/03. |
+| P5 NF-e | **P5-01/P5-02 concluídos, issues 0013/0020; P5-03 pendente** | Porta semântica e simulador NF-e bounded para entrada/saída, Ciência, XML completo e eventos, com jobs idempotentes, evidência original/XML, vínculos P4 e auditoria/métricas seguras. Manifestação e transporte real continuam fora; transporte real permanece Open até homologação. Ver `p5-nfe-distribution-and-manifestation.md`. | P4-02, P2-03, P3-02/03. |
 | P6 NFS-e/ADN | **P6-01/P6-02 concluídos, issue 0014** | Adapter semântico simulator-only, cobertura versionada, distribuição por ator/fluxo/NSU, tomada/prestada/eventos/substituições, handoff ao P4, auditoria/métricas/UI segura; sem integrações municipais ou transporte oficial. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
 | P7 consulta/download | **P7-01/P7-02 concluídos, issue 0015** | Busca bounded com filtros aprovados, cursor opaco, detalhe/eventos e download individual RBAC/auditado com verificação de digest/tamanho. PDF continua fora. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
@@ -79,8 +79,9 @@ quarentena ou estado de fluxo nos adaptadores.
 
 O issue 0013 concluiu o incremento P5-01: `nfx.adapters.nfe` valida a solicitação semântica,
 mantém received/issued independentes no simulador, mapeia outcomes bounded e chama somente
-`ingest_page` para persistência. P5-02 (Ciência/XML/eventos) e P5-03 (manifestação) ainda não
-foram implementados; nenhum transporte oficial foi habilitado.
+`ingest_page` para persistência. O issue 0020 concluiu P5-02 com Ciência, XML completo e eventos,
+jobs `nfe.science`/`nfe.complete_xml`, evidência original antes de parsing e vínculo de eventos
+via P4; P5-03 (manifestação) continua pendente e nenhum transporte oficial foi habilitado.
 
 O issue 0014 concluiu P6-01/P6-02: `nfx.adapters.adn` valida a solicitação por empresa,
 ator, fluxo e NSU, mantém históricos independentes, persiste snapshots seguros de cobertura,
@@ -104,7 +105,7 @@ nenhum transporte oficial ou municipal foi habilitado.
 
 ## Trabalho de specs e operação que resta
 
-- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01 foi implementado no issue 0013, P6-01/P6-02 no issue 0014, P8-03 no issue 0019 e P5-02/P5-03 continuam pendentes. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; `exports` permanece boundary sem implementação e `retention` agora tem seu slice P8-03.
+- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01/P5-02 foram implementados nos issues 0013/0020, P6-01/P6-02 no issue 0014, P8-03 no issue 0019 e P5-03 continua pendente. Não foram encontrados TODO/FIXME/placeholder de domínio, nem duplicação de implementação que alterem esse backlog; `exports` permanece boundary sem implementação e `retention` agora tem seu slice P8-03.
 - Issue 0007 corrigiu a higiene de `.env.example`; valores que tenham sido usados fora de testes descartáveis continuam potencialmente comprometidos e devem ser rotacionados fora do repositório.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.

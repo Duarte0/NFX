@@ -222,7 +222,7 @@ bloqueio, duplicata, conflito, payload malformado, evento sem pai e cursor repet
 genérico transforma esses valores em `HandlerOutcome` e preserva a fronteira de lease/idempotência
 dos jobs. Fixtures não carregam XML, credenciais, tokens, certificados ou endpoints produtivos.
 
-## Distribuição semântica NF-e (P5-01)
+## Distribuição semântica NF-e e follow-ups (P5-01/P5-02)
 
 `nfx.adapters.nfe` é a fronteira worker-facing para distribuição simulada NF-e. A solicitação
 usa somente referências bounded, uma página limitada e uma posição `NFePosition` vinculada a
@@ -236,8 +236,14 @@ Para persistir uma página, o worker chama `adapter.ingest(storage, request)`. O
 o resultado seguro para `FiscalResponse` e delega a `nfx.collection.ingestion.ingest_page`;
 essa função continua dona de objeto original, identidade, unidade, checkpoint, cursor,
 quarentena, conflito e avanço. Auditoria/métricas recebem apenas fluxo, outcome, motivo,
-contagem e prefixo de posição. P5-02/P5-03 (XML completo, eventos e manifestação) e qualquer
-transporte oficial permanecem fora deste incremento.
+contagem e prefixo de posição. O P5-02 adiciona `NFeFollowUpAdapter`/`NFeFollowUpSimulator` para
+Ciência, XML completo e eventos. `nfe.science` é um job próprio; somente Ciência permitida cria
+`nfe.complete_xml`. O original é armazenado e vinculado antes da validação/parsing, e o XML completo
+é evidência adicional (`fiscal_xml`) do mesmo `Document`. Eventos passam pelo `ingest_page` de P4 em
+um escopo de follow-up sem cursor de distribuição; pai incompatível/ausente fica em quarentena e o
+reconciliador pode vinculá-lo depois sem alterar competência, situação ou identidade do pai.
+As fixtures rejeitam destino/credencial sensíveis, limitam MIME/tamanho/declarações XML e mantêm
+auditoria/resultados sem payloads. P5-03 (manifestação) e qualquer transporte oficial permanecem fora.
 
 ## Controle manual de coleta (P3-05)
 

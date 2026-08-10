@@ -131,6 +131,7 @@ class FiscalUnit:
     kind: str = "document"
     parent_identity: str | None = None
     synthetic: bool = True
+    occurred_at: datetime | None = None
 
     def __post_init__(self) -> None:
         _reference("identity", self.identity)
@@ -139,6 +140,10 @@ class FiscalUnit:
         _code(self.kind)
         if self.parent_identity is not None:
             _reference("parent_identity", self.parent_identity)
+        if self.occurred_at is not None and (
+            self.occurred_at.tzinfo is None or self.occurred_at.utcoffset() is None
+        ):
+            raise ScenarioValidationError("synthetic unit timestamp must be timezone-aware")
         if not self.synthetic:
             raise ScenarioValidationError("only generated synthetic units are supported")
 
