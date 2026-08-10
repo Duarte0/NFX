@@ -68,7 +68,7 @@ class DocumentInput:
     authorized_at: datetime | None = None
     situation: str = DocumentSituation.UNKNOWN
     correlation_id: str = ""
-    kind: Literal["document", "event"] = "document"
+    kind: Literal["document", "event", "substitution"] = "document"
     parent_document_id: UUID | str | None = None
     relationship_type: str | None = None
 
@@ -80,7 +80,7 @@ class DocumentInput:
             raise InvalidDocumentInput("Document references are invalid") from exc
         if self.family not in {choice.value for choice in DocumentFamily}:
             raise InvalidDocumentInput("Document family is unsupported")
-        if self.kind not in {"document", "event"}:
+        if self.kind not in {"document", "event", "substitution"}:
             raise InvalidDocumentInput("Document kind is unsupported")
         for value in (self.role, self.category, self.source, self.flow, self.origin_execution_ref):
             _validate_reference(value)
@@ -95,7 +95,7 @@ class DocumentInput:
                 raise InvalidDocumentInput("Authorization precedes emission")
         if self.situation not in {choice.value for choice in DocumentSituation}:
             raise InvalidDocumentInput("Document situation is unsupported")
-        if self.kind == "event":
+        if self.kind in {"event", "substitution"}:
             if self.parent_document_id is None:
                 raise InvalidDocumentInput("Event parent is required")
             try:
@@ -250,7 +250,7 @@ def persist_document(data: DocumentInput) -> DocumentPersistenceResult:
             DocumentPersistenceStatus.QUARANTINE, reason_code="identity_insufficient"
         )
 
-    if data.kind == "event":
+    if data.kind in {"event", "substitution"}:
         return _persist_event(data, company_id, artifact, selection)
     return _persist_document(data, company_id, artifact, selection)
 

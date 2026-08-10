@@ -2,14 +2,21 @@
 
 ## Metadados
 
-- **Fase/status:** P6 — pronta para implementação com simulador; não implementada. Conexão real permanece localmente Open.
-- **Backlog:** P6-01, P6-02. **Dependências:** P2-03, P3-02/03, P4-02.
+- **Fase/status:** P6 — P6-01/P6-02 concluídos no issue 0014 com simulador; conexão real permanece localmente Open.
+- **Backlog:** P6-01/P6-02 concluídos. **Dependências:** P2-03, P3-02/03, P4-02.
 - **PRD:** FR-NFSE-001, FR-NFSE-002, FR-NFSE-003; BR-NFSE-001, BR-NFSE-002, BR-NFSE-003; BR-COLL-006, NFR-008. **Aceite:** AC-005, AC-008, AC-009, AC-018.
 - **Arquitetura:** ADR-006/007; seções 10.2, 14, 19, 22, 24, 25, 28, 32, 33, 37, 38 e 40.
 
 ## Propósito, baseline, escopo
 
 Implementar adapter exclusivamente para Portal Nacional/ADN, distribuição por ator/NSU, classificação tomada/prestada/evento e cobertura explícita. Baseline P4 preserva unidades; P3 simula. Não integrar sistemas municipais, inferir movimento fora do ADN ou tratar todo município como coberto.
+
+A implementação usa `nfx.adapters.adn`: `AdnDistributionRequest` limita empresa, ator,
+fluxo, NSU, política e página; `AdnDistributionResult` devolve cobertura, unidades originais,
+continuação e outcome bounded. O simulador mantém histórico independente por ator+fluxo e a
+ponte chama somente `ingest_page` com um fluxo P4 escopado (`actor:flow`). Snapshots aditivos
+`AdnCoverageSnapshot` preservam fonte, estado, instante, evidência segura e versão de política;
+coletas NFS-e expõem o último estado no status/UI.
 
 ## Contratos e estado Proposed
 
@@ -37,10 +44,13 @@ Fixtures simulam cada estado, ator, paginação, replay, substituição, evento 
 
 ## Aceite e DoD
 
-- [ ] Vazio, sem cobertura, indisponível e parcial têm contrato/UI distintos.
-- [ ] Empresa sem cobertura continua cadastrável.
-- [ ] Tomada/prestada/evento e substituição são vinculados quando comprováveis.
-- [ ] Desconhecido preserva original e não conclui integralmente.
-- [ ] Nenhuma fonte municipal fora do ADN é chamada.
+- [x] Vazio, sem cobertura, indisponível e parcial têm contrato/UI distintos.
+- [x] Empresa sem cobertura continua cadastrável.
+- [x] Tomada/prestada/evento e substituição são vinculados quando comprováveis.
+- [x] Desconhecido preserva original e não conclui integralmente.
+- [x] Nenhuma fonte municipal fora do ADN é chamada.
 
-DoD simulada: porta, adapter, estado, UI, auditoria/métricas e testes verdes. **Blocker local:** detalhes oficiais Open bloqueiam somente transporte real/homologação.
+DoD simulada: porta, adapter, estado, UI, auditoria/métricas e testes unitários verdes; a
+integração PostgreSQL/MinIO foi adicionada, mas não pôde executar neste ambiente porque o
+serviço PostgreSQL de teste não estava disponível. **Blocker local:** detalhes oficiais Open
+bloqueiam somente transporte real/homologação.

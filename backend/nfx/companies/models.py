@@ -23,6 +23,12 @@ class FlowState(models.TextChoices):
     PAUSED = "pausado", "Pausado"
 
 
+class AdnCoverageStatus(models.TextChoices):
+    AVAILABLE = "available", "Available"
+    NONE = "none", "No coverage"
+    UNKNOWN = "unknown", "Unknown"
+
+
 class EnrichmentStatus(models.TextChoices):
     SUCCESS = "sucesso", "Sucesso"
     EMPTY = "vazio", "Vazio"
@@ -100,6 +106,43 @@ class CompanyFlow(models.Model):
             models.Index(
                 fields=("collection_state", "next_scheduled_at"), name="nfx_flow_collection_due_ix"
             ),
+        ]
+
+
+class AdnCoverageSnapshot(models.Model):
+    """Versioned, safe evidence that one company was checked by the ADN boundary."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        Company, on_delete=models.PROTECT, related_name="adn_coverage_snapshots"
+    )
+    source = models.CharField(max_length=64)
+    status = models.CharField(max_length=16, choices=AdnCoverageStatus.choices)
+    verified_at = models.DateTimeField()
+    evidence_reference = models.CharField(max_length=128, blank=True)
+    policy_version = models.CharField(max_length=128)
+
+    class Meta:
+        db_table = "nfx_adn_coverage_snapshot"
+        ordering = ("-verified_at", "-id")
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(source__regex=r"^[A-Za-z0-9_.:/-]{1,64}$"),
+                name="nfx_adn_coverage_source_ck",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(policy_version__regex=r"^[A-Za-z0-9_.:/-]{1,128}$"),
+                name="nfx_adn_coverage_policy_ck",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(evidence_reference="")
+                | models.Q(evidence_reference__regex=r"^[A-Za-z0-9_.:/-]{1,128}$"),
+                name="nfx_adn_coverage_evidence_ck",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=("company", "status"), name="nfx_adn_coverage_status_ix"),
+            models.Index(fields=("company", "verified_at"), name="nfx_adn_coverage_time_ix"),
         ]
 
 

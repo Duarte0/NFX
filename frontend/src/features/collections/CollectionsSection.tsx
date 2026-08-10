@@ -19,6 +19,14 @@ function collectionLabel(status: string): string {
   );
 }
 
+function coverageLabel(status: string): string {
+  return {
+    available: "Cobertura ADN disponível",
+    none: "Sem cobertura automática no ADN",
+    unknown: "Cobertura ADN desconhecida",
+  }[status] ?? "Cobertura ADN não verificada";
+}
+
 type CollectionsSectionProps = {
   canManage: boolean;
   loadSignal: number;
@@ -83,6 +91,11 @@ export function CollectionsSection({ canManage, loadSignal, notify }: Collection
                 {flow.family === "nfe" ? "NF-e" : "NFS-e"}: {collectionLabel(flow.collection_state)}
               </strong>
               <p>Tentativa: {flow.last_attempt_at ?? "—"} · Sucesso: {flow.last_success_at ?? "—"}</p>
+              {flow.family === "nfse" && flow.coverage && (
+                <p role="status">
+                  {coverageLabel(flow.coverage.status)} · verificada em {flow.coverage.verified_at}
+                </p>
+              )}
               {flow.safe_error && <p role="status">Correção: {flow.safe_error}</p>}
               {canManage && (
                 <>

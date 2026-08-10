@@ -43,6 +43,7 @@ from nfx.documents.services import (
 
 _REFERENCE = re.compile(r"^[A-Za-z0-9_.:/-]{1,128}$")
 _HASH = re.compile(r"^[0-9a-f]{64}$")
+_POSITION_NUMBER = re.compile(r"(?:^|[:_-])(\d+)$")
 _FAMILY = {"nfe", "adn", "nfse"}
 _FAILURE_RESPONSE_OUTCOMES = {
     FiscalOutcome.NO_COVERAGE,
@@ -160,7 +161,13 @@ def _default_metadata(unit: FiscalUnit, context: IngestionContext) -> IngestionD
         identity=FiscalIdentity(external_id=unit.identity),
         category=unit.kind,
         parent_document_id=None,
-        relationship_type=DocumentRelationship.EVENT if unit.kind == "event" else None,
+        relationship_type=(
+            DocumentRelationship.EVENT
+            if unit.kind == "event"
+            else DocumentRelationship.SUBSTITUTION
+            if unit.kind == "substitution"
+            else None
+        ),
     )
 
 
@@ -168,6 +175,11 @@ def _safe_reason(value: str) -> str:
     if value and re.fullmatch(r"[a-z][a-z0-9_.-]{0,63}", value):
         return value
     return "ingestion_failure"
+
+
+def _position_number(value: str) -> int | None:
+    match = _POSITION_NUMBER.search(value)
+    return int(match.group(1)) if match else None
 
 
 def classify_page_response(response: FiscalResponse) -> IngestionClassification:
@@ -589,7 +601,7 @@ class FiscalIngestionService:
 
         try:
             metadata = self.metadata_factory(unit, context)
-            if unit.kind == "event" and metadata.parent_document_id is None:
+            if unit.kind in {"event", "substitution"} and metadata.parent_document_id is None:
                 parent = (
                     ReceivedUnit.objects.filter(
                         company_id=context.company_id,
@@ -628,7 +640,7 @@ class FiscalIngestionService:
                 artifact_id=artifact.id,
                 origin_execution_ref=context.execution_ref,
                 correlation_id=context.correlation_id,
-                kind="event" if unit.kind == "event" else "document",
+                kind="event" if unit.kind in {"event", "substitution"} else "document",
                 parent_document_id=metadata.parent_document_id,
                 relationship_type=metadata.relationship_type,
             )
@@ -815,11 +827,27 @@ class FiscalIngestionService:
                         checkpoint.cursor = page.next_cursor
                         advanced = bool(page.next_cursor)
                 else:
-                    if page.next_nsu == requested:
+                    requested_number = _position_number(requested)
+                    next_number = _position_number(page.next_nsu)
+                    if not requested and not page.next_nsu:
+                        checkpoint.last_page = page
+                        checkpoint.save(update_fields=["last_page", "updated_at"])
+                        page.state = state
+                        page.finalized_at = self.clock()
+                    elif page.next_nsu == requested:
                         page.state = IngestionPageState.FAILED
                         persisted_outcome = IngestionOutcome.TEMPORARY_FAILURE
                         persisted_recovery = IngestionRecovery.RECONCILE
                         page.safe_error = "repeated_nsu"
+                    elif (
+                        requested_number is not None
+                        and next_number is not None
+                        and next_number < requested_number
+                    ):
+                        page.state = IngestionPageState.FAILED
+                        persisted_outcome = IngestionOutcome.TEMPORARY_FAILURE
+                        persisted_recovery = IngestionRecovery.RECONCILE
+                        page.safe_error = "non_monotonic_nsu"
                     else:
                         checkpoint.nsu = page.next_nsu
                         advanced = bool(page.next_nsu)

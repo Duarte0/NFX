@@ -16,6 +16,8 @@ from nfx.adapters.opencnpj import OpenCnpjClient, OpenCnpjResponse
 from nfx.audit.services import AuditService
 from nfx.companies.metrics import company_metrics
 from nfx.companies.models import (
+    AdnCoverageSnapshot,
+    AdnCoverageStatus,
     Company,
     CompanyFlow,
     CompanyStatus,
@@ -29,6 +31,7 @@ from nfx.identity.services import SessionIdentity
 
 logger = logging.getLogger(__name__)
 _CNPJ_CHARS = re.compile(r"^[A-Z0-9]+$")
+_SAFE_ADN_REFERENCE = re.compile(r"^[A-Za-z0-9_.:/-]{1,128}$")
 
 
 class CompanyError(ValueError):
@@ -313,6 +316,52 @@ def can_execute_flow(company_id: str, family: str, *, certificate_valid: bool) -
             company=company, family=family, state=FlowState.ENABLED
         ).exists()
     )
+
+
+def record_adn_coverage(
+    *,
+    company_id: UUID | str,
+    source: str,
+    status: str,
+    policy_version: str,
+    evidence_reference: str = "",
+    verified_at: datetime | None = None,
+) -> AdnCoverageSnapshot:
+    """Persist only the bounded coverage evidence emitted by the ADN adapter."""
+    if not _SAFE_ADN_REFERENCE.fullmatch(source):
+        raise CompanyError("ADN coverage source is invalid.")
+    if not _SAFE_ADN_REFERENCE.fullmatch(policy_version):
+        raise CompanyError("ADN coverage policy is invalid.")
+    if evidence_reference and not _SAFE_ADN_REFERENCE.fullmatch(evidence_reference):
+        raise CompanyError("ADN coverage evidence is invalid.")
+    try:
+        normalized_status = AdnCoverageStatus(status)
+    except (TypeError, ValueError) as exc:
+        raise CompanyError("ADN coverage status is invalid.") from exc
+    company = _company(company_id)
+    snapshot = AdnCoverageSnapshot.objects.create(
+        company=company,
+        source=source,
+        status=normalized_status,
+        policy_version=policy_version,
+        evidence_reference=evidence_reference,
+        verified_at=verified_at or timezone.now(),
+    )
+    AuditService().append(
+        action="adn.coverage",
+        entity_type="adn_coverage",
+        entity_id=str(snapshot.id),
+        result=normalized_status,
+        actor_role="system",
+        context={
+            "company_id": str(company.id),
+            "source": source,
+            "status": normalized_status,
+            "policy_version": policy_version,
+            "evidence_reference": evidence_reference,
+        },
+    )
+    return snapshot
 
 
 @dataclass(frozen=True)

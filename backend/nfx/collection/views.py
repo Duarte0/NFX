@@ -21,7 +21,7 @@ from nfx.collection.services import (
     CollectionRetryNotEligible,
     request_collection,
 )
-from nfx.companies.models import Company, CompanyFlow
+from nfx.companies.models import AdnCoverageSnapshot, Company, CompanyFlow
 from nfx.identity.policy import Action
 from nfx.identity.services import resolve_session
 from nfx.identity.views import SESSION_COOKIE_NAME, protected
@@ -64,6 +64,20 @@ def _flow_payload(flow: CompanyFlow) -> dict[str, object]:
         .order_by("-created_at")
         .first()
     )
+    coverage = None
+    if flow.family == "nfse":
+        snapshot = (
+            AdnCoverageSnapshot.objects.filter(company_id=flow.company_id)
+            .order_by("-verified_at", "-id")
+            .first()
+        )
+        if snapshot is not None:
+            coverage = {
+                "status": snapshot.status,
+                "source": snapshot.source,
+                "verified_at": snapshot.verified_at.isoformat(),
+                "policy_version": snapshot.policy_version,
+            }
     return {
         "family": flow.family,
         "flow_state": flow.state,
@@ -75,6 +89,7 @@ def _flow_payload(flow: CompanyFlow) -> dict[str, object]:
         "blocked_reason": flow.blocked_reason,
         "safe_error": flow.safe_error,
         "progress": {"current": flow.progress_current, "total": flow.progress_total},
+        "coverage": coverage,
         "active_execution": (
             _execution_payload(CollectionExecution.objects.get(id=flow.active_execution_id))
             if flow.active_execution_id

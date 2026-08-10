@@ -25,13 +25,13 @@ O código e as migrações são a baseline de implementação; testes são a evi
 | P3-03 — simuladores fiscais | `adapters/simulation.py`, cenários NF-e/ADN determinísticos e sem rede | testes de cenário, replay e boundary do job cobertos. |
 | P3-04 — observabilidade inicial | `0010_process_heartbeats`, agregados, `/health/operational` | health, heartbeats e logs estruturados cobertos. |
 
-P4-01 adicionou a identidade e persistência base de documentos/eventos em `documents`, com referências imutáveis a artefatos. P4-02 adicionou pipeline/cursor, P4-03 adicionou a matriz durável de estados/recovery e P4-04 adicionou a API/UI mínima de status/lista; exportações, retenção e renderização continuam fora desta entrega. Simuladores são infraestrutura de teste; não implementam P5–P6.
+P4-01 adicionou a identidade e persistência base de documentos/eventos em `documents`, com referências imutáveis a artefatos. P4-02 adicionou pipeline/cursor, P4-03 adicionou a matriz durável de estados/recovery e P4-04 adicionou a API/UI mínima de status/lista; exportações, retenção e renderização continuam fora desta entrega. O simulador genérico continua infraestrutura de teste; o issue 0014 adicionou a porta semântica P6 sobre ele sem habilitar transporte oficial.
 
 O incremento transversal de frontend do issue 0011 também está concluído: `main.tsx` é somente
 bootstrap, `App.tsx` compõe o shell e as funcionalidades, e `shared/http.ts` é a fronteira
 única para credenciais same-origin, CSRF, serialização e erros seguros. A extração preserva os
 contratos e estados visíveis P1–P4; não altera backend, banco, endpoints ou dependências de
-runtime. A próxima implementação de produto continua sendo P5/P6.
+runtime. A próxima implementação de produto continua sendo P5 follow-up/P7.
 
 ### Implementado, mas com acompanhamento documental/operacional pendente
 
@@ -56,7 +56,7 @@ runtime. A próxima implementação de produto continua sendo P5/P6.
 | Marco | Status | Resultado e critérios | Dependências |
 |---|---|---|---|
 | P5 NF-e | **P5-01 concluído, issue 0013; P5-02/P5-03 pendentes** | Porta semântica e simulador NF-e bounded para entrada/saída, com histórico/posição independente, auditoria/métricas seguras e handoff à ingestão P4. XML/eventos, manifestação e transporte real continuam fora; transporte real permanece Open até homologação. Ver `p5-nfe-distribution-and-manifestation.md`. | P4-02, P2-03, P3-02/03. |
-| P6 NFS-e/ADN | **especificado, não implementado** | Distribuição por ator/NSU, cobertura explícita e tomada/prestada/eventos; sem integrações municipais. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
+| P6 NFS-e/ADN | **P6-01/P6-02 concluídos, issue 0014** | Adapter semântico simulator-only, cobertura versionada, distribuição por ator/fluxo/NSU, tomada/prestada/eventos/substituições, handoff ao P4, auditoria/métricas/UI segura; sem integrações municipais ou transporte oficial. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
 | P7 consulta/download | **especificado, não implementado** | Busca/filtros/detalhe e download individual RBAC/auditado. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
 | P8 ZIP/dashboard/retenção | **especificado, não implementado** | ZIP assíncrono, drill-down reconciliável e prévia de elegibilidade sem exclusão. Ver specs P8. | Consulta/download; dashboard pode usar P3-04 progressivamente; retenção depende P4. |
@@ -65,11 +65,11 @@ runtime. A próxima implementação de produto continua sendo P5/P6.
 ## Sequência executável
 
 ```text
-Agora: P5 NF-e / P6 ADN ────────────────┐
+Agora: P5 NF-e follow-up / P7 ──────────┐
                                        ├─ P4-01 → P4-02 → P4-03 → P4-04
 Correção do contrato de build ──────────┘                 │
                                                            ├─ P5 NF-e
-                                                           ├─ P6 ADN
+                                                           ├─ P6 ADN (concluído)
                                                            └─ P7 consulta → P8 → P9
 ```
 
@@ -81,6 +81,12 @@ O issue 0013 concluiu o incremento P5-01: `nfx.adapters.nfe` valida a solicitaç
 mantém received/issued independentes no simulador, mapeia outcomes bounded e chama somente
 `ingest_page` para persistência. P5-02 (Ciência/XML/eventos) e P5-03 (manifestação) ainda não
 foram implementados; nenhum transporte oficial foi habilitado.
+
+O issue 0014 concluiu P6-01/P6-02: `nfx.adapters.adn` valida a solicitação por empresa,
+ator, fluxo e NSU, mantém históricos independentes, persiste snapshots seguros de cobertura,
+classifica documentos/eventos/substituições e chama somente o owner P4 para artefatos,
+identidade, recovery e checkpoint. A guarda de NSU não monotônico permanece no pipeline, e
+nenhum transporte oficial ou municipal foi habilitado.
 
 ## Decisões, inconsistências e riscos registrados
 
@@ -98,7 +104,7 @@ foram implementados; nenhum transporte oficial foi habilitado.
 
 ## Trabalho de specs e operação que resta
 
-- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01 foi implementado no issue 0013 e P5-02/P5-03/P6 continuam pendentes. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; os boundaries vazios de `documents`, `exports` e `retention` são intencionais.
+- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01 foi implementado no issue 0013, P6-01/P6-02 no issue 0014 e P5-02/P5-03 continuam pendentes. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; os boundaries vazios de `documents`, `exports` e `retention` são intencionais.
 - Issue 0007 corrigiu a higiene de `.env.example`; valores que tenham sido usados fora de testes descartáveis continuam potencialmente comprometidos e devem ser rotacionados fora do repositório.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.
@@ -106,5 +112,5 @@ foram implementados; nenhum transporte oficial foi habilitado.
 
 ## Próxima ação recomendada
 
-**Próxima passagem: issues.** As issues `0001`–`0012` estão concluídas; a próxima
-implementação elegível pertence ao caminho P5/P6 conforme os bloqueios e a ordem do backlog.
+**Próxima passagem: issues.** As issues `0001`–`0014` estão concluídas; a próxima
+implementação elegível pertence ao caminho P5/P7 conforme os bloqueios e a ordem do backlog.

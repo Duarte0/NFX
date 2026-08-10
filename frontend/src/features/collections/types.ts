@@ -9,6 +9,12 @@ export type CollectionFlow = {
   blocked_reason: string;
   safe_error: string;
   progress: { current: number; total: number };
+  coverage: {
+    status: string;
+    source: string;
+    verified_at: string;
+    policy_version: string;
+  } | null;
   active_execution: {
     id: string;
     state: string;

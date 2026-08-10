@@ -123,6 +123,22 @@ pendentes ou falhas após interrupção; o reconciliador não apaga objetos nem 
 uma página incompleta. Checkpoints NF-e (`nfe`) e ADN (`adn`) são independentes. Transportes
 oficiais e payloads fiscais brutos continuam fora do escopo.
 
+## Distribuição semântica NFS-e/ADN (P6)
+
+`nfx.adapters.adn` valida referências bounded de empresa, ator, fluxo, política e NSU. Cada
+ator+fluxo recebe um histórico independente no `AdnDistributionSimulator`; `taken` e `provided`
+não compartilham posição. A resposta mantém `available`, `none` e `unknown` distintos de
+`empty`, `unavailable`, `partial` e `unknown`/quarentena, e somente unidades `document`,
+`event` e `substitution` atravessam a porta. O método `ingest` grava a evidência de cobertura
+segura e delega unidade, artefato, identidade, vínculo, checkpoint, retry e reconciliação ao P4,
+usando `actor:flow` no escopo do NSU.
+
+O estado `none` aparece como “Sem cobertura automática no ADN”; não é uma consulta vazia e não
+afirma ausência fiscal. Páginas parciais, falhas, desconhecidas, eventos sem pai e evidência
+insuficiente não avançam o NSU; o reconciliador aplica também a guarda de NSU não monotônico.
+Nenhum adapter chama rede ou fonte municipal, e logs/auditoria/metrics carregam somente códigos,
+contagens, prefixos limitados e referências seguras.
+
 ## Matriz de falhas de ingestão (P4-03)
 
 `classify_page_response` é a classificação única da resposta do simulador. Ela persiste

@@ -76,6 +76,8 @@ class ScenarioName(StrEnum):
     REPEATED_CURSOR = "repeated_cursor"
     PARTIAL_RESULT = "partial_result"
     INTERRUPTION_RESTART = "interruption_restart"
+    EVENT_WITH_PARENT = "event_with_parent"
+    SUBSTITUTION = "substitution"
 
 
 def _reference(field_name: str, value: str, *, required: bool = True) -> str:
@@ -503,31 +505,61 @@ def build_scenario(
                 ),
             ),
         )
-    elif scenario_name == ScenarioName.REPEATED_CURSOR:
+    elif scenario_name == ScenarioName.EVENT_WITH_PARENT:
+        parent = _unit(family, seed, "parent")
+        event = _unit(family, seed, "event", kind="event", parent=parent.identity)
         steps = (
-            ScenarioStep(
-                None, _response(FiscalOutcome.SUCCESS, units=(first,), next_cursor="cursor-repeat")
-            ),
-            ScenarioStep(
-                "cursor-repeat",
-                _response(
-                    FiscalOutcome.REPEATED_CURSOR,
-                    next_cursor="cursor-repeat",
-                    error_code="cursor_repeated",
-                ),
-            ),
+            ScenarioStep(None, _response(FiscalOutcome.SUCCESS, units=(parent, event))),
+        )
+    elif scenario_name == ScenarioName.SUBSTITUTION:
+        parent = _unit(family, seed, "parent")
+        substitution = _unit(
+            family, seed, "substitution", kind="substitution", parent=parent.identity
+        )
+        steps = (
+            ScenarioStep(None, _response(FiscalOutcome.SUCCESS, units=(parent, substitution))),
+        )
+    elif scenario_name == ScenarioName.REPEATED_CURSOR:
+        first_response = (
+            _response(FiscalOutcome.SUCCESS, units=(first,), next_cursor="cursor-repeat")
+            if family == FiscalFamily.NFE
+            else _response(FiscalOutcome.SUCCESS, units=(first,), next_nsu="cursor-repeat")
+        )
+        repeated_response = (
+            _response(
+                FiscalOutcome.REPEATED_CURSOR,
+                next_cursor="cursor-repeat",
+                error_code="cursor_repeated",
+            )
+            if family == FiscalFamily.NFE
+            else _response(
+                FiscalOutcome.REPEATED_CURSOR,
+                next_nsu="cursor-repeat",
+                error_code="cursor_repeated",
+            )
+        )
+        steps = (
+            ScenarioStep(None, first_response),
+            ScenarioStep("cursor-repeat", repeated_response),
         )
     else:
+        response = (
+            _response(
+                FiscalOutcome.PARTIAL,
+                units=(first,),
+                next_cursor="cursor-partial",
+                error_code="partial_result",
+            )
+            if family == FiscalFamily.NFE
+            else _response(
+                FiscalOutcome.PARTIAL,
+                units=(first,),
+                next_nsu="cursor-partial",
+                error_code="partial_result",
+            )
+        )
         steps = (
-            ScenarioStep(
-                None,
-                _response(
-                    FiscalOutcome.PARTIAL,
-                    units=(first,),
-                    next_cursor="cursor-partial",
-                    error_code="partial_result",
-                ),
-            ),
+            ScenarioStep(None, response),
         )
     return SyntheticScenario(scenario_name, family, seed, steps)
 

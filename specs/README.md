@@ -24,7 +24,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 12 | [x] | [p3-fiscal-adapter-simulation-and-fixtures.md](p3-fiscal-adapter-simulation-and-fixtures.md) | P3 | P3-03 concluído | P0-04, P3-01 |
 | 13 | [x] | [p4-fiscal-document-ingestion-and-integrity.md](p4-fiscal-document-ingestion-and-integrity.md) | P4 | P4-01/P4-02/P4-03/P4-04 concluídos; migration `0014` e testes de matriz | P1-01/05/06, P2-03, P3-01/03 |
 | 14 | [ ] | [p5-nfe-distribution-and-manifestation.md](p5-nfe-distribution-and-manifestation.md) | P5 | **P5-01 implementado (issue 0013)**; P5-02, P5-03 pendentes | P2-03, P3-02/03, P4-02 |
-| 15 | [ ] | [p6-nfse-adn-distribution-and-coverage.md](p6-nfse-adn-distribution-and-coverage.md) | P6 | P6-01, P6-02 | P2-03, P3-02/03, P4-02 |
+| 15 | [x] | [p6-nfse-adn-distribution-and-coverage.md](p6-nfse-adn-distribution-and-coverage.md) | P6 | P6-01/P6-02 concluídos no issue 0014; transporte real permanece Open | P2-03, P3-02/03, P4-02 |
 | 16 | [ ] | [p7-document-consultation-and-individual-download.md](p7-document-consultation-and-individual-download.md) | P7 | P7-01, P7-02 | P1-03/04, P4-01/04 |
 | 17 | [ ] | [p7-danfe-danfse-rendering.md](p7-danfe-danfse-rendering.md) | P7 | P7-03 | P3-01, P4-01, P7-01, renderer Open |
 | 18 | [ ] | [p8-zip-export.md](p8-zip-export.md) | P8 | P8-01 | P3-01, P7-01/02; P7-03 se PDF |
@@ -38,7 +38,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 
 Todos os itens P0-01 a P9-05 estão cobertos. P2-04 é deliberadamente compartilhado pelas duas specs P2 porque a UI integra empresa e certificado; isso é cobertura transversal, não execução duplicada. Nenhum outro backlog tem dois proprietários primários. A seção “Specs futuras” de P3 inclui a spec manual; sua ausência na tabela original do mapa é corrigida neste índice conforme instrução explícita.
 
-Todas as entradas acima são specs ativas; não há specs superseded, deprecated ou template versionado neste diretório. P5 e P6 estão prontas para implementação com simuladores; P5-01 já foi implementado no issue 0013, enquanto P5-02/P5-03 e P6 permanecem pendentes. A conexão real continua bloqueada apenas pelas decisões externas registradas. A caixa de P0 registra a fundação entregue, incluindo o contrato reproduzível de `make build`.
+Todas as entradas acima são specs ativas; não há specs superseded, deprecated ou template versionado neste diretório. P5 e P6 usam simuladores para implementação segura; P5-01 foi implementado no issue 0013 e P6-01/P6-02 no issue 0014, enquanto P5-02/P5-03 permanecem pendentes. A conexão real continua bloqueada apenas pelas decisões externas registradas. A caixa de P0 registra a fundação entregue, incluindo o contrato reproduzível de `make build`.
 
 ## Fluxo de entrega
 
@@ -52,7 +52,7 @@ Uma spec ativa define o contrato verificável de uma fatia. A passagem de issues
 - Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 também pode avançar após P1/P3, sem esperar todo P8.
 - P9-03 depende de restore comprovado, mas esse gate não bloqueia outras specs.
 
-Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5, 1; P6, 1; P7, 2; P8, 3; P9, 5. Total: 25.
+Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5, 1 slice; P6, 1 spec concluída; P7, 2; P8, 3; P9, 5. Total: 25.
 
 ## Decisões Open, Blocked, Deferred e Proposed
 
@@ -65,6 +65,6 @@ Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05 e P4-01/P4-02/P4-03/P4-04 estão implementados. A próxima implementação pertence ao caminho P5/P6, respeitando os bloqueios e a ordem do backlog.
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05, P4-01/P4-02/P4-03/P4-04 e P6-01/P6-02 estão implementados. A próxima implementação pertence ao caminho P5/P7, respeitando os bloqueios e a ordem do backlog.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.
