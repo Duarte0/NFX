@@ -335,11 +335,10 @@ def _unit(
     kind: str = "document",
     parent: str | None = None,
 ) -> FiscalUnit:
-    digest = hashlib.sha256(
-        f"nfx-synthetic:{family.value}:{seed}:{label}:{variant}".encode()
-    ).hexdigest()
+    identity = f"synthetic:{family.value}:{seed}:{label}"
+    digest = hashlib.sha256(f"nfx-synthetic-unit:{identity}".encode()).hexdigest()
     return FiscalUnit(
-        identity=f"synthetic:{family.value}:{seed}:{label}",
+        identity=identity,
         content_hash=digest,
         kind=kind,
         parent_identity=parent,

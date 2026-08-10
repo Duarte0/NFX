@@ -84,6 +84,16 @@ PDF e conteúdo de objetos continuam sob responsabilidade de `nfx.artifacts`.
 P4-01 não cria execução, unidade, checkpoint, cursor/NSU, job ou transporte fiscal. Essa sequência
 fica para P4-02.
 
+## Pipeline fiscal durável (P4-02)
+
+`nfx.collection.ingestion.ingest_page` é a fronteira comum para páginas sintéticas. Ela registra
+a página e as unidades limitadas, finaliza o original através de `ArtifactStorageService`, e
+então delega a identidade para `nfx.documents.services.persist_document`. Somente uma página
+completa ou vazia avança o cursor ou NSU do seu escopo. Use `reconcile_ingestion` para unidades
+pendentes ou falhas após interrupção; o reconciliador não apaga objetos nem infere progresso de
+uma página incompleta. Checkpoints NF-e (`nfe`) e ADN (`adn`) são independentes. Transportes
+oficiais e payloads fiscais brutos continuam fora do escopo.
+
 ## Scope boundary
 
 ## Políticas e resultados de jobs (P3-02)

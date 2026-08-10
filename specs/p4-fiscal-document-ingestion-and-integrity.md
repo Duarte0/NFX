@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P4 — pronta após P2/P3.
+- **Fase/status:** P4 — P4-01/P4-02 implementados; P4-03/P4-04 pendentes.
 - **Backlog:** P4-01, P4-02, P4-03, P4-04.
 - **Dependências:** P1-01/05/06, P2-03, P3-01/03.
 - **PRD:** BR-INT-001, BR-INT-002, BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; BR-COLL-006, BR-COLL-008, BR-COLL-009; FR-DOC-001, FR-DOC-005; NFR-004, NFR-005, NFR-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009, AC-017.
@@ -31,6 +31,21 @@ Mesmo identity+hash é replay e não duplica. Identity igual+hash diferente pres
 Issue 0006 implementa a base relacional e a porta `nfx.documents`: documentos e eventos usam identidade externa normalizada com contexto de empresa/família/papel/fonte/fluxo, competência derivada da emissão e evidências referenciadas por `Artifact`. A migração aditiva `0011_document_documentevent_documenteventevidence_and_more` cria constraints e índices; replay, conflito com hashes divergentes, quarentena por identidade insuficiente, vínculos de evento e corrida de unicidade são cobertos por testes unitários e de integração.
 
 Esta evidência não marca a spec P4 como concluída: unidade recebida, checkpoint, cursor/NSU, reconciliador, API/UI e a matriz completa de falhas continuam pertencendo a P4-02–P4-04.
+
+## Evidência de implementação P4-02
+
+Issue 0009 adiciona a migration `0013` e os modelos de página, unidade recebida e checkpoint
+em `nfx.collection`. `FiscalIngestionService` registra a resposta, finaliza o original no
+`ArtifactStorageService`, delega identidade/evento/replay/conflito a `nfx.documents`, e só
+atualiza o cursor ou NSU depois de uma página vazia ou de todas as unidades em estado terminal.
+Páginas, unidades pendentes/falhas e referências de artefato são recuperáveis por
+`reconcile_ingestion`; cursor NF-e e NSU ADN ficam em escopos independentes. A integração com
+uma `CollectionExecution` está em `ingest_collection_response`, mantendo o worker e o
+simulador sem transporte oficial.
+
+Os testes de integração cobrem instalação da migration, replay, falha de objeto e recuperação,
+quarentena, hash divergente com ambas as evidências, cursor stale/repetido, página vazia e NSU
+ADN. P4-03 (matriz de estados de falha/decisão operacional) e P4-04 (API/UI) continuam abertos.
 
 ## Contratos, frontend e autorização
 
