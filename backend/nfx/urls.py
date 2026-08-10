@@ -9,6 +9,7 @@ from nfx.documents import views as document_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.health import operational
+from nfx.operations.views import dashboard
 
 
 def index(_: HttpRequest) -> HttpResponse:
@@ -30,6 +31,7 @@ urlpatterns = [
     path("health/live", live),
     path("health/ready", ready),
     path("health/operational", operational),
+    path("api/dashboard", dashboard),
     path("api/auth/csrf", identity_views.csrf),
     path("api/auth/login", identity_views.login),
     path("api/auth/logout", identity_views.logout),

@@ -59,7 +59,7 @@ runtime. A próxima implementação de produto continua sendo P5 follow-up/P7.
 | P6 NFS-e/ADN | **P6-01/P6-02 concluídos, issue 0014** | Adapter semântico simulator-only, cobertura versionada, distribuição por ator/fluxo/NSU, tomada/prestada/eventos/substituições, handoff ao P4, auditoria/métricas/UI segura; sem integrações municipais ou transporte oficial. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
 | P7 consulta/download | **P7-01/P7-02 concluídos, issue 0015** | Busca bounded com filtros aprovados, cursor opaco, detalhe/eventos e download individual RBAC/auditado com verificação de digest/tamanho. PDF continua fora. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
-| P8 ZIP/dashboard/retenção | **especificado, não implementado** | ZIP assíncrono, drill-down reconciliável e prévia de elegibilidade sem exclusão. Ver specs P8. | Consulta/download; dashboard pode usar P3-04 progressivamente; retenção depende P4. |
+| P8 ZIP/dashboard/retenção | **P8-02 slice inicial concluído no issue 0018; P8-01/P8-03 pendentes** | Dashboard read-only com períodos consecutivos, cards de empresas/documentos/coletas/jobs, drill-down, estados explícitos e health Admin-only; ZIP assíncrono e prévia de elegibilidade sem exclusão continuam pendentes. Ver specs P8. | Consulta/download; fontes P5–P7, rendering, disco e backup continuam capacidades ausentes; retenção depende P4. |
 | P9 runtime/restore/exclusão/piloto | **especificado, não implementado** | HTTPS interno, restore comprovado, exclusão somente após restore, hardening e piloto segregado. | Ver specs P9; P9-03 permanece bloqueado até P9-02. |
 
 ## Sequência executável
@@ -109,6 +109,9 @@ nenhum transporte oficial ou municipal foi habilitado.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.
 - Antes de P9-03: implementar e comprovar backup/restore incluindo banco, objetos, certificado cifrado e chave necessária.
+- P8-02 inicial entregue sem materialização: agregação calculate-on-read e capacidades futuras
+  permanecem `unavailable` até seus slices proprietários; ampliar cards somente após as fontes
+  correspondentes existirem.
 
 ## Próxima ação recomendada
 

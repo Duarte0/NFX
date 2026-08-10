@@ -6,6 +6,8 @@
 - **Backlog:** P8-02. **Dependências:** P3-04 e capacidades P2–P7 disponíveis.
 - **PRD:** FR-DASH-001, FR-DASH-002, FR-DASH-003; FR-OPS-001, BR-OPS-001, BR-DASH-001; NFR-001, NFR-002, NFR-008. **Aceite:** AC-013, AC-023, AC-024.
 - **Arquitetura:** seções 14, 26, 32, 35, 36, 39 e 40; ADR-012 quanto à limitação de backup.
+- **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering,
+  disco e backup continuam explicitamente indisponíveis para incrementos posteriores.
 
 ## Propósito e resultado
 
@@ -38,3 +40,13 @@ Falha de uma fonte não derruba demais cards. Cache/snapshot antigo mostra idade
 - [ ] Não há notificação ou relatório fora do MVP.
 
 DoD: contrato, queries/snapshots decididos, UI, RBAC, telemetria e testes verdes. **Proposed:** estratégia de agregação/cache e limites padrão de período.
+
+### Evidência do slice inicial P8-02
+
+`GET /api/dashboard` e a seção React `#dashboard` implementam agregação calculate-on-read para
+empresas, documentos persistidos, coletas e jobs, com intervalo `[from,to)`, comparação de mesma
+duração, drill-down bounded e estados de frescura/degradação. Saúde de dependências permanece
+Admin-only e reutiliza o avaliador P3-04; documentos/fonte fiscal futura, PDF, disco e backup
+continuam `unavailable`. Não há migration, snapshot, cache ou escrita fiscal. Evidência: testes
+unitários de intervalo/falha isolada e testes de integração de agregação, zero, RBAC e health,
+além de Ruff/mypy/TypeScript/Vite.

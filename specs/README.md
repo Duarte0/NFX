@@ -28,7 +28,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 16 | [x] | [p7-document-consultation-and-individual-download.md](p7-document-consultation-and-individual-download.md) | P7 | P7-01/P7-02 concluídos no issue 0015; PDF permanece fora | P1-03/04, P4-01/04 |
 | 17 | [ ] | [p7-danfe-danfse-rendering.md](p7-danfe-danfse-rendering.md) | P7 | P7-03 | P3-01, P4-01, P7-01, renderer Open |
 | 18 | [ ] | [p8-zip-export.md](p8-zip-export.md) | P8 | P8-01 | P3-01, P7-01/02; P7-03 se PDF |
-| 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | P8-02 | P3-04 + dados P2–P7 disponíveis |
+| 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | **P8-02 slice inicial implementado (issue 0018); capacidades P5–P7/P9 permanecem indisponíveis** | P3-04 + dados P2–P7 disponíveis; entrega progressiva permitida |
 | 20 | [ ] | [p8-retention-eligibility.md](p8-retention-eligibility.md) | P8 | P8-03 | P1-05, P4-01, P7-03 se houver PDF |
 | 21 | [ ] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 | P1-01, P1-03, P3-04 |
 | 22 | [ ] | [p9-backup-and-restore.md](p9-backup-and-restore.md) | P9 | P9-02 | P1-06, P2-03, P3-04 |

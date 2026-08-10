@@ -17,3 +17,18 @@ Restart cria uma nova evidência sem apagar o processo anterior, e atualizaçõe
 identidades diferentes são independentes. Os limites são validados antes do boot por
 `NFX_WORKER_HEARTBEAT_TIMEOUT_SECONDS`, `NFX_SCHEDULER_HEARTBEAT_TIMEOUT_SECONDS` e
 `NFX_JOB_BACKLOG_DELAY_SECONDS` (1–86400 segundos); os padrões são 30, 30 e 300.
+
+## Dashboard inicial (P8-02)
+
+Usuários autenticados podem consultar `GET /api/dashboard`, uma leitura sem persistência própria
+que agrega apenas dados já duráveis de empresas, documentos, coletas e jobs. Os limites `from` e
+`to` são datas civis de Brasília em intervalo semiaberto `[from,to)`, com máximo de 366 dias; a
+resposta sempre informa o período anterior de mesma duração. `zero`, `unavailable`, `degraded` e
+`unknown` são estados distintos, e cada card disponível aponta para a lista existente com filtros
+suportados. Valores fiscais ainda não persistidos, fontes P5/P6, rendering, disco e backup não são
+inventados: aparecem como capacidade indisponível.
+
+Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
+Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
+recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por
+URL direta. O endpoint não cria snapshots, jobs, auditoria adicional, cache ou migração.

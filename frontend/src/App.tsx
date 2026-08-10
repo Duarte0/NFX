@@ -4,13 +4,15 @@ import { AuditSection } from "./features/audit/AuditSection";
 import { CollectionsSection } from "./features/collections/CollectionsSection";
 import { CompaniesSection } from "./features/companies/CompaniesSection";
 import { DocumentsSection } from "./features/documents/DocumentsSection";
+import { DashboardSection } from "./features/dashboard/DashboardSection";
 import { UsersSection } from "./features/users/UsersSection";
 
-type Section = "documents" | "companies" | "collections" | "users" | "audit";
+type Section = "dashboard" | "documents" | "companies" | "collections" | "users" | "audit";
 
 function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedContext) {
   const [loadRequests, setLoadRequests] = useState<Record<Section, number>>({
     documents: 0,
+    dashboard: 0,
     companies: 0,
     collections: 0,
     users: 0,
@@ -31,6 +33,7 @@ function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedConte
         <button onClick={() => void signOut()}>Sair</button>
       </header>
       <nav aria-label="Navegação principal">
+        <a href="#dashboard" onClick={() => requestLoad("dashboard")}>Dashboard</a>
         <a href="#documentos" onClick={() => requestLoad("documents")}>Documentos</a>
         <a href="#exportacoes">Exportações</a>
         {canManage && (
@@ -48,6 +51,7 @@ function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedConte
         )}
       </nav>
       <p>{message} · Horários em Brasília · valores em R$.</p>
+      <DashboardSection loadSignal={loadRequests.dashboard} notify={notify} />
       <DocumentsSection loadSignal={loadRequests.documents} notify={notify} />
       {canManage && <CompaniesSection loadSignal={loadRequests.companies} notify={notify} />}
       <CollectionsSection canManage={canManage} loadSignal={loadRequests.collections} notify={notify} />

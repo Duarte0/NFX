@@ -8,7 +8,7 @@ O bootstrap em `frontend/src/main.tsx` somente valida o elemento `#root` e monta
 contratos HTTP, estado, handlers e apresentação em `frontend/src/features/`:
 
 - `auth` — login, restauração, encerramento e shell de sessão;
-- `users`, `companies`, `certificates`, `collections`, `documents` e `audit` — um limite por
+- `users`, `companies`, `certificates`, `collections`, `documents`, `dashboard` e `audit` — um limite por
   domínio, sem estado ou regra de negócio compartilhado entre funcionalidades;
 - `shared/http.ts` — credenciais same-origin, CSRF, serialização e erros seguros; e
   `shared/ui/` — primitives sem regras de domínio.
