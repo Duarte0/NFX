@@ -60,6 +60,11 @@ segredo externo/sintético apropriado. `.env.example` e `docs/DEVELOPMENT.md` do
 desconhecida, allowlist vazia, URL/case/porta, redaction aninhada, arquivo montado e espião com zero
 chamadas. Não há schema nem migração.
 
+A higiene do template também é verificada no mesmo módulo: `.env.example` mantém uma única entrada
+por configuração, usa placeholders inválidos para os dois segredos e documenta as alternativas de
+variável ou arquivo montado. A regressão cobre ausência, placeholder, chave malformada e fontes
+conflitantes sem depender de qualquer valor que tenha aparecido em uma cópia local.
+
 DoD: contratos aplicados aos três processos, documentação de configuração e testes de
 bypass/redaction verdes. **Concluído em 2026-08-04.** **Open não bloqueante:** endpoints oficiais
 permanecem indefinidos; esta spec não precisa conhecê-los.

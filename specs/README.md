@@ -62,3 +62,5 @@ Fases: P0 tem 2 specs e está concluída; P1 tem 5 specs (4 concluídas, P1-04 b
 Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07 e P2-01/P2-02/P2-03/P2-04 estão implementados. A próxima implementável é `p3-manual-collection-control.md` (P3-05), dependente de P1-03, P1-05, P3-01 e P3-02.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.
+
+O contrato de configuração P0 inclui a higiene do template verificada no issue 0007; a lacuna operacional de `make build` permanece registrada na spec própria.

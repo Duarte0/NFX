@@ -12,6 +12,7 @@ from nfx.infrastructure.http import JsonFormatter
 from nfx.infrastructure.redaction import REDACTED, redact
 
 CANARY = "synthetic-secret-canary"
+TEMPLATE_PATH = Path(__file__).parents[2] / ".env.example"
 
 
 def environment(**overrides: str) -> dict[str, str]:
@@ -26,6 +27,47 @@ def environment(**overrides: str) -> dict[str, str]:
     }
     values.update(overrides)
     return values
+
+
+def template_assignments() -> dict[str, list[str]]:
+    assignments: dict[str, list[str]] = {}
+    for line in TEMPLATE_PATH.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, value = line.split("=", 1)
+        assignments.setdefault(name, []).append(value)
+    return assignments
+
+
+def test_environment_template_uses_external_secret_placeholders_once() -> None:
+    text = TEMPLATE_PATH.read_text(encoding="utf-8")
+    assignments = template_assignments()
+
+    assert all(len(values) == 1 for values in assignments.values())
+    assert assignments["NFX_SECRET_KEY"][0].startswith("CHANGE_ME_")
+    assert assignments["NFX_CERTIFICATE_MASTER_KEY"][0].startswith("CHANGE_ME_")
+    assert "NFX_SECRET_KEY_FILE" in text
+    assert "NFX_CERTIFICATE_MASTER_KEY_FILE" in text
+    assert "nunca preencha ambos" in text
+    assert "base64url" in text
+
+    assert assignments["NFX_PROFILE"] == ["development"]
+    assert assignments["NFX_FISCAL_TRANSPORT"] == ["simulator"]
+    assert assignments["NFX_FISCAL_DESTINATION"] == ["simulator://empty"]
+    assert assignments["NFX_FISCAL_ALLOWLIST"] == ["simulator://empty"]
+
+
+@pytest.mark.parametrize("name", ["NFX_SECRET_KEY", "NFX_CERTIFICATE_MASTER_KEY"])
+def test_required_template_secrets_cannot_be_absent_or_placeholder(name: str) -> None:
+    values = environment()
+    values.pop(name)
+    with pytest.raises(ConfigurationError):
+        load_settings(values)
+
+    values = environment(**{name: "CHANGE_ME"})
+    with pytest.raises(ConfigurationError):
+        load_settings(values)
 
 
 @pytest.mark.parametrize("profile", ["test", "development"])
@@ -73,6 +115,39 @@ def test_secret_can_be_loaded_from_a_mounted_file(tmp_path: Path) -> None:
     secret_file.write_text(CANARY, encoding="utf-8")
     settings = load_settings(environment(NFX_SECRET_KEY="", NFX_SECRET_KEY_FILE=str(secret_file)))
     assert settings.secrets.django_secret_key == CANARY
+
+
+def test_both_secret_sources_are_rejected_and_certificate_file_is_supported(tmp_path: Path) -> None:
+    certificate_material = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+    certificate_file = tmp_path / "certificate-key"
+    certificate_file.write_text(certificate_material, encoding="utf-8")
+
+    settings = load_settings(
+        environment(
+            NFX_CERTIFICATE_MASTER_KEY="",
+            NFX_CERTIFICATE_MASTER_KEY_FILE=str(certificate_file),
+        )
+    )
+    assert settings.secrets.certificate_master_key == b"\x01" * 32
+
+    django_file = tmp_path / "django-key-conflict"
+    django_file.write_text(CANARY, encoding="utf-8")
+    with pytest.raises(ConfigurationError):
+        load_settings(environment(NFX_SECRET_KEY_FILE=str(django_file)))
+
+    with pytest.raises(ConfigurationError):
+        load_settings(
+            environment(
+                NFX_CERTIFICATE_MASTER_KEY=certificate_material,
+                NFX_CERTIFICATE_MASTER_KEY_FILE=str(certificate_file),
+            )
+        )
+
+
+@pytest.mark.parametrize("value", ["CHANGE_ME", "not-base64url-key"])
+def test_malformed_certificate_master_key_fails_closed(value: str) -> None:
+    with pytest.raises(ConfigurationError):
+        load_settings(environment(NFX_CERTIFICATE_MASTER_KEY=value))
 
 
 def test_certificate_master_key_requires_external_base64url_32_byte_material() -> None:

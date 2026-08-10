@@ -92,3 +92,9 @@ Os cenários distinguem vazio válido, ausência de cobertura, indisponibilidade
 bloqueio, duplicata, conflito, payload malformado, evento sem pai e cursor repetido. O handler
 genérico transforma esses valores em `HandlerOutcome` e preserva a fronteira de lease/idempotência
 dos jobs. Fixtures não carregam XML, credenciais, tokens, certificados ou endpoints produtivos.
+
+Copy `.env.example` only as a list of settings: its `CHANGE_ME_*` values are deliberately invalid.
+Provide `NFX_SECRET_KEY` and `NFX_CERTIFICATE_MASTER_KEY` through the process environment or their
+corresponding mounted `*_FILE` variables, exactly one source per secret. Do not commit or reuse
+secrets from prior local copies; if a value was used outside disposable testing, rotate it through
+the external secret-management process.

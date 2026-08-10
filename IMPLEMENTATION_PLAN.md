@@ -496,3 +496,7 @@ Um item termina quando código e migrações necessárias passam nos testes defi
 Criar specs na ordem da seção 17, citando os IDs deste backlog. Cada spec cobre uma fatia, preserva ADRs Accepted, não reabre decisões resolvidas e explicita testes/evidências. Decisões Open bloqueiam apenas integrações diretamente afetadas.
 
 Depois de modificações de código, atualizar Graphify conforme AGENTS.md. Este documento não exige alteração de código ou Graphify.
+
+**Template hygiene (issue 0007, completed 2026-08-09):** `.env.example` contains only invalid
+external placeholders, mounted-file alternatives, unique settings, and simulator-only fiscal
+values. Configuration tests cover missing, placeholder, malformed, and conflicting sources.
