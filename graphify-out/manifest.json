@@ -70,13 +70,13 @@
     "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786365402.951997,
-    "ast_hash": "614f7959a3fbe108fd7f04d37b974c08",
+    "mtime": 1786366270.0946412,
+    "ast_hash": "714002ff1c1caa5cc906693723a35c73",
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786365165.771734,
-    "ast_hash": "7dd57bda4f18fe01b746f8b032114e03",
+    "mtime": 1786366034.3508055,
+    "ast_hash": "d5ea5bd409e2d8364d3e497bc04522ed",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "specs/p4-fiscal-document-ingestion-and-integrity.md": {
-    "mtime": 1786365165.770734,
-    "ast_hash": "2097a7b5fcceb506069aca0872568e14",
+    "mtime": 1786366046.197801,
+    "ast_hash": "aa3cd81c8a1c6156b08fe71ca8ec49cf",
     "semantic_hash": ""
   },
   "specs/p5-nfe-distribution-and-manifestation.md": {
@@ -320,8 +320,8 @@
     "semantic_hash": "090595e2358fc50b3215387c7e3b3c28"
   },
   "backend/nfx/urls.py": {
-    "mtime": 1786324767.1158507,
-    "ast_hash": "516e65e9bd6094868bdd1b9bb4dcd9eb",
+    "mtime": 1786365755.9607518,
+    "ast_hash": "dfeb8a81a97dbe77a895395f701f0194",
     "semantic_hash": ""
   },
   "backend/nfx/wsgi.py": {
@@ -340,8 +340,8 @@
     "semantic_hash": "8435964a4fd1a46cc8b7f44ad069a630"
   },
   "frontend/src/main.tsx": {
-    "mtime": 1786325250.2947903,
-    "ast_hash": "1795e89331ec644be1d6f7372419389a",
+    "mtime": 1786365793.44278,
+    "ast_hash": "d99f797c445dc01672888f42862e1022",
     "semantic_hash": ""
   },
   "frontend/tsconfig.json": {
@@ -400,8 +400,8 @@
     "semantic_hash": ""
   },
   "docs/DEVELOPMENT.md": {
-    "mtime": 1786365175.5478032,
-    "ast_hash": "2f4d46b43ac6f3c7ce34c8194171f7a6",
+    "mtime": 1786366055.1867974,
+    "ast_hash": "aabc488cf68ac4d42ad973b9ec2ee298",
     "semantic_hash": ""
   },
   "frontend/index.html": {
@@ -865,8 +865,28 @@
     "semantic_hash": ""
   },
   "issues/0010_-_minimum-document-status-and-list-contract.md": {
-    "mtime": 1786328204.0185635,
-    "ast_hash": "2a30c2b87bdcbbf0470a990816eb6033",
+    "mtime": 1786366223.4116848,
+    "ast_hash": "56bb48138e446e75f0cfffa6ca5fb70e",
+    "semantic_hash": ""
+  },
+  "backend/nfx/documents/status.py": {
+    "mtime": 1786366079.8827858,
+    "ast_hash": "684321653498235826054eb863028664",
+    "semantic_hash": ""
+  },
+  "backend/nfx/documents/views.py": {
+    "mtime": 1786365819.3997953,
+    "ast_hash": "33d37ef83c31d6056c1763baaf1cfdb4",
+    "semantic_hash": ""
+  },
+  "tests/integration/test_document_status.py": {
+    "mtime": 1786365980.2908201,
+    "ast_hash": "d21db575a20481464c1311742560c752",
+    "semantic_hash": ""
+  },
+  "tests/unit/test_document_status.py": {
+    "mtime": 1786365835.970803,
+    "ast_hash": "5859dca81dc6a2f59fe16647e4bd06be",
     "semantic_hash": ""
   }
 }

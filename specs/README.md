@@ -22,7 +22,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 10 | [x] | [p3-durable-jobs-leases-and-policy-engine.md](p3-durable-jobs-leases-and-policy-engine.md) | P3 | P3-01/P3-02/P3-04 implementados e validados | P1-01, P1-05 |
 | 11 | [x] | [p3-manual-collection-control.md](p3-manual-collection-control.md) | P3 | P3-05 concluído no issue 0005 | P1-03, P1-05, P3-01, P3-02 |
 | 12 | [x] | [p3-fiscal-adapter-simulation-and-fixtures.md](p3-fiscal-adapter-simulation-and-fixtures.md) | P3 | P3-03 concluído | P0-04, P3-01 |
-| 13 | [ ] | [p4-fiscal-document-ingestion-and-integrity.md](p4-fiscal-document-ingestion-and-integrity.md) | P4 | P4-01/P4-02 concluídos; P4-03, P4-04 pendentes | P1-01/05/06, P2-03, P3-01/03 |
+| 13 | [ ] | [p4-fiscal-document-ingestion-and-integrity.md](p4-fiscal-document-ingestion-and-integrity.md) | P4 | P4-01/P4-02/P4-04 concluídos; P4-03 pendente | P1-01/05/06, P2-03, P3-01/03 |
 | 14 | [ ] | [p5-nfe-distribution-and-manifestation.md](p5-nfe-distribution-and-manifestation.md) | P5 | P5-01, P5-02, P5-03 | P2-03, P3-02/03, P4-02 |
 | 15 | [ ] | [p6-nfse-adn-distribution-and-coverage.md](p6-nfse-adn-distribution-and-coverage.md) | P6 | P6-01, P6-02 | P2-03, P3-02/03, P4-02 |
 | 16 | [ ] | [p7-document-consultation-and-individual-download.md](p7-document-consultation-and-individual-download.md) | P7 | P7-01, P7-02 | P1-03/04, P4-01/04 |
@@ -52,7 +52,7 @@ Uma spec ativa define o contrato verificável de uma fatia. A passagem de issues
 - Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 também pode avançar após P1/P3, sem esperar todo P8.
 - P9-03 depende de restore comprovado, mas esse gate não bloqueia outras specs.
 
-Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02 implementados dentro da spec, com P4-03/P4-04 pendentes; P5, 1; P6, 1; P7, 2; P8, 3; P9, 5. Total: 25.
+Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02/P4-04 implementados dentro da spec, com P4-03 pendente; P5, 1; P6, 1; P7, 2; P8, 3; P9, 5. Total: 25.
 
 ## Decisões Open, Blocked, Deferred e Proposed
 
@@ -65,6 +65,6 @@ Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04 e P3-05 estão implementados. A próxima implementável é `p4-fiscal-document-ingestion-and-integrity.md` (P4-02), dependente de P4-01 e P3-01.
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05 e P4-04 estão implementados. A próxima implementação da spec P4 é a matriz P4-03, mantendo P4-04 como contrato de leitura concluído.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.

@@ -1,16 +1,16 @@
 # Graph Report - workspace  (2026-08-10)
 
 ## Corpus Check
-- 168 files · ~95,028 words
+- 172 files · ~96,990 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1820 nodes · 3873 edges · 150 communities (109 shown, 41 thin omitted)
+- 1867 nodes · 3992 edges · 152 communities (111 shown, 41 thin omitted)
 - Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 318 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9a944163`
+- Built from commit: `c6b45133`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,10 +22,10 @@
 - Arquitetura técnica — NFX INOV
 - Plano de implementação — NFX INOV
 - audit/services.py
-- dependencies.py
-- ArtifactStorageService
-- Consulta de documentos e download individual
+- status.py
 - AuditService
+- P4 Ingestão comum
+- companies/services.py
 - devDependencies
 - documents/services.py
 - What You Must Do When Invoked
@@ -82,7 +82,7 @@
 - jobs/policy.py
 - 0005_-_manual-collection-control.md
 - urls.py
-- documents/__init__.py
+- integration/test_document_status.py
 - exports/__init__.py
 - test_job_engine.py
 - infrastructure/__init__.py
@@ -134,7 +134,7 @@
 - 0010_process_heartbeats.py
 - OPERATIONS.md
 - Artifact
-- FiscalIngestionService
+- FiscalResponse
 - Exports Reference
 - Runtime interno e HTTPS
 - Query Reference
@@ -144,29 +144,31 @@
 - DependencyCheck
 - GitHub and Merge Reference
 - test_manual_collection.py
-- FiscalResponse
-- HandlerOutcome
+- MemoryObjectStore
+- collection_handler
 - 0011_document_documentevent_documenteventevidence_and_more.py
 - 0012_companyflow_blocked_reason_and_more.py
 - test_build_contract.py
 - 0009_-_durable-ingestion-pipeline-and-cursor.md
 - 0010_-_minimum-document-status-and-list-contract.md
-- ingest_page
+- 10. Fases detalhadas e backlog estável
 - Distribuição NF-e e manifestação
 - Administração de usuários
-- IngestionError
+- Consulta de documentos e download individual
 - 0013_ingestionpage_ingestioncheckpoint_receivedunit_and_more.py
+- Elegibilidade de retenção e prévia administrativa
+- Distribuição NFS-e/ADN e cobertura
 
 ## God Nodes (most connected - your core abstractions)
 1. `AuditService` - 78 edges
 2. `ArtifactStorageService` - 56 edges
-3. `Action` - 55 edges
+3. `Action` - 56 edges
 4. `Artifact` - 47 edges
 5. `HandlerOutcome` - 47 edges
 6. `Arquitetura técnica — NFX INOV` - 47 edges
 7. `JobEngine` - 40 edges
 8. `SessionIdentity` - 35 edges
-9. `protected()` - 33 edges
+9. `protected()` - 35 edges
 10. `load_settings()` - 33 edges
 
 ## Surprising Connections (you probably didn't know these)
@@ -174,12 +176,12 @@
   tests/integration/test_ingestion.py → backend/nfx/adapters/simulation.py
 - `MemoryObjectStore` --uses--> `FiscalUnit`  [INFERRED]
   tests/integration/test_ingestion.py → backend/nfx/adapters/simulation.py
+- `MemoryObjectStore` --uses--> `FiscalResponse`  [INFERRED]
+  tests/integration/test_ingestion.py → backend/nfx/adapters/simulation.py
 - `MemoryObjectStore` --uses--> `ArtifactState`  [INFERRED]
   tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
 - `MemoryObjectStore` --uses--> `Artifact`  [INFERRED]
   tests/integration/test_artifact_storage.py → backend/nfx/artifacts/models.py
-- `MemoryObjectStore` --uses--> `ArtifactNotReadable`  [INFERRED]
-  tests/integration/test_artifact_storage.py → backend/nfx/artifacts/storage.py
 
 ## Import Cycles
 - None detected.
@@ -191,11 +193,11 @@
 - **Docker Infrastructure Stack** — docker_compose_app, docker_compose_test, docker_compose_dev [EXTRACTED 0.95]
 - **Fiscal Ingestion Flow** — specs_p3_fiscal_adapter_simulation_and_fixtures_fiscal_adapter_port, specs_p4_fiscal_document_ingestion_and_integrity_document, specs_p1_object_storage_and_integrity_artifact_storage_service [EXTRACTED 0.90]
 
-## Communities (150 total, 41 thin omitted)
+## Communities (152 total, 41 thin omitted)
 
 ### Community 0 - "identity/services.py"
 Cohesion: 0.07
-Nodes (89): IdentitySession, LoginThrottle, Meta, A keyed subject digest avoids retaining an account identifier on failed logins., Role, User, _admin_event(), _assert_not_last_administrator() (+81 more)
+Nodes (88): IdentitySession, LoginThrottle, Meta, A keyed subject digest avoids retaining an account identifier on failed logins., Role, User, _admin_event(), _assert_not_last_administrator() (+80 more)
 
 ### Community 1 - "ArtifactState"
 Cohesion: 0.10
@@ -214,26 +216,26 @@ Cohesion: 0.04
 Nodes (46): 11. Organização do repositório, 12. Stack selecionada e justificativa, 13. Alternativas consideradas e rejeitadas, 14. Responsabilidade e propriedade de estado, 15. Estratégia de dados e persistência, 16. Responsabilidades do PostgreSQL, 17. Responsabilidades do armazenamento de objetos, 18. Identidade fiscal de documentos (+38 more)
 
 ### Community 5 - "Plano de implementação — NFX INOV"
-Cohesion: 0.05
-Nodes (37): 10. Fases detalhadas e backlog estável, 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs (+29 more)
+Cohesion: 0.08
+Nodes (26): 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs, 18. Rastreabilidade do PRD (+18 more)
 
 ### Community 6 - "audit/services.py"
+Cohesion: 0.07
+Nodes (46): AuditEvent, AuditChain, AuditEvent, Meta, The single stream serializes appends without allowing event rewrites., AuditUnavailable, AuditVerifier, _canonical() (+38 more)
+
+### Community 7 - "status.py"
+Cohesion: 0.12
+Nodes (27): _aggregate_status(), collection_status(), CollectionStatus, _document_payload(), DocumentListParams, DocumentStatusCode, InvalidDocumentListParams, list_document_status() (+19 more)
+
+### Community 8 - "AuditService"
 Cohesion: 0.08
-Nodes (35): AuditEvent, AuditChain, AuditEvent, Meta, The single stream serializes appends without allowing event rewrites., AuditUnavailable, AuditVerifier, _canonical() (+27 more)
+Nodes (69): ArtifactStorageService, object_store_from_environment(), ObjectStore, Protocol, Build the adapter at the infrastructure edge, not in a domain caller., Creates pending metadata, verifies bytes, and finalizes atomically., AuditService, Certificate (+61 more)
 
-### Community 7 - "dependencies.py"
-Cohesion: 0.18
-Nodes (11): dependencies_from_environment(), _object_probe(), _postgres_probe(), _schema_probe(), ServiceDependencies, Command, BaseCommand, django_db (+3 more)
+### Community 9 - "P4 Ingestão comum"
+Cohesion: 0.19
+Nodes (8): P0 Fundação, P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P5 NF-e, P6 NFS-e/ADN, P7 Consulta e artefatos
 
-### Community 8 - "ArtifactStorageService"
-Cohesion: 0.08
-Nodes (68): ArtifactStorageService, object_store_from_environment(), ObjectStore, Protocol, Build the adapter at the infrastructure edge, not in a domain caller., Creates pending metadata, verifies bytes, and finalizes atomically., Certificate, CertificateState (+60 more)
-
-### Community 9 - "Consulta de documentos e download individual"
-Cohesion: 0.08
-Nodes (24): P0 Fundação, P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P6 NFS-e/ADN, P7 Consulta e artefatos, Aceite e DoD (+16 more)
-
-### Community 10 - "AuditService"
+### Community 10 - "companies/services.py"
 Cohesion: 0.06
 Nodes (84): HttpOpenCnpjClient, _HttpResponse, OpenCnpjClient, OpenCnpjResponse, Protocol, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Optional public-source transport with an injected opener for tests. (+76 more)
 
@@ -242,8 +244,8 @@ Cohesion: 0.06
 Nodes (32): eslint, @eslint/js, eslint-plugin-react-hooks, dependencies, react, react-dom, vite, @vitejs/plugin-react (+24 more)
 
 ### Community 12 - "documents/services.py"
-Cohesion: 0.15
-Nodes (37): _artifact(), _artifact_size(), _audit(), derive_competence(), DocumentInput, DocumentPersistenceResult, FiscalIdentity, _identity_key() (+29 more)
+Cohesion: 0.18
+Nodes (28): _artifact(), _artifact_size(), _audit(), derive_competence(), DocumentInput, DocumentPersistenceResult, DocumentPersistenceStatus, FiscalIdentity (+20 more)
 
 ### Community 13 - "What You Must Do When Invoked"
 Cohesion: 0.13
@@ -258,7 +260,7 @@ Cohesion: 0.09
 Nodes (21): compilerOptions, allowJs, allowSyntheticDefaultImports, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, lib (+13 more)
 
 ### Community 16 - "HeartbeatService"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (22): ensure_collection_handler(), configure_logging(), JsonFormatter, Any, Emit bounded structured fields without making logging part of a state…, safe_log(), HeartbeatService, Write only this process's identity and read the freshest component evidence. (+14 more)
 
 ### Community 17 - "9. Requisitos funcionais e regras de negócio"
@@ -282,8 +284,8 @@ Cohesion: 0.18
 Nodes (10): Aceite e DoD, Baseline, escopo e não escopo, Contratos, frontend e autorização, Falhas, recovery e testes, Ingestão fiscal comum e integridade, Metadados, Pipeline e invariantes, Propriedade e schema Proposed (+2 more)
 
 ### Community 22 - "main.tsx"
-Cohesion: 0.16
-Nodes (12): App(), AuditEvent, Certificate, CollectionCompany, CollectionFlow, collectionLabel(), Company, CompanyFlow (+4 more)
+Cohesion: 0.14
+Nodes (16): App(), AuditEvent, Certificate, CollectionCompany, CollectionFlow, collectionLabel(), Company, CompanyFlow (+8 more)
 
 ### Community 23 - "Fundação do projeto"
 Cohesion: 0.20
@@ -318,8 +320,8 @@ Cohesion: 0.29
 Nodes (7): Technical Architecture - NFX INOV, Audit Chain Mechanism, Infrastructure Configuration Module, Product Requirements Document - NFX INOV, Spec: P0 Project Foundation, Spec: P0 Safe Configuration, Spec: P1 Audit Foundation
 
 ### Community 31 - "JobEngine"
-Cohesion: 0.16
-Nodes (17): Job, A safe, referential unit of background work and its current lease., InvalidTransition, JobEngine, process_one(), Any, datetime, timedelta (+9 more)
+Cohesion: 0.11
+Nodes (28): Job, JobPolicy, Versioned retry policy selected by a job and retained for its lifetime., A safe, referential unit of background work and its current lease., InvalidJobPayload, InvalidTransition, JobEngine, JobEngineError (+20 more)
 
 ### Community 33 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -332,10 +334,6 @@ Nodes (8): Aceite e DoD, Baseline, escopo e não escopo, Contratos Proposed e ce
 ### Community 35 - "Controle manual de coleta"
 Cohesion: 0.22
 Nodes (8): Aceite e DoD, Baseline, escopo e não escopo, Controle manual de coleta, Estado e contratos Proposed, Falhas, observabilidade e testes, Metadados, Propósito e resultado, UI, permissões e comportamento visível
-
-### Community 36 - "README.md"
-Cohesion: 0.14
-Nodes (11): P8 ZIP, dashboard e retenção, P9 Operação e piloto, Aceite e DoD, Baseline, escopo e não escopo, Contratos, UI e autorização, Elegibilidade de retenção e prévia administrativa, Metadados, Propósito e resultado (+3 more)
 
 ### Community 37 - "19. Jornadas principais"
 Cohesion: 0.25
@@ -366,12 +364,12 @@ Cohesion: 0.29
 Nodes (6): Configuração segura e isolamento fiscal (P0-02/P0-04), Contratos dos comandos, Decisões Proposed adotadas, Fundação P0, Persistência e migrações (P1-01), Scope boundary
 
 ### Community 44 - "collection/services.py"
-Cohesion: 0.09
-Nodes (61): CollectionExecution, CollectionExecutionState, CollectionOrigin, CollectionScope, InitialCollectionRequest, InitialCollectionRequestState, Meta, Durable, safe operational record for one company/family collection. (+53 more)
+Cohesion: 0.10
+Nodes (58): CollectionExecution, CollectionOrigin, CollectionScope, Durable, safe operational record for one company/family collection., _active_execution(), _audit(), CollectionAccessDenied, CollectionBlocked (+50 more)
 
 ### Community 45 - "schema.py"
-Cohesion: 0.17
-Nodes (10): MigrationOutcome, RuntimeError, Schema compatibility and serialized migration support. This module deliberately…, Raised when the database cannot safely serve this application version., Run Django migrations once at a time and report only safe metadata., SchemaIncompatibleError, SchemaMigrator, SchemaStatus (+2 more)
+Cohesion: 0.13
+Nodes (12): MigrationOutcome, RuntimeError, Schema compatibility and serialized migration support. This module deliberately…, Raised when the database cannot safely serve this application version., Run Django migrations once at a time and report only safe metadata., SchemaIncompatibleError, SchemaMigrator, SchemaStatus (+4 more)
 
 ### Community 46 - "graphify reference: query, path, explain"
 Cohesion: 0.33
@@ -414,24 +412,28 @@ Cohesion: 0.67
 Nodes (3): Durable Job Engine, Collection Request Service, ZIP Export Service
 
 ### Community 66 - "jobs/policy.py"
-Cohesion: 0.20
-Nodes (17): JobPolicy, Versioned retry policy selected by a job and retained for its lifetime., AmbiguousPolicy, create_policy(), InvalidPolicy, PolicyError, PolicyNotFound, datetime (+9 more)
+Cohesion: 0.22
+Nodes (14): AmbiguousPolicy, InvalidPolicy, PolicyError, PolicyNotFound, datetime, RuntimeError, ValueError, Validated selection and creation of versioned job policies. (+6 more)
 
 ### Community 67 - "0005_-_manual-collection-control.md"
 Cohesion: 0.20
 Nodes (9): Acceptance Criteria, Description, Implementation Plan, In Scope, Objective and Expected Outcome, Out of Scope, References, Resolution (+1 more)
 
 ### Community 68 - "urls.py"
-Cohesion: 0.15
-Nodes (10): Append-only audit trail, integrity verifier, and administrative query boundary., Certificate lifecycle and envelope-encryption domain boundary., Durable collection request boundary used by certificate activation., Company lifecycle, flow configuration, and public enrichment boundary., Identity boundary (no domain implementation in P0)., index(), live(), HttpRequest (+2 more)
+Cohesion: 0.09
+Nodes (20): Append-only audit trail, integrity verifier, and administrative query boundary., Certificate lifecycle and envelope-encryption domain boundary., Durable collection request boundary used by certificate activation., Company lifecycle, flow configuration, and public enrichment boundary., Document boundary (no domain implementation in P0)., Identity boundary (no domain implementation in P0)., dependencies_from_environment(), _object_probe() (+12 more)
+
+### Community 69 - "integration/test_document_status.py"
+Cohesion: 0.35
+Nodes (11): _artifact(), _client(), _document(), Company, django_db, parametrize, test_all_authenticated_roles_can_read_the_global_document_scope(), test_document_list_is_authenticated_and_valid_empty_is_not_unavailable() (+3 more)
 
 ### Community 71 - "test_job_engine.py"
-Cohesion: 0.24
-Nodes (16): FrozenClock, datetime, django_db, test_claim_renew_complete_and_stale_owner_rejection_are_atomic(), test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks(), test_effective_policy_cannot_change_after_job_is_scheduled(), test_enqueue_is_idempotent_only_while_the_key_is_active(), test_expired_lease_is_reclaimed_and_overdue_job_can_be_claimed_again() (+8 more)
+Cohesion: 0.29
+Nodes (15): create_policy(), FrozenClock, datetime, django_db, test_claim_renew_complete_and_stale_owner_rejection_are_atomic(), test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks(), test_effective_policy_cannot_change_after_job_is_scheduled(), test_enqueue_is_idempotent_only_while_the_key_is_active() (+7 more)
 
 ### Community 88 - "jobs/services.py"
-Cohesion: 0.13
-Nodes (17): clear_handlers(), get_handler(), datetime, Explicit handler boundary used by the worker and synthetic tests., register_handler(), JobOutcomeKind, JobState, Meta (+9 more)
+Cohesion: 0.20
+Nodes (11): get_handler(), Explicit handler boundary used by the worker and synthetic tests., register_handler(), JobOutcomeKind, JobState, Meta, ProcessHeartbeat, Durable freshness evidence for a worker or scheduler process. (+3 more)
 
 ### Community 90 - "Build Pass"
 Cohesion: 0.12
@@ -467,7 +469,7 @@ Nodes (7): Acceptance Criteria, Description, Implementation Plan, Out of Scope, 
 
 ### Community 111 - "simulation.py"
 Cohesion: 0.07
-Nodes (51): AdnSimulator, build_scenario(), _code(), Coverage, DeterministicFiscalSimulator, FakeFiscalTransport, FiscalAdapter, FiscalFamily (+43 more)
+Nodes (50): AdnSimulator, build_scenario(), _code(), Coverage, DeterministicFiscalSimulator, FakeFiscalTransport, FiscalAdapter, FiscalFamily (+42 more)
 
 ### Community 112 - "Operating Principles"
 Cohesion: 0.22
@@ -482,8 +484,8 @@ Cohesion: 0.30
 Nodes (8): err(), info(), log(), ok(), print_summary(), render_stream(), loop.sh script, warn()
 
 ### Community 117 - "operational"
-Cohesion: 0.13
-Nodes (12): operational(), HttpRequest, JsonResponse, require_GET, JobObservability, datetime, timedelta, Compute bounded aggregates without mutating jobs or leases. (+4 more)
+Cohesion: 0.25
+Nodes (8): operational(), HttpRequest, JsonResponse, require_GET, JobObservability, Compute bounded aggregates without mutating jobs or leases., django_db, test_job_metrics_aggregate_safe_durable_states_without_mutating_jobs()
 
 ### Community 118 - "0006_-_fiscal-document-identity-and-persistence.md"
 Cohesion: 0.18
@@ -514,12 +516,12 @@ Cohesion: 0.20
 Nodes (9): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Usage (+1 more)
 
 ### Community 127 - "Artifact"
-Cohesion: 0.14
-Nodes (24): Artifact, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, _document_family(), Durable, simulator-safe fiscal page ingestion. Collection owns continuation…, IngestionCheckpoint, IngestionPageState, The sole durable continuation position for one collection scope. (+16 more)
+Cohesion: 0.13
+Nodes (26): Artifact, Meta, Relational reference to one opaque object-store key. The logical key belongs to…, Durable, simulator-safe fiscal page ingestion. Collection owns continuation…, CollectionExecutionState, IngestionCheckpoint, IngestionPageState, InitialCollectionRequest (+18 more)
 
-### Community 128 - "FiscalIngestionService"
-Cohesion: 0.22
-Nodes (12): FiscalUnit, Synthetic identity and hash references; no fiscal content is carried., FiscalIngestionService, IngestionResult, StrEnum, UUID, _safe_reason(), UnitOutcome (+4 more)
+### Community 128 - "FiscalResponse"
+Cohesion: 0.11
+Nodes (33): FiscalOutcome, FiscalResponse, FiscalUnit, Synthetic identity and hash references; no fiscal content is carried., Typed adapter response containing only safe references and metadata., _default_metadata(), _document_family(), FiscalIngestionService (+25 more)
 
 ### Community 129 - "Exports Reference"
 Cohesion: 0.25
@@ -546,24 +548,24 @@ Cohesion: 0.29
 Nodes (7): Autoridade, baseline e regra de uso, Como escolher a próxima spec, Decisões Open, Blocked, Deferred e Proposed, Fluxo de entrega, Ordem, cobertura e dependências diretas, Paralelismo e conclusão de fase, Índice de implementação das specs
 
 ### Community 135 - "DependencyCheck"
-Cohesion: 0.26
-Nodes (9): DependencyCheck, ComponentHealth, JobMetricsSnapshot, OperationalHealth, Evaluate dependency, process freshness, and overdue durable backlog., _components(), _metrics(), test_operational_health_never_claims_ready_when_durable_state_is_unavailable() (+1 more)
+Cohesion: 0.15
+Nodes (13): DependencyCheck, ComponentHealth, JobMetricsSnapshot, OperationalHealth, datetime, timedelta, Evaluate dependency, process freshness, and overdue durable backlog., _components() (+5 more)
 
 ### Community 136 - "GitHub and Merge Reference"
 Cohesion: 0.83
 Nodes (4): Cross-Repository Graph Merge, GitHub and Merge Reference, GitHub Clone, Monorepo Graph Merge
 
 ### Community 137 - "test_manual_collection.py"
-Cohesion: 0.40
-Nodes (13): actor(), certificate_for(), company(), policy(), Certificate, django_db, fixture, reset_handlers() (+5 more)
-
-### Community 138 - "FiscalResponse"
 Cohesion: 0.24
-Nodes (18): FiscalResponse, Typed adapter response containing only safe references and metadata., _default_metadata(), IngestionContext, IngestionDocumentMetadata, company(), _context(), MemoryObjectStore (+10 more)
+Nodes (18): clear_handlers(), fixture, reset_handlers(), fixture, reset_handlers(), actor(), certificate_for(), company() (+10 more)
 
-### Community 139 - "HandlerOutcome"
-Cohesion: 0.21
-Nodes (12): Translate a synthetic response at the generic jobs handler seam., collection_handler(), HandlerOutcome, Any, Safe, classified result returned by a registered handler., InvalidJobPayload, JobEngineError, LeaseLost (+4 more)
+### Community 138 - "MemoryObjectStore"
+Cohesion: 0.29
+Nodes (14): IngestionDocumentMetadata, company(), _context(), MemoryObjectStore, _metadata(), BytesIO, django_db, fixture (+6 more)
+
+### Community 139 - "collection_handler"
+Cohesion: 0.38
+Nodes (4): Translate a synthetic response at the generic jobs handler seam., collection_handler(), Any, datetime
 
 ### Community 142 - "test_build_contract.py"
 Cohesion: 0.70
@@ -577,36 +579,44 @@ Nodes (10): Acceptance Criteria, Dependencies and Notes, Description, Implementa
 Cohesion: 0.18
 Nodes (10): Acceptance Criteria, Dependencies and Notes, Description, Implementation Plan, In Scope, Objective and Expected Outcome, Out of Scope, References (+2 more)
 
-### Community 145 - "ingest_page"
-Cohesion: 0.29
-Nodes (9): ingest_collection_response(), ingest_page(), datetime, Retry pending/failed units without deleting objects or advancing blindly., Convenience port used by workers and deterministic integration tests., Bridge a claimed collection execution to the durable ingestion port., reconcile_ingestion(), DocumentMetadataFactory (+1 more)
+### Community 145 - "10. Fases detalhadas e backlog estável"
+Cohesion: 0.18
+Nodes (11): 10. Fases detalhadas e backlog estável, P0 — Fundação de projeto e isolamento seguro, P1 — Núcleo seguro, persistente e auditável, P2 — Empresas, cobertura e certificados, P3 — Jobs, scheduler, políticas e simuladores, P4 — Ingestão fiscal comum e integridade, P5 — Adaptador e fluxos NF-e, P6 — Adaptador e fluxos NFS-e/ADN (+3 more)
 
 ### Community 146 - "Distribuição NF-e e manifestação"
-Cohesion: 0.20
-Nodes (9): P5 NF-e, Aceite e DoD, Decisões e contratos, Distribuição NF-e e manifestação, Estado e comportamento, Falhas, testes e recovery, Metadados, Propósito, baseline e limites (+1 more)
+Cohesion: 0.25
+Nodes (8): Aceite e DoD, Decisões e contratos, Distribuição NF-e e manifestação, Estado e comportamento, Falhas, testes e recovery, Metadados, Propósito, baseline e limites, UI, autorização, segurança e auditoria
 
 ### Community 147 - "Administração de usuários"
 Cohesion: 0.22
 Nodes (9): Aceite e DoD, Administração de usuários, Baseline, escopo e não escopo, Decisões de implementação e evidências, Estado, backend, auditoria e segurança, Falhas, testes e recovery, Metadados, Propósito e resultado (+1 more)
 
-### Community 148 - "IngestionError"
-Cohesion: 0.29
-Nodes (6): IngestionError, IngestionPositionError, RuntimeError, Materialize only the deterministic synthetic marker, never fiscal content., Safe ingestion failure; caller input and external exceptions are omitted., synthetic_payload()
+### Community 148 - "Consulta de documentos e download individual"
+Cohesion: 0.22
+Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Consulta de documentos e download individual, Dados, índices e contratos Proposed, Falhas e testes, Metadados, Propósito e resultado, Segurança, auditoria e observabilidade (+1 more)
+
+### Community 150 - "Elegibilidade de retenção e prévia administrativa"
+Cohesion: 0.22
+Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Contratos, UI e autorização, Elegibilidade de retenção e prévia administrativa, Metadados, Propósito e resultado, Regras e estado, Segurança, auditoria e observabilidade (+1 more)
+
+### Community 151 - "Distribuição NFS-e/ADN e cobertura"
+Cohesion: 0.25
+Nodes (8): Aceite e DoD, Contratos e estado Proposed, Distribuição NFS-e/ADN e cobertura, Falhas, testes e recovery, Metadados, Propósito, baseline, escopo, Regras e comportamento visível, Segurança, auditoria e observabilidade
 
 ## Knowledge Gaps
-- **611 isolated node(s):** `Meta`, `Meta`, `Migration`, `Migration`, `Migration` (+606 more)
+- **613 isolated node(s):** `Meta`, `Meta`, `Migration`, `Migration`, `Migration` (+608 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AuditService` connect `AuditService` to `FiscalIngestionService`, `identity/services.py`, `audit/services.py`, `ArtifactStorageService`, `FiscalResponse`, `collection/services.py`, `documents/services.py`, `IngestionError`, `Artifact`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
-- **Why does `HandlerOutcome` connect `HandlerOutcome` to `FiscalIngestionService`, `test_job_engine.py`, `FiscalResponse`, `collection/services.py`, `simulation.py`, `jobs/services.py`, `JobEngine`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
-- **Why does `load_settings()` connect `load_settings` to `ArtifactStorageService`, `operational`, `dependencies.py`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `AuditService` connect `AuditService` to `FiscalResponse`, `identity/services.py`, `audit/services.py`, `MemoryObjectStore`, `companies/services.py`, `collection/services.py`, `documents/services.py`, `Artifact`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `HandlerOutcome` connect `collection/services.py` to `FiscalResponse`, `test_job_engine.py`, `collection_handler`, `simulation.py`, `jobs/services.py`, `JobEngine`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `JobEngine` connect `JobEngine` to `test_jobs.py`, `test_job_engine.py`, `test_manual_collection.py`, `collection/services.py`, `simulation.py`, `HeartbeatService`, `jobs/services.py`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **Are the 52 inferred relationships involving `AuditService` (e.g. with `CertificateAccessDenied` and `CertificateAlreadyAssigned`) actually correct?**
   _`AuditService` has 52 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 25 inferred relationships involving `ArtifactStorageService` (e.g. with `Artifact` and `ArtifactState`) actually correct?**

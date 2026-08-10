@@ -5,6 +5,7 @@ from nfx.audit import views as audit_views
 from nfx.certificates import views as certificate_views
 from nfx.collection import views as collection_views
 from nfx.companies import views as company_views
+from nfx.documents import views as document_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.health import operational
@@ -42,6 +43,7 @@ urlpatterns = [
     path("api/users/<uuid:user_id>/active", identity_views.user_active),
     path("api/audit/events", audit_views.events),
     path("api/collections", collection_views.collections),
+    path("api/documents", document_views.documents),
     path("api/companies", company_views.companies),
     path("api/companies/create", company_views.company_create),
     path("api/companies/<uuid:company_id>", company_views.company_detail),

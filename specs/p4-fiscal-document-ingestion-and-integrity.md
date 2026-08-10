@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P4 — P4-01/P4-02 implementados; P4-03/P4-04 pendentes.
+- **Fase/status:** P4 — P4-01/P4-02/P4-04 implementados; P4-03 pendente.
 - **Backlog:** P4-01, P4-02, P4-03, P4-04.
 - **Dependências:** P1-01/05/06, P2-03, P3-01/03.
 - **PRD:** BR-INT-001, BR-INT-002, BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; BR-COLL-006, BR-COLL-008, BR-COLL-009; FR-DOC-001, FR-DOC-005; NFR-004, NFR-005, NFR-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009, AC-017.
@@ -45,11 +45,25 @@ simulador sem transporte oficial.
 
 Os testes de integração cobrem instalação da migration, replay, falha de objeto e recuperação,
 quarentena, hash divergente com ambas as evidências, cursor stale/repetido, página vazia e NSU
-ADN. P4-03 (matriz de estados de falha/decisão operacional) e P4-04 (API/UI) continuam abertos.
+ADN. P4-03 (matriz de estados de falha/decisão operacional) continua aberto; P4-04 foi implementado
+como contrato de leitura sobre esses estados existentes.
 
 ## Contratos, frontend e autorização
 
 Porta de ingestão recebe unidade e contexto, retorna `persistida|replay|quarentena|conflito` e checkpoint. API mínima lista documentos e expõe estado por empresa/fluxo com estados completos. UI mostra sucesso, vazio, parcial, retry, bloqueado, indisponível, sem cobertura, desconhecido, quarentena e conflito; “Nenhum documento encontrado” apenas para consulta válida vazia. Todos autenticados podem ver dados conforme política global; controles de coleta seguem P3-05.
+
+### Evidência de implementação P4-04
+
+Issue 0010 adiciona o endpoint somente leitura autenticado `GET /api/documents` e a seção React
+`#documentos`. A consulta aceita apenas filtros limitados de empresa/família/fluxo, limite de 1–100
+e cursor UUID; ordena por UUID e expõe apenas metadados, competência, estado, código de motivo e
+disponibilidade de evidência. Documentos persistidos/conflitantes e unidades em quarentena usam o
+mesmo envelope limitado, sem bytes, chaves de objeto ou erros externos. A resposta separa
+`valid_empty`, `unavailable`, `no_coverage`, `unknown`, `partial`, `retry` e `blocked`; a UI possui
+ramificações explícitas para carregando, vazio válido, indisponibilidade, sem cobertura, estado
+desconhecido, degradação, persistido, quarentena, conflito, parcial, retry e bloqueio. A leitura
+não grava documentos, artefatos, jobs, coletas ou cursores e deixa P4-03 como dona da matriz de
+falhas operacional.
 
 ## Segurança, auditoria e observabilidade
 

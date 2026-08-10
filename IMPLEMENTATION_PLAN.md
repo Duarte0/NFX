@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-10 |
 | Fontes | Código/migrações, testes, PRD.md, ARCHITECTURE.md, specs/ e issues/ |
-| Status geral | Fundação e plataforma de processamento concluídas e verificadas; P4-01/P4-02 de ingestão fiscal concluídos, acervo e estados/API ainda pendentes. |
+| Status geral | Fundação e plataforma de processamento concluídas e verificadas; P4-01/P4-02 de ingestão e o contrato mínimo P4-04 concluídos, a matriz P4-03 de falhas ainda pendente. |
 
 O código e as migrações são a baseline de implementação; testes são a evidência de comportamento verificado. PRD e arquitetura continuam a definir o comportamento pretendido. Este plano substitui a premissa anterior de que o repositório era apenas um scaffold.
 
@@ -25,7 +25,7 @@ O código e as migrações são a baseline de implementação; testes são a evi
 | P3-03 — simuladores fiscais | `adapters/simulation.py`, cenários NF-e/ADN determinísticos e sem rede | testes de cenário, replay e boundary do job cobertos. |
 | P3-04 — observabilidade inicial | `0010_process_heartbeats`, agregados, `/health/operational` | health, heartbeats e logs estruturados cobertos. |
 
-P4-01 adicionou a identidade e persistência base de documentos/eventos em `documents`, com referências imutáveis a artefatos. Ainda não há pipeline/cursor P4-02, API/UI P4-04, exportações, retenção ou renderização. Simuladores são infraestrutura de teste; não implementam P4-02–P6.
+P4-01 adicionou a identidade e persistência base de documentos/eventos em `documents`, com referências imutáveis a artefatos. P4-02 adicionou pipeline/cursor e P4-04 adicionou a API/UI mínima de status/lista; exportações, retenção, renderização e a matriz P4-03 de falhas continuam fora desta entrega. Simuladores são infraestrutura de teste; não implementam P5–P6.
 
 ### Implementado, mas com acompanhamento documental/operacional pendente
 
@@ -40,9 +40,9 @@ P4-01 adicionou a identidade e persistência base de documentos/eventos em `docu
 |---|---|---|---|
 | P3 | P3-05 Controle manual de coleta — **concluído, issue 0005** | `nfx.collection` persiste execuções e estado independente por família; comandos manual/retry/automático validam RBAC, certificado, fluxo, cooldown, bloqueio e política, enfileiram jobs sintéticos idempotentes, auditam e expõem HTTP/UI. | Migração `0012_companyflow_blocked_reason_and_more`; sem transporte fiscal ou resultado documental antes de P4. |
 | P0 | P4-01 Identidade fiscal e persistência — **concluído, issue 0006** | Migração `0011`, modelos/serviços para documento, evento, competência, hashes e vínculos; constraints/índices impedem duplicata lógica e preservam conflito. | P4-02 continua dona de unidade, checkpoint e cursor; sem avanço de coleta nesta entrega. |
-| P0 | P4-02 Pipeline durável e cursor — **concluído, issue 0009** | Migration `0013`, páginas/unidades/checkpoints, objeto antes do banco, replay/conflito/quarentena, progressão monotônica, reconciliação e ponte de execução de coleta; integração isolada com simuladores sintéticos. | P4-01 e P3-01; P4-03/P4-04 continuam donos dos estados/API. |
+| P0 | P4-02 Pipeline durável e cursor — **concluído, issue 0009** | Migration `0013`, páginas/unidades/checkpoints, objeto antes do banco, replay/conflito/quarentena, progressão monotônica, reconciliação e ponte de execução de coleta; integração isolada com simuladores sintéticos. | P4-01 e P3-01; P4-03 continua dona da matriz de estados de falha. |
 | P1 | P4-03 Estados de falha — **pendente** | Quarentena, conflito, parcial, vazio, bloqueio e degradação preservam evidência e não são confundidos. | P4-02, auditoria. |
-| P1 | P4-04 Contrato mínimo de status/lista — **pendente** | API e UI/mocks exibem estados explícitos sem a UI assumir estado durável. | P4-01. Pode avançar após a identidade de documento. |
+| P1 | P4-04 Contrato mínimo de status/lista — **concluído, issue 0010** | `/api/documents` e a seção `#documentos` exibem metadados limitados, estados explícitos, paginação e resultados de quarentena/conflito sem inferir sucesso de vazio. | P4-01/P4-02; P4-03 continua dona da matriz operacional de falhas. |
 | P1 | Correção do contrato de build — **concluída, issue 0008** | `docs/DEVELOPMENT.md`, `Makefile`, testes de fronteira e spec P0 deixam explícito/encapsulam o perfil exigido, com comando de checkout limpo reproduzível sem segredo versionado. | Não alterar comportamento fail-closed nem valores de produção. |
 
 ## Marcos posteriores, ordenados por dependência
@@ -67,7 +67,7 @@ Correção do contrato de build ──────────┘               
                                                            └─ P7 consulta → P8 → P9
 ```
 
-P3-05, P4-01 e P4-02 estão concluídos. A coleta manual deve usar o mesmo pipeline P4 quando passar
+P3-05, P4-01, P4-02 e P4-04 estão concluídos. A coleta manual deve usar o mesmo pipeline P4 quando passar
 de resultados sintéticos a resultados fiscais persistidos. Não duplicar cursor, idempotência,
 quarentena ou estado de fluxo nos adaptadores.
 
@@ -88,11 +88,11 @@ quarentena ou estado de fluxo nos adaptadores.
 
 - Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados e P5/P6 agora declaram explicitamente que estão especificadas, mas não implementadas. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; os boundaries vazios de `documents`, `exports` e `retention` são intencionais.
 - Issue 0007 corrigiu a higiene de `.env.example`; valores que tenham sido usados fora de testes descartáveis continuam potencialmente comprometidos e devem ser rotacionados fora do repositório.
-- Antes de P4-03/P4-04: manter migração aditiva, testes de instalação/upgrade e reconciliação nos limites objeto–banco–cursor; P4-02 cobre a unidade/checkpoint e usa fixtures sintéticas.
+- Antes de P4-03: manter migração aditiva, testes de instalação/upgrade e reconciliação nos limites objeto–banco–cursor; P4-02 cobre a unidade/checkpoint e P4-04 mantém as leituras sem escrita.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.
 - Antes de P9-03: implementar e comprovar backup/restore incluindo banco, objetos, certificado cifrado e chave necessária.
 
 ## Próxima ação recomendada
 
-**Próxima passagem: issues.** As issues `0001`–`0009` estão concluídas; P4-03/P4-04 ainda
-requerem os estados de falha e o contrato mínimo de consulta conforme a spec.
+**Próxima passagem: issues.** As issues `0001`–`0010` estão concluídas; P4-03 ainda
+requer a matriz completa de estados de falha conforme a spec.

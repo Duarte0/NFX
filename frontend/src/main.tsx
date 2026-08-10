@@ -76,6 +76,46 @@ type CollectionCompany = {
   status: string;
   flows: CollectionFlow[];
 };
+type DocumentItem = {
+  id: string;
+  company_id: string;
+  company_name: string;
+  family: string;
+  role: string | null;
+  category: string;
+  source: string | null;
+  flow: string;
+  identity: string;
+  identity_kind: string | null;
+  emitted_at: string | null;
+  authorized_at: string | null;
+  competence: string | null;
+  situation: string | null;
+  outcome: "persisted" | "quarantine" | "conflict";
+  evidence_available: boolean;
+  reason_code: string | null;
+};
+type DocumentResponse = {
+  status:
+    | "available"
+    | "valid_empty"
+    | "unavailable"
+    | "no_coverage"
+    | "unknown"
+    | "partial"
+    | "retry"
+    | "blocked";
+  reason_code: string;
+  documents: DocumentItem[];
+  collection_states: Array<{
+    company_id: string | null;
+    family: string | null;
+    flow: string | null;
+    status: string;
+    reason_code: string;
+  }>;
+  next_cursor: string | null;
+};
 
 function cookie(name: string): string {
   return (
@@ -109,6 +149,29 @@ function collectionLabel(status: string): string {
   );
 }
 
+function documentStatusLabel(status: DocumentResponse["status"]): string {
+  return (
+    {
+      available: "Documentos disponíveis",
+      valid_empty: "Consulta válida sem documentos",
+      unavailable: "Documentos indisponíveis",
+      no_coverage: "Sem cobertura",
+      unknown: "Estado desconhecido",
+      partial: "Resultado parcial",
+      retry: "Retry pendente",
+      blocked: "Coleta bloqueada",
+    }[status] ?? "Estado desconhecido"
+  );
+}
+
+function documentOutcomeLabel(outcome: DocumentItem["outcome"]): string {
+  return {
+    persisted: "Persistido",
+    quarantine: "Quarentena",
+    conflict: "Conflito",
+  }[outcome];
+}
+
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
@@ -134,6 +197,9 @@ function App() {
   const [collectionCompanies, setCollectionCompanies] = useState<
     CollectionCompany[]
   >([]);
+  const [documents, setDocuments] = useState<DocumentResponse | null>(null);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState("");
 
   useEffect(() => {
     void fetch("/api/auth/csrf", { credentials: "same-origin" })
@@ -472,6 +538,23 @@ function App() {
     await loadCollections();
   }
 
+  async function loadDocuments() {
+    setDocumentsLoading(true);
+    setDocumentsError("");
+    try {
+      const response = await fetch("/api/documents?limit=50", {
+        credentials: "same-origin",
+      });
+      if (!response.ok) throw new Error("documents");
+      setDocuments((await response.json()) as DocumentResponse);
+    } catch {
+      setDocumentsError("Não foi possível consultar os documentos.");
+      setDocuments(null);
+    } finally {
+      setDocumentsLoading(false);
+    }
+  }
+
   if (!user)
     return (
       <main lang="pt-BR">
@@ -512,7 +595,9 @@ function App() {
         <button onClick={() => void signOut()}>Sair</button>
       </header>
       <nav aria-label="Navegação principal">
-        <a href="#documentos">Documentos</a>
+        <a href="#documentos" onClick={() => void loadDocuments()}>
+          Documentos
+        </a>
         <a href="#exportacoes">Exportações</a>
         {canManage && (
           <>
@@ -537,6 +622,54 @@ function App() {
         )}
       </nav>
       <p>{message} · Horários em Brasília · valores em R$.</p>
+      <section id="documentos">
+        <h2>Documentos</h2>
+        <button onClick={() => void loadDocuments()}>Atualizar documentos</button>
+        {documentsLoading && <p role="status">Carregando documentos…</p>}
+        {documentsError && <p role="alert">{documentsError}</p>}
+        {!documentsLoading && !documentsError && documents && (
+          <>
+            <p role="status">
+              Estado: {documentStatusLabel(documents.status)} · Motivo: {documents.reason_code}
+            </p>
+            {documents.documents.length === 0 ? (
+              <p>
+                {documents.status === "valid_empty"
+                  ? "Nenhum documento encontrado."
+                  : "Nenhum documento disponível para este estado."}
+              </p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Empresa</th>
+                    <th>Identidade</th>
+                    <th>Família</th>
+                    <th>Competência</th>
+                    <th>Resultado</th>
+                    <th>Evidência</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {documents.documents.map((document) => (
+                    <tr key={document.id}>
+                      <td>{document.company_name}</td>
+                      <td>{document.identity}</td>
+                      <td>{document.family}</td>
+                      <td>{document.competence ?? "—"}</td>
+                      <td>
+                        {documentOutcomeLabel(document.outcome)}
+                        {document.reason_code ? ` · ${document.reason_code}` : ""}
+                      </td>
+                      <td>{document.evidence_available ? "Disponível" : "Não disponível"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </>
+        )}
+      </section>
       {canManage && (
         <section id="empresas">
           <h2>Empresas</h2>

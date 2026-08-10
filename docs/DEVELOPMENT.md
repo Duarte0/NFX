@@ -84,6 +84,16 @@ PDF e conteúdo de objetos continuam sob responsabilidade de `nfx.artifacts`.
 P4-01 não cria execução, unidade, checkpoint, cursor/NSU, job ou transporte fiscal. Essa sequência
 fica para P4-02.
 
+## Consulta mínima de documentos (P4-04)
+
+`GET /api/documents` é a leitura autenticada e limitada do acervo disponível. Aceita `company_id`,
+`family`, `flow`, `limit` (1–100) e `cursor` UUID; a ordenação é determinística por ID. A resposta
+separa `valid_empty`, `unavailable`, `no_coverage`, `unknown`, `partial`, `retry` e `blocked` e
+lista somente metadados, competência, situação, resultado (`persisted`, `quarantine` ou `conflict`)
+e a disponibilidade booleana de evidência. Bytes, chaves de objeto e erros externos nunca saem por
+essa fronteira. A seção React `#documentos` mantém ramos explícitos para carregamento, vazio válido,
+degradação e cada resultado documental; ela não cria cursor, checkpoint, retry ou estado durável.
+
 ## Pipeline fiscal durável (P4-02)
 
 `nfx.collection.ingestion.ingest_page` é a fronteira comum para páginas sintéticas. Ela registra
