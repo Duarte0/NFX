@@ -13,4 +13,10 @@ class Command(BaseCommand):
         if not password:
             raise CommandError("NFX_BOOTSTRAP_ADMIN_PASSWORD must be supplied externally")
         _, created = bootstrap_first_administrator(password)
-        self.stdout.write(self.style.SUCCESS("Bootstrap administrator created" if created else "Bootstrap administrator unchanged"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Bootstrap administrator created"
+                if created
+                else "Bootstrap administrator unchanged"
+            )
+        )

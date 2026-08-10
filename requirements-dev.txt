@@ -3,5 +3,5 @@ pytest==8.3.5
 pytest-django==4.9.0
 ruff==0.8.6
 mypy==1.13.0
-django-stubs==5.1.1
+django-stubs==5.1.2
 boto3-stubs[s3]==1.35.99

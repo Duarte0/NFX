@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P5 — implementação com simulador pronta; conexão real localmente Open.
+- **Fase/status:** P5 — pronta para implementação com simulador; não implementada. Conexão real permanece localmente Open.
 - **Backlog:** P5-01, P5-02, P5-03. **Dependências:** P2-03, P3-02, P3-03, P4-02.
 - **PRD:** FR-NFE-001, FR-NFE-002, FR-NFE-003, FR-NFE-004; BR-NFE-001, BR-NFE-002, BR-NFE-003; BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009.
 - **Arquitetura:** ADR-006/007; seções 10.2, 14, 19, 22, 23, 25, 28, 32, 33, 37, 38 e 40.

@@ -26,6 +26,12 @@ Coleta é dona de execução/cursor/checkpoint/unidade; Documentos, de identidad
 
 Mesmo identity+hash é replay e não duplica. Identity igual+hash diferente preserva ambas evidências e cria conflito; identidade insuficiente vai à quarentena. Original é imutável; XML completo posterior é artefato relacionado. Competência vem da emissão, nunca coleta; evento não altera competência do pai.
 
+## Evidência de implementação P4-01
+
+Issue 0006 implementa a base relacional e a porta `nfx.documents`: documentos e eventos usam identidade externa normalizada com contexto de empresa/família/papel/fonte/fluxo, competência derivada da emissão e evidências referenciadas por `Artifact`. A migração aditiva `0011_document_documentevent_documenteventevidence_and_more` cria constraints e índices; replay, conflito com hashes divergentes, quarentena por identidade insuficiente, vínculos de evento e corrida de unicidade são cobertos por testes unitários e de integração.
+
+Esta evidência não marca a spec P4 como concluída: unidade recebida, checkpoint, cursor/NSU, reconciliador, API/UI e a matriz completa de falhas continuam pertencendo a P4-02–P4-04.
+
 ## Contratos, frontend e autorização
 
 Porta de ingestão recebe unidade e contexto, retorna `persistida|replay|quarentena|conflito` e checkpoint. API mínima lista documentos e expõe estado por empresa/fluxo com estados completos. UI mostra sucesso, vazio, parcial, retry, bloqueado, indisponível, sem cobertura, desconhecido, quarentena e conflito; “Nenhum documento encontrado” apenas para consulta válida vazia. Todos autenticados podem ver dados conforme política global; controles de coleta seguem P3-05.

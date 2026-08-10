@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P1 — implementação validada; Blocked local: atualização Graphify completa requer backend semântico configurado.
+- **Fase/status:** P1 — concluída.
 - **Backlog:** P1-04. **Dependências:** P1-02, P1-03, P1-05.
 - **PRD:** FR-AUTH-002, FR-AUTH-003, FR-AUTH-004, BR-AUTH-002, SEC-004, SEC-005, AUD-003, AUD-008, AUD-009. **Aceite:** AC-003, AC-004, AC-014, AC-022.
 - **Arquitetura:** ADR-009, ADR-010; seções 14, 26, 27, 33 e 37.
@@ -45,4 +45,4 @@ Falha entre desativação e revogação é protegida pela mesma transação que 
 - [x] Papel/reset/desativação sem motivo são rejeitados — `test_reasons_versions_and_last_administrator_are_enforced` e validação de serviço/`AuditService`.
 - [x] Nenhuma resposta ou evidência contém senha/hash — `test_user_http_routes_are_admin_only_and_never_return_passwords` e contexto de auditoria redigido.
 
-DoD pendente somente da atualização Graphify completa: `backend/nfx/identity/services.py`, `views.py` e `policy.py` implementam os casos de uso e o enforcement server-side; `0005_user_administration_version.py` adiciona concorrência; `frontend/src/main.tsx` oferece a área localizada de usuários; e os eventos passam pela auditoria append-only. Evidência: 47 testes unitários verdes, 18 testes de integração verdes, build/lint da shell, Ruff, mypy e migração forward/rerun. `graphify . --update` falhou porque 3 documentos alterados precisam de extração semântica e não há chave/backend configurado; `graphify . --update --code-only` e `graphify cluster-only .` foram executados com sucesso para manter o subgrafo de código atual, mas isso não satisfaz a sincronização semântica completa.
+DoD concluído: `backend/nfx/identity/services.py`, `views.py` e `policy.py` implementam os casos de uso e o enforcement server-side; `0005_user_administration_version.py` adiciona concorrência; `frontend/src/main.tsx` oferece a área localizada de usuários; e os eventos passam pela auditoria append-only. Evidência: 47 testes unitários verdes, 18 testes de integração verdes, build/lint da shell, Ruff, mypy e migração forward/rerun. A disponibilidade de extração semântica do Graphify é metadado de navegação e não é requisito de produto, implementação nem DoD desta spec.

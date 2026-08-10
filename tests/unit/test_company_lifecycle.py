@@ -3,7 +3,6 @@ from __future__ import annotations
 import pytest
 from django.contrib.auth.hashers import make_password
 from django.test import Client
-
 from nfx.adapters.opencnpj import OpenCnpjResponse
 from nfx.audit.models import AuditEvent
 from nfx.companies.models import Company, CompanyStatus, EnrichmentStatus, FlowFamily, FlowState
@@ -21,7 +20,6 @@ from nfx.companies.services import (
 )
 from nfx.identity.models import Role, User
 from nfx.identity.services import SessionIdentity
-
 
 VALID_CNPJ = "11.222.333/0001-81"
 
@@ -53,7 +51,9 @@ def test_cnpj_is_normalized_validated_and_duplicate_is_rejected_by_constraint() 
     actor = _actor()
     _company(actor)
     with pytest.raises(DuplicateCompanyCnpj):
-        create_company(actor=actor, cnpj="11222333000181", legal_name="Outra", ip_address="127.0.0.1")
+        create_company(
+            actor=actor, cnpj="11222333000181", legal_name="Outra", ip_address="127.0.0.1"
+        )
     assert Company.objects.count() == 1
 
 
@@ -152,10 +152,11 @@ def test_public_enrichment_only_receives_cnpj_and_failures_are_snapshots() -> No
 def test_company_api_is_restricted_to_admin_and_operator_and_has_no_delete() -> None:
     viewer = _actor(Role.VIEWER)
     client = Client()
+    from datetime import timedelta
+
+    from django.utils import timezone
     from nfx.identity.models import IdentitySession
     from nfx.identity.services import _digest
-    from django.utils import timezone
-    from datetime import timedelta
 
     token = "synthetic-company-session"
     IdentitySession.objects.create(

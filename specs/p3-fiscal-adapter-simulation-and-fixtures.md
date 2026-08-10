@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P3 — P3-03 concluído; P3-04 continua pendente.
+- **Fase/status:** P3 — P3-03 concluído. P3-04 é governado por `p3-durable-jobs-leases-and-policy-engine.md` e também está concluído.
 - **Backlog:** P3-03. **Dependências:** P0-04, P3-01.
 - **PRD:** SEC-007, NFR-007, NFR-008; suporta testes de BR-COLL-006, BR-INT-002, BR-INT-005. **Aceite futuro:** AC-006, AC-007, AC-008, AC-009.
 - **Arquitetura:** ADR-006; seções 10.2, 23, 24, 33, 37 e 38.

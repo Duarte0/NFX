@@ -38,6 +38,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certifi
     && bash /tmp/nodesource_setup.sh && rm -f /tmp/nodesource_setup.sh \
     && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli docker-compose-plugin nodejs \
     && rm -rf /var/lib/apt/lists/*
-RUN npm install --global @openai/codex && python -m pip install "graphifyy==${GRAPHIFYY_VERSION}"
+
+# Criar usuário não-root ANTES de instalar pacotes
+RUN useradd -m -u 1000 -s /bin/bash devuser \
+    && mkdir -p /home/devuser/.codex \
+    && mkdir -p /home/devuser/.npm-global \
+    && mkdir -p /home/devuser/.local/bin \
+    && chown -R devuser:devuser /home/devuser
+
+USER devuser
+ENV HOME=/home/devuser \
+    PATH=/home/devuser/.npm-global/bin:/home/devuser/.local/bin:${PATH} \
+    NPM_CONFIG_PREFIX=/home/devuser/.npm-global
+
+# Agora instale como devuser
+RUN npm install --global @openai/codex && python -m pip install --user "graphifyy==${GRAPHIFYY_VERSION}"
+
 WORKDIR /workspace
 CMD ["sleep", "infinity"]

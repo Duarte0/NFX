@@ -4,7 +4,7 @@ import hashlib
 import io
 import threading
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from cryptography import x509
@@ -14,7 +14,6 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509.oid import NameOID
 from django.contrib.auth.hashers import make_password
 from django.db import connections
-
 from nfx.artifacts.storage import ObjectMetadata
 from nfx.audit.models import AuditEvent
 from nfx.certificates.models import Certificate, CertificateState
@@ -28,12 +27,11 @@ from nfx.certificates.services import (
     certificate_material,
     certificate_status,
 )
+from nfx.collection.models import InitialCollectionRequest
 from nfx.companies.models import Company, CompanyStatus
 from nfx.companies.services import create_company
-from nfx.collection.models import InitialCollectionRequest
 from nfx.identity.models import Role, User
 from nfx.identity.services import SessionIdentity
-
 
 MASTER_KEY = b"\x00" * 32
 CNPJ = "11222333000181"
@@ -45,7 +43,9 @@ class MemoryObjectStore:
         self.objects: dict[str, tuple[bytes, str]] = {}
         self.fail_writes = False
 
-    def write_stream(self, object_key: str, chunks: object, content_type: str, maximum_size: int) -> ObjectMetadata:
+    def write_stream(
+        self, object_key: str, chunks: object, content_type: str, maximum_size: int
+    ) -> ObjectMetadata:
         if self.fail_writes:
             raise RuntimeError("synthetic storage outage")
         payload = b"".join(chunks)  # type: ignore[arg-type]
@@ -70,7 +70,7 @@ class MemoryObjectStore:
 
 
 def _pfx(*, days: int = 365, cnpj: str = CNPJ, password: str = PASSWORD) -> bytes:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     subject = x509.Name(
         [
@@ -144,10 +144,14 @@ def test_valid_pfx_is_enveloped_and_queues_one_idempotent_initial_request() -> N
     assert pfx not in ciphertext
     assert PASSWORD.encode() not in bytes(certificate.encrypted_password)
     assert InitialCollectionRequest.objects.filter(company=company, kind="initial").count() == 1
-    assert AuditEvent.objects.filter(action="certificate.create", entity_id=str(certificate.id)).exists()
+    assert AuditEvent.objects.filter(
+        action="certificate.create", entity_id=str(certificate.id)
+    ).exists()
     assert can_collect(str(company.id))
 
-    with certificate_material(certificate.id, object_store=store, master_key=MASTER_KEY) as material:
+    with certificate_material(
+        certificate.id, object_store=store, master_key=MASTER_KEY
+    ) as material:
         assert bytes(material.pfx) == pfx
         assert bytes(material.password) == PASSWORD.encode()
 
@@ -209,7 +213,7 @@ def test_expiry_boundary_is_inclusive_at_thirty_days(days: int, expected: str) -
     actor = _actor()
     company = _company(actor)
     store = MemoryObjectStore()
-    reference = datetime.now(timezone.utc)
+    reference = datetime.now(UTC)
     certificate = add_certificate(
         actor=actor,
         company_id=str(company.id),
@@ -227,7 +231,7 @@ def test_expiry_boundary_is_inclusive_at_thirty_days(days: int, expected: str) -
 def test_current_certificate_becomes_expired_and_blocks_collection() -> None:
     actor = _actor()
     company = _company(actor)
-    reference = datetime.now(timezone.utc)
+    reference = datetime.now(UTC)
     certificate = add_certificate(
         actor=actor,
         company_id=str(company.id),

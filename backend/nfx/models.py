@@ -5,6 +5,7 @@ from nfx.audit.models import AuditChain, AuditEvent
 from nfx.certificates.models import Certificate
 from nfx.collection.models import CollectionExecution, InitialCollectionRequest
 from nfx.companies.models import Company, CompanyFlow, EnrichmentSnapshot
+from nfx.documents.models import Document, DocumentEvent, DocumentEventEvidence, DocumentEvidence
 from nfx.identity.models import IdentitySession, LoginThrottle, User
 from nfx.jobs.models import Job, JobPolicy, ProcessHeartbeat
 
@@ -24,4 +25,8 @@ __all__ = [
     "Job",
     "JobPolicy",
     "ProcessHeartbeat",
+    "Document",
+    "DocumentEvidence",
+    "DocumentEvent",
+    "DocumentEventEvidence",
 ]

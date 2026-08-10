@@ -52,11 +52,7 @@ class MigrationOutcome:
 
 def _migration_names(connection: BaseDatabaseWrapper) -> tuple[str, ...]:
     loader = MigrationLoader(connection, ignore_no_migrations=True)
-    names = {
-        name
-        for app_label, name in loader.graph.nodes
-        if app_label == SCHEMA_APP_LABEL
-    }
+    names = {name for app_label, name in loader.graph.nodes if app_label == SCHEMA_APP_LABEL}
     return tuple(sorted(names))
 
 
@@ -96,9 +92,13 @@ class SchemaMigrator:
             targets = executor.loader.graph.leaf_nodes()
             plan = executor.migration_plan(targets)
             names = tuple(f"{migration.app_label}.{migration.name}" for migration, _ in plan)
-            logger.info("schema_migration_started", extra={"migrations": names, "result": "started"})
+            logger.info(
+                "schema_migration_started", extra={"migrations": names, "result": "started"}
+            )
             executor.migrate(targets)
-            logger.info("schema_migration_finished", extra={"migrations": names, "result": "success"})
+            logger.info(
+                "schema_migration_finished", extra={"migrations": names, "result": "success"}
+            )
             return MigrationOutcome(applied=names)
         except Exception:
             logger.exception("schema_migration_finished", extra={"result": "failure"})

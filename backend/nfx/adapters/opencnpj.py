@@ -4,8 +4,8 @@ import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol, cast
-from urllib.parse import quote
 from urllib.error import HTTPError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 
@@ -64,7 +64,7 @@ class HttpOpenCnpjClient:
                     return OpenCnpjResponse("malformed", error_code="resposta_invalida")
                 if payload is None:
                     return OpenCnpjResponse("empty")
-                if not isinstance(payload, (dict, list)):
+                if not isinstance(payload, dict | list):
                     return OpenCnpjResponse("malformed", error_code="conteudo_invalido")
                 return OpenCnpjResponse("success", payload)
         except HTTPError as exc:

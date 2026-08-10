@@ -4,10 +4,11 @@ import math
 import os
 import re
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone as dt_timezone
-from typing import BinaryIO, Iterator
+from datetime import UTC, datetime, timedelta
+from typing import BinaryIO, cast
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -19,9 +20,9 @@ from django.utils import timezone
 from nfx.artifacts.storage import ArtifactStorageService, ObjectStore, object_store_from_environment
 from nfx.audit.services import AuditService
 from nfx.certificates.models import Certificate, CertificateState
+from nfx.collection.models import InitialCollectionRequest
 from nfx.companies.models import Company, CompanyStatus
 from nfx.companies.services import normalize_cnpj
-from nfx.collection.models import InitialCollectionRequest
 from nfx.identity.policy import Action, authorize
 from nfx.identity.services import SessionIdentity
 from nfx.infrastructure.configuration import load_settings
@@ -124,7 +125,9 @@ class EnvelopeCipher:
             encrypted_pfx,
         )
 
-    def decrypt(self, certificate_id: uuid.UUID, payload: EnvelopePayload) -> tuple[bytearray, bytearray]:
+    def decrypt(
+        self, certificate_id: uuid.UUID, payload: EnvelopePayload
+    ) -> tuple[bytearray, bytearray]:
         if len(payload.encrypted_pfx) <= GCM_NONCE_SIZE:
             raise CertificateStorageFailure("Material cifrado do certificado está incompleto.")
         try:
@@ -145,7 +148,9 @@ class EnvelopeCipher:
                 _PASSWORD_AAD + certificate_id.bytes,
             )
         except Exception as exc:
-            raise CertificateStorageFailure("Não foi possível descriptografar o certificado.") from exc
+            raise CertificateStorageFailure(
+                "Não foi possível descriptografar o certificado."
+            ) from exc
         finally:
             if "data_key" in locals():
                 data_key = b"\x00" * len(data_key)
@@ -162,8 +167,8 @@ class CertificateMaterial:
 
 def _utc(value: datetime) -> datetime:
     if value.tzinfo is None:
-        return value.replace(tzinfo=dt_timezone.utc)
-    return value.astimezone(dt_timezone.utc)
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
 
 
 def _cnpj_candidates(value: str) -> set[str]:
@@ -199,7 +204,9 @@ def parse_pfx(pfx: bytes, password: str, *, now: datetime | None = None) -> Pars
             pfx, password.encode("utf-8")
         )
     except (TypeError, ValueError) as exc:
-        raise CertificateWrongPassword("A senha do certificado está incorreta ou o arquivo é ilegível.") from exc
+        raise CertificateWrongPassword(
+            "A senha do certificado está incorreta ou o arquivo é ilegível."
+        ) from exc
     if private_key is None or certificate is None:
         raise CertificateUnreadable("O arquivo não contém um certificado A1 legível.")
     not_before_value = (
@@ -280,16 +287,22 @@ def add_certificate(
     certificate_id = uuid.uuid4()
     envelope = EnvelopeCipher(_master_key(master_key)).encrypt(certificate_id, pfx, password)
     store = object_store or object_store_from_environment()
-    artifact_service = ArtifactStorageService(store, maximum_size=CERTIFICATE_MAX_SIZE_BYTES + 64)
+    artifact_service = ArtifactStorageService(store, maximum_size=CERTIFICATE_MAX_SIZE_BYTES + 64)  # type: ignore[arg-type]
     certificate: Certificate | None = None
     try:
         with transaction.atomic():
             company = _company(company_id, lock=True)
-            if Certificate.objects.filter(
-                fingerprint_sha256=parsed.fingerprint_sha256,
-                state=CertificateState.CURRENT,
-            ).exclude(company=company).exists():
-                raise CertificateAlreadyAssigned("Este certificado já está associado a outra empresa.")
+            if (
+                Certificate.objects.filter(
+                    fingerprint_sha256=parsed.fingerprint_sha256,
+                    state=CertificateState.CURRENT,
+                )
+                .exclude(company=company)
+                .exists()
+            ):
+                raise CertificateAlreadyAssigned(
+                    "Este certificado já está associado a outra empresa."
+                )
             certificate = Certificate.objects.create(
                 id=certificate_id,
                 company=company,
@@ -317,19 +330,29 @@ def add_certificate(
                 raise CertificateStorageFailure("Certificado sem objeto cifrado.")
             artifact_service.transmit(certificate.artifact.pk, [envelope.encrypted_pfx])
         except Exception as exc:
-            raise CertificateStorageFailure("Não foi possível armazenar o certificado com integridade.") from exc
+            raise CertificateStorageFailure(
+                "Não foi possível armazenar o certificado com integridade."
+            ) from exc
 
         with transaction.atomic():
             certificate = Certificate.objects.select_for_update().get(pk=certificate.id)
             company = Company.objects.select_for_update().get(pk=company_id)
-            if Certificate.objects.filter(
-                fingerprint_sha256=parsed.fingerprint_sha256,
-                state=CertificateState.CURRENT,
-            ).exclude(company=company).exists():
-                raise CertificateAlreadyAssigned("Este certificado já está associado a outra empresa.")
-            current = Certificate.objects.select_for_update().filter(
-                company=company, state=CertificateState.CURRENT
-            ).exclude(pk=certificate.pk)
+            if (
+                Certificate.objects.filter(
+                    fingerprint_sha256=parsed.fingerprint_sha256,
+                    state=CertificateState.CURRENT,
+                )
+                .exclude(company=company)
+                .exists()
+            ):
+                raise CertificateAlreadyAssigned(
+                    "Este certificado já está associado a outra empresa."
+                )
+            current = (
+                Certificate.objects.select_for_update()
+                .filter(company=company, state=CertificateState.CURRENT)
+                .exclude(pk=certificate.pk)
+            )
             replacing = current.exists()
             current.update(state=CertificateState.REPLACED, replaced_at=timezone.now())
             certificate.state = CertificateState.CURRENT
@@ -360,7 +383,9 @@ def add_certificate(
             )
         if isinstance(exc, CertificateError):
             raise
-        raise CertificateStorageFailure("Não foi possível concluir a substituição do certificado.") from exc
+        raise CertificateStorageFailure(
+            "Não foi possível concluir a substituição do certificado."
+        ) from exc
 
 
 def certificate_status(certificate: Certificate, *, now: datetime | None = None) -> str:
@@ -373,11 +398,12 @@ def certificate_status(certificate: Certificate, *, now: datetime | None = None)
         if certificate.not_after <= current + timedelta(days=30):
             return "proximo_vencimento"
         return "valido"
-    return {
+    status_map: dict[CertificateState, str] = {
         CertificateState.PENDING: "pendente",
         CertificateState.REPLACED: "substituido",
         CertificateState.STORAGE_FAILED: "falha_armazenamento",
-    }.get(certificate.state, "invalido")
+    }
+    return status_map.get(cast(CertificateState, certificate.state), "invalido")
 
 
 def days_until_expiry(certificate: Certificate, *, now: datetime | None = None) -> int | None:
@@ -394,10 +420,14 @@ def can_collect(company_id: str, *, now: datetime | None = None) -> bool:
         if company
         else None
     )
-    return bool(certificate and certificate_status(certificate, now=now) in {"valido", "proximo_vencimento"})
+    return bool(
+        certificate and certificate_status(certificate, now=now) in {"valido", "proximo_vencimento"}
+    )
 
 
-def certificate_payload(certificate: Certificate | None, *, now: datetime | None = None) -> dict[str, object] | None:
+def certificate_payload(
+    certificate: Certificate | None, *, now: datetime | None = None
+) -> dict[str, object] | None:
     if certificate is None:
         return None
     return {
@@ -431,7 +461,7 @@ def certificate_material(
         raise CertificateError("Certificado não está habilitado para coleta.")
     if certificate.artifact is None:
         raise CertificateStorageFailure("Certificado sem objeto cifrado.")
-    artifact_service = ArtifactStorageService(object_store or object_store_from_environment())
+    artifact_service = ArtifactStorageService(object_store or object_store_from_environment())  # type: ignore[arg-type]
     stream: BinaryIO | None = None
     material: tuple[bytearray, bytearray] | None = None
     try:
@@ -449,7 +479,9 @@ def certificate_material(
         material = EnvelopeCipher(_master_key(master_key), certificate.key_version).decrypt(
             certificate.id, payload
         )
-        yield CertificateMaterial(material[0], material[1], certificate.fingerprint_sha256, certificate.certificate_cnpj)
+        yield CertificateMaterial(
+            material[0], material[1], certificate.fingerprint_sha256, certificate.certificate_cnpj
+        )
     finally:
         if stream is not None:
             stream.close()

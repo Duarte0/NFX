@@ -15,7 +15,7 @@ Gerar DANFE/DANFSe como PDF derivado, versionado e regenerável sem afetar origi
 
 Independentemente da biblioteca, porta de renderer recebe bytes verificados + tipo/leiaute e retorna PDF/diagnóstico sem acesso a banco/rede fiscal. Artefatos é dono do PDF; Jobs, da execução. **Proposed:** registro derivado com documento pai, tipo, objeto/hash, renderer ID/versão, estado, tentativa, resultado e timestamps; constraint única por documento+renderer+versão+variante. Índices por pai/estado/renderer.
 
-Mudança de renderer cria versão nova ou invalida anterior explicitamente, nunca sobrescreve original/PDF histórico. Chave de job usa documento+renderer+versão. Falha deixa `indisponível/falho`, XML segue consultável e usuário autorizado pode solicitar regeneração; requests concorrentes retornam job/artefato existente.
+Mudança de renderer cria versão nova ou invalida anterior explicitamente, nunca sobrescreve original/PDF histórico. Chave de job usa documento+renderer+versão. Falha deixa `indisponível/falho`, XML segue consultável e usuário autorizado pode solicitar regeneração; requests concorrentes retornam job/artefato existente. PDF deve herdar acesso, auditoria, retenção e exclusão do documento pai; as regras canônicas de elegibilidade e exclusão pertencem a `p8-retention-eligibility.md` e `p9-controlled-deletion.md`.
 
 ## UI, autorização e segurança
 

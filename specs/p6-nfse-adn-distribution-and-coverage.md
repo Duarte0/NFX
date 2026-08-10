@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P6 — implementação com simulador pronta; conexão real localmente Open.
+- **Fase/status:** P6 — pronta para implementação com simulador; não implementada. Conexão real permanece localmente Open.
 - **Backlog:** P6-01, P6-02. **Dependências:** P2-03, P3-02/03, P4-02.
 - **PRD:** FR-NFSE-001, FR-NFSE-002, FR-NFSE-003; BR-NFSE-001, BR-NFSE-002, BR-NFSE-003; BR-COLL-006, NFR-008. **Aceite:** AC-005, AC-008, AC-009, AC-018.
 - **Arquitetura:** ADR-006/007; seções 10.2, 14, 19, 22, 24, 25, 28, 32, 33, 37, 38 e 40.

@@ -7,7 +7,6 @@ from collections.abc import Iterable, Iterator
 
 import pytest
 from django.db import IntegrityError
-
 from nfx.artifacts.models import Artifact, ArtifactState
 from nfx.artifacts.storage import (
     ArtifactConflict,
@@ -119,7 +118,9 @@ def test_db_failure_after_upload_leaves_a_detectable_pending_reference(
     assert Artifact.objects.get(pk=artifact.id).state == ArtifactState.PENDING
     assert artifact.object_key in store.objects
     report = service.reconcile()
-    assert report.pending == 1  # a known pending reference is not deleted or misreported as an orphan
+    assert (
+        report.pending == 1
+    )  # a known pending reference is not deleted or misreported as an orphan
     assert artifact.object_key in store.objects
 
 
@@ -162,7 +163,7 @@ def test_reconciler_reports_orphans_without_deleting_them(
 
 @pytest.mark.django_db(transaction=True)
 def test_finalized_logical_key_is_idempotent_for_same_bytes_and_conflicts_for_different_bytes(
-    service: ArtifactStorageService
+    service: ArtifactStorageService,
 ) -> None:
     first = service.begin("synthetic", "retry", "application/octet-stream")
     same = service.begin("synthetic", "retry", "application/octet-stream")
@@ -177,7 +178,7 @@ def test_finalized_logical_key_is_idempotent_for_same_bytes_and_conflicts_for_di
 
 @pytest.mark.django_db(transaction=True)
 def test_two_concurrent_finalizations_cannot_create_two_finalized_references(
-    service: ArtifactStorageService
+    service: ArtifactStorageService,
 ) -> None:
     first = service.begin("synthetic", "concurrent", "application/octet-stream")
     second = service.begin("synthetic", "concurrent", "application/octet-stream")
@@ -189,14 +190,19 @@ def test_two_concurrent_finalizations_cannot_create_two_finalized_references(
         except BaseException as exc:  # pragma: no cover - asserted below
             failures.append(exc)
 
-    threads = [threading.Thread(target=transmit, args=(artifact.id,)) for artifact in (first, second)]
+    threads = [
+        threading.Thread(target=transmit, args=(artifact.id,)) for artifact in (first, second)
+    ]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
 
     assert not failures
-    assert Artifact.objects.filter(logical_key="concurrent", state=ArtifactState.FINALIZED).count() == 1
+    assert (
+        Artifact.objects.filter(logical_key="concurrent", state=ArtifactState.FINALIZED).count()
+        == 1
+    )
 
 
 @pytest.mark.django_db(transaction=True)
@@ -213,7 +219,9 @@ def test_minio_adapter_writes_and_verifies_synthetic_bytes() -> None:
     )
     object_key = f"artifacts/integration-{__name__.replace('.', '-')}/v1"
     try:
-        written = store.write_stream(object_key, [b"synthetic", b"-bytes"], "application/octet-stream", 64)
+        written = store.write_stream(
+            object_key, [b"synthetic", b"-bytes"], "application/octet-stream", 64
+        )
         assert store.head(object_key) == written
         assert store.read(object_key).read() == b"synthetic-bytes"  # type: ignore[union-attr]
     finally:

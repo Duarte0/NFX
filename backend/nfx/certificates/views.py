@@ -5,6 +5,7 @@ from uuid import UUID
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
+from nfx.certificates.models import Certificate, CertificateState
 from nfx.certificates.services import (
     CertificateAlreadyAssigned,
     CertificateCnpjMismatch,
@@ -18,7 +19,6 @@ from nfx.certificates.services import (
     add_certificate,
     certificate_payload,
 )
-from nfx.certificates.models import Certificate, CertificateState
 from nfx.companies.models import Company
 from nfx.identity.policy import Action
 from nfx.identity.services import resolve_session
@@ -31,21 +31,23 @@ def _error(exc: Exception) -> JsonResponse:
     if isinstance(exc, CertificateAlreadyAssigned):
         return JsonResponse({"detail": str(exc)}, status=409)
     if isinstance(
-        exc,
-        (
-            CertificateTooLarge,
-            CertificateWrongPassword,
-            CertificateUnreadable,
-            CertificateExpired,
-            CertificateCnpjMismatch,
-        ),
+    exc,
+    (
+        CertificateTooLarge
+        | CertificateWrongPassword
+        | CertificateUnreadable
+        | CertificateExpired
+        | CertificateCnpjMismatch
+    ),
     ):
         return JsonResponse({"detail": str(exc)}, status=400)
     if isinstance(exc, CertificateStorageFailure):
         return JsonResponse(
             {"detail": "Não foi possível armazenar o certificado com integridade."}, status=503
         )
-    return JsonResponse({"detail": "Não foi possível concluir a operação do certificado."}, status=400)
+    return JsonResponse(
+        {"detail": "Não foi possível concluir a operação do certificado."}, status=400
+    )
 
 
 @require_GET
@@ -55,7 +57,9 @@ def certificate_detail(request: HttpRequest, company_id: UUID) -> JsonResponse:
         company = Company.objects.get(pk=company_id)
     except Company.DoesNotExist:
         return _error(CertificateNotFound("Empresa não encontrada."))
-    certificate = Certificate.objects.filter(company=company, state=CertificateState.CURRENT).first()
+    certificate = Certificate.objects.filter(
+        company=company, state=CertificateState.CURRENT
+    ).first()
     response = JsonResponse({"certificate": certificate_payload(certificate)})
     response["Cache-Control"] = "no-store"
     return response

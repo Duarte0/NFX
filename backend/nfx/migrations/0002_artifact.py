@@ -1,5 +1,6 @@
-from django.db import migrations, models
 import uuid
+
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -9,7 +10,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Artifact",
             fields=[
-                ("id", models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
                 ("logical_class", models.CharField(max_length=64)),
                 ("logical_key", models.CharField(max_length=255)),
                 ("object_key", models.CharField(max_length=255, unique=True)),
@@ -18,7 +24,19 @@ class Migration(migrations.Migration):
                 ("size_bytes", models.BigIntegerField(blank=True, null=True)),
                 ("declared_mime_type", models.CharField(max_length=255)),
                 ("detected_mime_type", models.CharField(blank=True, max_length=255)),
-                ("state", models.CharField(choices=[("pending", "Pending"), ("finalized", "Finalized"), ("missing", "Missing"), ("divergent", "Divergent")], default="pending", max_length=16)),
+                (
+                    "state",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("finalized", "Finalized"),
+                            ("missing", "Missing"),
+                            ("divergent", "Divergent"),
+                        ],
+                        default="pending",
+                        max_length=16,
+                    ),
+                ),
                 ("version", models.PositiveIntegerField(default=1)),
                 ("safe_error", models.CharField(blank=True, max_length=255)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -28,11 +46,20 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="artifact",
-            constraint=models.CheckConstraint(condition=models.Q(("size_bytes__isnull", True), ("size_bytes__gte", 0), _connector="OR"), name="nfx_artifact_size_nonnegative_ck"),
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ("size_bytes__isnull", True), ("size_bytes__gte", 0), _connector="OR"
+                ),
+                name="nfx_artifact_size_nonnegative_ck",
+            ),
         ),
         migrations.AddConstraint(
             model_name="artifact",
-            constraint=models.UniqueConstraint(condition=models.Q(("state", "finalized")), fields=("logical_key",), name="nfx_artifact_one_finalized_logical_key_uq"),
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("state", "finalized")),
+                fields=("logical_key",),
+                name="nfx_artifact_one_finalized_logical_key_uq",
+            ),
         ),
         migrations.AddIndex(
             model_name="artifact",

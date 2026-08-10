@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 
 import pytest
-
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.schema import schema_status
 
