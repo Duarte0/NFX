@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P5 — pronta para implementação com simulador; não implementada. Conexão real permanece localmente Open.
+- **Fase/status:** P5 — P5-01 implementado com simulador; P5-02/P5-03 permanecem pendentes. Conexão real permanece localmente Open.
 - **Backlog:** P5-01, P5-02, P5-03. **Dependências:** P2-03, P3-02, P3-03, P4-02.
 - **PRD:** FR-NFE-001, FR-NFE-002, FR-NFE-003, FR-NFE-004; BR-NFE-001, BR-NFE-002, BR-NFE-003; BR-INT-003, BR-INT-004, BR-INT-005, BR-INT-006, BR-INT-007, BR-INT-008; AUD-005. **Aceite:** AC-005, AC-006, AC-007, AC-008, AC-009.
 - **Arquitetura:** ADR-006/007; seções 10.2, 14, 19, 22, 23, 25, 28, 32, 33, 37, 38 e 40.
@@ -38,3 +38,17 @@ Timeout/indisponível → retry; cooldown → agenda; A1 permanente → bloqueio
 - [ ] Produção permanece bloqueada sem política/homologação.
 
 DoD simulada: adapter, políticas, jobs, estados/UI, auditoria e contratos verdes. **Blocker local:** detalhes oficiais Open bloqueiam somente transporte real/homologação, não domínio nem simulador.
+
+## Evidência do incremento P5-01 (issue 0013)
+
+`backend/nfx/adapters/nfe.py` fornece a porta semântica `NFeDistributionAdapter`, a política
+de limite de página, posições vinculadas ao fluxo `received`/`issued`, resultado seguro,
+métricas e auditoria limitada. `NFeDistributionSimulator` mantém histórico independente por
+fluxo, reproduz respostas sintéticas e repete uma solicitação concorrente idempotentemente.
+
+O método `ingest` converte o resultado somente para `FiscalResponse` e chama a única fronteira
+`nfx.collection.ingestion.ingest_page`; portanto objeto original, identidade, unidade,
+quarentena, checkpoint e cursor continuam sob propriedade P4. Testes unitários cobrem limites,
+posições, sensibilidade, envelopes/outcomes e concorrência; a integração cobre persistência em
+objeto, documentos e checkpoints independentes. XML completo, eventos, manifestação, jobs
+específicos e transporte Portal Nacional/SEFAZ continuam fora deste incremento.

@@ -6,7 +6,20 @@ from collections.abc import Iterable, Iterator
 from datetime import UTC, datetime
 
 import pytest
-from nfx.adapters.simulation import FiscalOutcome, FiscalResponse, FiscalUnit
+from nfx.adapters.nfe import (
+    NFeDistributionRequest,
+    NFeDistributionSimulator,
+    NFeFlow,
+    NFePosition,
+)
+from nfx.adapters.simulation import (
+    FiscalFamily,
+    FiscalOutcome,
+    FiscalResponse,
+    FiscalUnit,
+    ScenarioName,
+    build_scenario,
+)
 from nfx.artifacts.storage import ArtifactStorageService, ObjectMetadata
 from nfx.collection.ingestion import (
     IngestionContext,
@@ -354,3 +367,67 @@ def test_divergent_hash_preserves_both_artifacts_and_adn_uses_an_independent_nsu
     assert adn.advanced is True
     assert IngestionCheckpoint.objects.get(company=company, family="adn").nsu == "nsu:1"
     assert not IngestionCheckpoint.objects.get(company=company, family="adn").cursor
+
+
+@pytest.mark.django_db(transaction=True)
+def test_nfe_distribution_handoff_owns_independent_flow_checkpoints(
+    company: Company, storage: tuple[ArtifactStorageService, MemoryObjectStore]
+) -> None:
+    artifact_service, _ = storage
+    simulator = NFeDistributionSimulator(
+        build_scenario(ScenarioName.PAGINATED_SUCCESS, FiscalFamily.NFE, seed=211)
+    )
+
+    def distribution_request(
+        flow: NFeFlow,
+        position: NFePosition | None = None,
+        *,
+        company_id: object = company.id,
+    ) -> NFeDistributionRequest:
+        return NFeDistributionRequest(
+            company_id=company_id,
+            flow=flow,
+            source="synthetic",
+            actor="actor:synthetic-001",
+            position=position,
+            policy_reference="policy:synthetic-v1",
+            certificate_handle="certificate:synthetic-001",
+            correlation_id=f"correlation:nfe-{flow.value}",
+            execution_ref=f"execution:nfe-{flow.value}",
+        )
+
+    received = simulator.ingest(
+        artifact_service,
+        distribution_request(NFeFlow.RECEIVED),
+        metadata_factory=_metadata,
+    )
+    issued = simulator.ingest(
+        artifact_service,
+        distribution_request(NFeFlow.ISSUED),
+        metadata_factory=_metadata,
+    )
+
+    assert received.advanced is True
+    assert issued.advanced is True
+    assert IngestionCheckpoint.objects.get(
+        company=company, family="nfe", flow="received"
+    ).cursor == "cursor-1"
+    assert IngestionCheckpoint.objects.get(
+        company=company, family="nfe", flow="issued"
+    ).cursor == "cursor-1"
+    assert IngestionPage.objects.filter(company=company, family="nfe").count() == 2
+    assert ReceivedUnit.objects.filter(company=company, family="nfe").count() == 2
+
+    unavailable = NFeDistributionSimulator(
+        build_scenario(ScenarioName.UNAVAILABLE, FiscalFamily.NFE, seed=213)
+    )
+    failed_company = Company.objects.create(cnpj="22333444000181", legal_name="Falha Sintética")
+    failed = unavailable.ingest(
+        artifact_service,
+        distribution_request(NFeFlow.RECEIVED, company_id=failed_company.id),
+    )
+
+    assert failed.advanced is False
+    assert IngestionCheckpoint.objects.get(
+        company=failed_company, family="nfe", flow="received"
+    ).cursor == ""

@@ -23,7 +23,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 11 | [x] | [p3-manual-collection-control.md](p3-manual-collection-control.md) | P3 | P3-05 concluído no issue 0005 | P1-03, P1-05, P3-01, P3-02 |
 | 12 | [x] | [p3-fiscal-adapter-simulation-and-fixtures.md](p3-fiscal-adapter-simulation-and-fixtures.md) | P3 | P3-03 concluído | P0-04, P3-01 |
 | 13 | [x] | [p4-fiscal-document-ingestion-and-integrity.md](p4-fiscal-document-ingestion-and-integrity.md) | P4 | P4-01/P4-02/P4-03/P4-04 concluídos; migration `0014` e testes de matriz | P1-01/05/06, P2-03, P3-01/03 |
-| 14 | [ ] | [p5-nfe-distribution-and-manifestation.md](p5-nfe-distribution-and-manifestation.md) | P5 | P5-01, P5-02, P5-03 | P2-03, P3-02/03, P4-02 |
+| 14 | [ ] | [p5-nfe-distribution-and-manifestation.md](p5-nfe-distribution-and-manifestation.md) | P5 | **P5-01 implementado (issue 0013)**; P5-02, P5-03 pendentes | P2-03, P3-02/03, P4-02 |
 | 15 | [ ] | [p6-nfse-adn-distribution-and-coverage.md](p6-nfse-adn-distribution-and-coverage.md) | P6 | P6-01, P6-02 | P2-03, P3-02/03, P4-02 |
 | 16 | [ ] | [p7-document-consultation-and-individual-download.md](p7-document-consultation-and-individual-download.md) | P7 | P7-01, P7-02 | P1-03/04, P4-01/04 |
 | 17 | [ ] | [p7-danfe-danfse-rendering.md](p7-danfe-danfse-rendering.md) | P7 | P7-03 | P3-01, P4-01, P7-01, renderer Open |
@@ -38,7 +38,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 
 Todos os itens P0-01 a P9-05 estão cobertos. P2-04 é deliberadamente compartilhado pelas duas specs P2 porque a UI integra empresa e certificado; isso é cobertura transversal, não execução duplicada. Nenhum outro backlog tem dois proprietários primários. A seção “Specs futuras” de P3 inclui a spec manual; sua ausência na tabela original do mapa é corrigida neste índice conforme instrução explícita.
 
-Todas as entradas acima são specs ativas; não há specs superseded, deprecated ou template versionado neste diretório. P5 e P6 estão prontas para implementação com simuladores, mas não estão implementadas; a conexão real continua bloqueada apenas pelas decisões externas registradas. A caixa de P0 registra a fundação entregue, incluindo o contrato reproduzível de `make build`.
+Todas as entradas acima são specs ativas; não há specs superseded, deprecated ou template versionado neste diretório. P5 e P6 estão prontas para implementação com simuladores; P5-01 já foi implementado no issue 0013, enquanto P5-02/P5-03 e P6 permanecem pendentes. A conexão real continua bloqueada apenas pelas decisões externas registradas. A caixa de P0 registra a fundação entregue, incluindo o contrato reproduzível de `make build`.
 
 ## Fluxo de entrega
 

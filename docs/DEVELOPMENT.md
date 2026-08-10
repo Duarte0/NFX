@@ -194,6 +194,23 @@ bloqueio, duplicata, conflito, payload malformado, evento sem pai e cursor repet
 genérico transforma esses valores em `HandlerOutcome` e preserva a fronteira de lease/idempotência
 dos jobs. Fixtures não carregam XML, credenciais, tokens, certificados ou endpoints produtivos.
 
+## Distribuição semântica NF-e (P5-01)
+
+`nfx.adapters.nfe` é a fronteira worker-facing para distribuição simulada NF-e. A solicitação
+usa somente referências bounded, uma página limitada e uma posição `NFePosition` vinculada a
+`received` ou `issued`; nenhum fluxo aceita a posição do outro. `NFeDistributionSimulator`
+instancia uma história determinística por fluxo, cobre sucesso paginado, vazio válido,
+indisponibilidade, timeout/retry, cooldown, bloqueio, malformado e desconhecido, e não abre
+socket, DNS ou SOAP. Requisições concorrentes com a mesma correlação e posição são replayadas
+sem uma segunda chamada ao transporte sintético.
+
+Para persistir uma página, o worker chama `adapter.ingest(storage, request)`. O adapter converte
+o resultado seguro para `FiscalResponse` e delega a `nfx.collection.ingestion.ingest_page`;
+essa função continua dona de objeto original, identidade, unidade, checkpoint, cursor,
+quarentena, conflito e avanço. Auditoria/métricas recebem apenas fluxo, outcome, motivo,
+contagem e prefixo de posição. P5-02/P5-03 (XML completo, eventos e manifestação) e qualquer
+transporte oficial permanecem fora deste incremento.
+
 ## Controle manual de coleta (P3-05)
 
 `nfx.collection.services.request_collection` é a porta server-authoritative para solicitações

@@ -55,7 +55,7 @@ runtime. A próxima implementação de produto continua sendo P5/P6.
 
 | Marco | Status | Resultado e critérios | Dependências |
 |---|---|---|---|
-| P5 NF-e | **especificado, não implementado** | Distribuição simulada, fluxos entrada/saída, XML/eventos e manifestação idempotente; transporte real permanece Open até homologação. Ver `p5-nfe-distribution-and-manifestation.md`. | P4-02, P2-03, P3-02/03. |
+| P5 NF-e | **P5-01 concluído, issue 0013; P5-02/P5-03 pendentes** | Porta semântica e simulador NF-e bounded para entrada/saída, com histórico/posição independente, auditoria/métricas seguras e handoff à ingestão P4. XML/eventos, manifestação e transporte real continuam fora; transporte real permanece Open até homologação. Ver `p5-nfe-distribution-and-manifestation.md`. | P4-02, P2-03, P3-02/03. |
 | P6 NFS-e/ADN | **especificado, não implementado** | Distribuição por ator/NSU, cobertura explícita e tomada/prestada/eventos; sem integrações municipais. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
 | P7 consulta/download | **especificado, não implementado** | Busca/filtros/detalhe e download individual RBAC/auditado. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
@@ -77,6 +77,11 @@ P3-05, P4-01, P4-02, P4-03 e P4-04 estão concluídos. A coleta manual deve usar
 de resultados sintéticos a resultados fiscais persistidos. Não duplicar cursor, idempotência,
 quarentena ou estado de fluxo nos adaptadores.
 
+O issue 0013 concluiu o incremento P5-01: `nfx.adapters.nfe` valida a solicitação semântica,
+mantém received/issued independentes no simulador, mapeia outcomes bounded e chama somente
+`ingest_page` para persistência. P5-02 (Ciência/XML/eventos) e P5-03 (manifestação) ainda não
+foram implementados; nenhum transporte oficial foi habilitado.
+
 ## Decisões, inconsistências e riscos registrados
 
 | Tema | Registro / impacto |
@@ -93,7 +98,7 @@ quarentena ou estado de fluxo nos adaptadores.
 
 ## Trabalho de specs e operação que resta
 
-- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados e P5/P6 agora declaram explicitamente que estão especificadas, mas não implementadas. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; os boundaries vazios de `documents`, `exports` e `retention` são intencionais.
+- Passagem de specs validou as 25 specs ativas sem lacunas de backlog: P0/P1/P3 foram reconciliados, P5-01 foi implementado no issue 0013 e P5-02/P5-03/P6 continuam pendentes. Não foram encontrados TODO/FIXME/placeholder de domínio, testes skipped/xfail/flaky, nem duplicação de implementação que alterem esse backlog; os boundaries vazios de `documents`, `exports` e `retention` são intencionais.
 - Issue 0007 corrigiu a higiene de `.env.example`; valores que tenham sido usados fora de testes descartáveis continuam potencialmente comprometidos e devem ser rotacionados fora do repositório.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.

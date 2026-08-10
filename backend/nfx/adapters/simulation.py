@@ -49,6 +49,7 @@ class FiscalOutcome(StrEnum):
     DUPLICATE = "duplicate"
     CONFLICT = "conflict"
     MALFORMED = "malformed"
+    UNKNOWN = "unknown"
     EVENT_WITHOUT_PARENT = "event_without_parent"
     REPEATED_CURSOR = "repeated_cursor"
 
@@ -70,6 +71,7 @@ class ScenarioName(StrEnum):
     COOLDOWN = "cooldown"
     PERMANENT_BLOCK = "permanent_block"
     MALFORMED_PAYLOAD = "malformed_payload"
+    UNKNOWN_OUTCOME = "unknown_outcome"
     EVENT_WITHOUT_PARENT = "event_without_parent"
     REPEATED_CURSOR = "repeated_cursor"
     PARTIAL_RESULT = "partial_result"
@@ -475,6 +477,17 @@ def build_scenario(
                     FiscalOutcome.MALFORMED,
                     coverage=Coverage.UNKNOWN,
                     error_code="malformed_payload",
+                ),
+            ),
+        )
+    elif scenario_name == ScenarioName.UNKNOWN_OUTCOME:
+        steps = (
+            ScenarioStep(
+                None,
+                _response(
+                    FiscalOutcome.UNKNOWN,
+                    coverage=Coverage.UNKNOWN,
+                    error_code="unknown_response",
                 ),
             ),
         )
