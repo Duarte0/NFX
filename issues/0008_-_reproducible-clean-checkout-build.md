@@ -2,12 +2,12 @@
 id: 0008
 title: "Make the clean-checkout build contract reproducible"
 type: feature
-status: open
+status: closed
 priority: low
 phase: P0
 created_at: 2026-08-09
 updated_at: 2026-08-09
-closed_at: ~
+closed_at: 2026-08-09
 related_issues: [0007]
 blocked_by: []
 affects:
@@ -134,7 +134,7 @@ while direct application boot and invalid configuration continue to fail closed.
   without weakening P0 configuration, redaction, isolation, or transport-guard guarantees.
 - [x] `IMPLEMENTATION_PLAN.md`, `specs/p0-project-foundation.md`, development documentation,
   and Graphify are synchronized according to repository conventions.
-- [ ] The issue is closed only after its Resolution records the implementation/evidence,
+- [x] The issue is closed only after its Resolution records the implementation/evidence,
   `IMPLEMENTATION_PLAN.md` is synchronized, and all changes are committed in one focused commit.
 
 ## References
@@ -149,14 +149,14 @@ while direct application boot and invalid configuration continue to fail closed.
 
 ---
 
-## Remaining Work
+## Resolution
 
 <!-- Filled by the agent on close. DO NOT edit manually. -->
 <!-- What was done, decisions made, and why. -->
 <!-- Include: files modified, tests added, edge cases handled. -->
 
-The implementation is complete in the working tree. `Makefile` now runs the Django
-configuration/import check with the existing local synthetic `test` profile and hidden recipe-scoped
+Implemented the reproducible P0 build contract. `Makefile` runs the Django
+configuration/import check with the existing local synthetic `test` profile and recipe-scoped
 values, then runs the frontend build in fail-fast order. No services, migrations, external secrets,
 production destinations, or fiscal transports were added.
 
@@ -173,12 +173,6 @@ Validation commands and results:
 - `make test-unit` — passed.
 - `make test-integration` — passed.
 - `make smoke` — passed.
-- test-profile `python -m pytest tests/unit/test_build_contract.py` — 2 passed.
+- `NFX_PROFILE=test ... python -m pytest tests/unit/test_build_contract.py` — 2 passed.
 
 No migration was required. Graphify was refreshed with `graphify update .`.
-
-The issue remains open because `IMPLEMENTATION_PLAN.md` and the P0 specification contain
-substantial pre-existing uncommitted rewrites. Git cannot isolate the completion hunks from those
-changes safely, so creating the required focused commit would also commit unrelated user work.
-The next action is to commit this implementation and its directly related documentation from a
-cleanly separated diff, then close the issue.

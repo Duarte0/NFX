@@ -1,16 +1,16 @@
 # Graph Report - workspace  (2026-08-09)
 
 ## Corpus Check
-- 163 files · ~88,471 words
+- 163 files · ~88,468 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1727 nodes · 3533 edges · 143 communities (102 shown, 41 thin omitted)
+- 1726 nodes · 3532 edges · 143 communities (102 shown, 41 thin omitted)
 - Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 258 edges (avg confidence: 0.52)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b48958bb`
+- Built from commit: `c62d2252`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -46,7 +46,7 @@
 - Jobs duráveis, leases, políticas e observabilidade inicial
 - Exportação ZIP assíncrona
 - Technical Architecture - NFX INOV
-- JobEngine
+- Job
 - 0006_company_lifecycle.py
 - graphify reference: extra exports and benchmark
 - Simuladores fiscais e fixtures seguras
@@ -84,7 +84,7 @@
 - urls.py
 - documents/__init__.py
 - exports/__init__.py
-- test_job_engine.py
+- JobEngine
 - infrastructure/__init__.py
 - nfx/__init__.py
 - 0002_artifact.py
@@ -208,7 +208,7 @@ Nodes (46): 11. Organização do repositório, 12. Stack selecionada e justifica
 
 ### Community 5 - "Plano de implementação — NFX INOV"
 Cohesion: 0.05
-Nodes (37): 10. Fases detalhadas e backlog estável, 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs (+29 more)
+Nodes (38): 10. Fases detalhadas e backlog estável, 11. Dependências, caminho crítico e paralelismo, 12. Estratégia de testes e validação, 13. Estratégia de segurança fiscal, 14. Banco e migrações, 15. Sequência de frontend, 16. Observabilidade, backup e restore, 17. Mapa de specs (+30 more)
 
 ### Community 6 - "audit/services.py"
 Cohesion: 0.08
@@ -224,11 +224,11 @@ Nodes (33): ObjectStore, Protocol, Certificate, CertificateState, Meta, Certific
 
 ### Community 9 - "Administração de usuários"
 Cohesion: 0.05
-Nodes (42): P0 Fundação, P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P5 NF-e, P6 NFS-e/ADN, P7 Consulta e artefatos (+34 more)
+Nodes (41): P1 Núcleo seguro, P2 Empresas e certificados, P3 Jobs e simuladores, P4 Ingestão comum, P5 NF-e, P6 NFS-e/ADN, P7 Consulta e artefatos, Aceite e DoD (+33 more)
 
 ### Community 10 - "AuditService"
-Cohesion: 0.06
-Nodes (84): HttpOpenCnpjClient, _HttpResponse, OpenCnpjClient, OpenCnpjResponse, Protocol, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Optional public-source transport with an injected opener for tests. (+76 more)
+Cohesion: 0.07
+Nodes (78): OpenCnpjClient, OpenCnpjResponse, A safe adapter value; payload is public data and never fiscal authority., The only input exposed to OpenCNPJ is the normalized CNPJ., Default local/runtime adapter until an approved public endpoint is configured., UnavailableOpenCnpjClient, AuditService, CompanyMetrics (+70 more)
 
 ### Community 11 - "devDependencies"
 Cohesion: 0.06
@@ -251,8 +251,8 @@ Cohesion: 0.09
 Nodes (21): compilerOptions, allowJs, allowSyntheticDefaultImports, esModuleInterop, forceConsistentCasingInFileNames, isolatedModules, jsx, lib (+13 more)
 
 ### Community 16 - "HeartbeatService"
-Cohesion: 0.11
-Nodes (22): ensure_collection_handler(), configure_logging(), JsonFormatter, Any, Emit bounded structured fields without making logging part of a state…, safe_log(), HeartbeatService, Write only this process's identity and read the freshest component evidence. (+14 more)
+Cohesion: 0.10
+Nodes (24): ensure_collection_handler(), configure_logging(), JsonFormatter, Any, Emit bounded structured fields without making logging part of a state…, safe_log(), HeartbeatService, Write only this process's identity and read the freshest component evidence. (+16 more)
 
 ### Community 17 - "9. Requisitos funcionais e regras de negócio"
 Cohesion: 0.15
@@ -310,9 +310,9 @@ Nodes (9): Aceite e DoD, Baseline, escopo e não escopo, Estado e contratos Prop
 Cohesion: 0.29
 Nodes (7): Technical Architecture - NFX INOV, Audit Chain Mechanism, Infrastructure Configuration Module, Product Requirements Document - NFX INOV, Spec: P0 Project Foundation, Spec: P0 Safe Configuration, Spec: P1 Audit Foundation
 
-### Community 31 - "JobEngine"
-Cohesion: 0.13
-Nodes (23): Job, A safe, referential unit of background work and its current lease., InvalidJobPayload, InvalidTransition, JobEngine, JobEngineError, LeaseLost, process_one() (+15 more)
+### Community 31 - "Job"
+Cohesion: 0.12
+Nodes (22): Job, A safe, referential unit of background work and its current lease., InvalidJobPayload, InvalidTransition, JobEngineError, LeaseLost, process_one(), Any (+14 more)
 
 ### Community 33 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -359,8 +359,8 @@ Cohesion: 0.29
 Nodes (6): Configuração segura e isolamento fiscal (P0-02/P0-04), Contratos dos comandos, Decisões Proposed adotadas, Fundação P0, Persistência e migrações (P1-01), Scope boundary
 
 ### Community 44 - "collection/services.py"
-Cohesion: 0.08
-Nodes (60): Translate a synthetic response at the generic jobs handler seam., CollectionExecution, CollectionExecutionState, CollectionOrigin, CollectionScope, InitialCollectionRequest, InitialCollectionRequestState, Meta (+52 more)
+Cohesion: 0.06
+Nodes (66): HttpOpenCnpjClient, _HttpResponse, Protocol, Optional public-source transport with an injected opener for tests., Translate a synthetic response at the generic jobs handler seam., CollectionExecution, CollectionExecutionState, CollectionOrigin (+58 more)
 
 ### Community 45 - "schema.py"
 Cohesion: 0.17
@@ -418,9 +418,9 @@ Nodes (9): Acceptance Criteria, Description, Implementation Plan, In Scope, Obje
 Cohesion: 0.15
 Nodes (10): Append-only audit trail, integrity verifier, and administrative query boundary., Certificate lifecycle and envelope-encryption domain boundary., Durable collection request boundary used by certificate activation., Company lifecycle, flow configuration, and public enrichment boundary., Identity boundary (no domain implementation in P0)., index(), live(), HttpRequest (+2 more)
 
-### Community 71 - "test_job_engine.py"
-Cohesion: 0.22
-Nodes (17): FrozenClock, datetime, django_db, test_claim_renew_complete_and_stale_owner_rejection_are_atomic(), test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks(), test_database_error_does_not_report_unsafe_progress(), test_effective_policy_cannot_change_after_job_is_scheduled(), test_enqueue_is_idempotent_only_while_the_key_is_active() (+9 more)
+### Community 71 - "JobEngine"
+Cohesion: 0.25
+Nodes (16): JobEngine, Owns all durable state transitions for background jobs., FrozenClock, datetime, django_db, test_claim_renew_complete_and_stale_owner_rejection_are_atomic(), test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks(), test_effective_policy_cannot_change_after_job_is_scheduled() (+8 more)
 
 ### Community 88 - "jobs/services.py"
 Cohesion: 0.17
@@ -487,8 +487,8 @@ Cohesion: 0.18
 Nodes (10): Acceptance Criteria, Dependencies and Notes, Description, Implementation Plan, In Scope, Objective and Expected Outcome, Out of Scope, References (+2 more)
 
 ### Community 120 - "0008_-_reproducible-clean-checkout-build.md"
-Cohesion: 0.17
-Nodes (11): Acceptance Criteria, Dependencies and Notes, Description, Implementation Plan, In Scope, Objective and Expected Outcome, Out of Scope, References (+3 more)
+Cohesion: 0.18
+Nodes (10): Acceptance Criteria, Dependencies and Notes, Description, Implementation Plan, In Scope, Objective and Expected Outcome, Out of Scope, References (+2 more)
 
 ### Community 121 - ".save"
 Cohesion: 0.50
@@ -559,14 +559,14 @@ Cohesion: 0.70
 Nodes (4): clean_build_environment(), Path, test_invalid_build_configuration_fails_before_frontend_step(), test_make_build_succeeds_without_services_or_ambient_configuration()
 
 ## Knowledge Gaps
-- **591 isolated node(s):** `Meta`, `Meta`, `Migration`, `Migration`, `Migration` (+586 more)
+- **590 isolated node(s):** `Meta`, `Meta`, `Migration`, `Migration`, `Migration` (+585 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **41 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `HandlerOutcome` connect `collection/services.py` to `jobs/services.py`, `JobEngine`, `test_job_engine.py`, `simulation.py`?**
+- **Why does `HandlerOutcome` connect `collection/services.py` to `jobs/services.py`, `Job`, `JobEngine`, `simulation.py`?**
   _High betweenness centrality (0.037) - this node is a cross-community bridge._
 - **Why does `AuditService` connect `AuditService` to `identity/services.py`, `audit/services.py`, `certificates/services.py`, `certificate_material`, `collection/services.py`, `Artifact`?**
   _High betweenness centrality (0.033) - this node is a cross-community bridge._

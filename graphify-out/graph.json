@@ -327,8 +327,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_py_protocol",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": "protocol"
     },
     {
@@ -349,8 +349,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpresponse",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": "_httpresponse"
     },
     {
@@ -360,8 +360,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpresponse_read",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".read()"
     },
     {
@@ -371,8 +371,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpresponse_enter",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".__enter__()"
     },
     {
@@ -382,8 +382,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpresponse_exit",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".__exit__()"
     },
     {
@@ -393,8 +393,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpopencnpjclient",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": "httpopencnpjclient"
     },
     {
@@ -404,8 +404,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpopencnpjclient_init",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".__init__()"
     },
     {
@@ -415,8 +415,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_httpopencnpjclient_fetch",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".fetch()"
     },
     {
@@ -470,8 +470,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "backend_nfx_adapters_opencnpj_rationale_38",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": "optional public-source transport with an injected opener for tests."
     },
     {
@@ -5728,8 +5728,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "backend_nfx_infrastructure_http_correlationidmiddleware",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": "correlationidmiddleware"
     },
     {
@@ -5739,8 +5739,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "backend_nfx_infrastructure_http_correlationidmiddleware_init",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".__init__()"
     },
     {
@@ -5750,8 +5750,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_infrastructure_http_py_httprequest",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": "httprequest"
     },
     {
@@ -5761,8 +5761,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "backend_nfx_infrastructure_http_correlationidmiddleware_call",
-      "community": 10,
-      "community_name": "AuditService",
+      "community": 44,
+      "community_name": "collection/services.py",
       "norm_label": ".__call__()"
     },
     {
@@ -6312,7 +6312,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_models_job",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "job"
     },
     {
@@ -6367,7 +6367,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_models_rationale_84",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "a safe, referential unit of background work and its current lease."
     },
     {
@@ -6840,7 +6840,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengineerror",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "jobengineerror"
     },
     {
@@ -6851,7 +6851,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_py_runtimeerror",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "runtimeerror"
     },
     {
@@ -6862,7 +6862,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_invalidjobpayload",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "invalidjobpayload"
     },
     {
@@ -6873,7 +6873,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_py_valueerror",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "valueerror"
     },
     {
@@ -6884,7 +6884,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_invalidtransition",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "invalidtransition"
     },
     {
@@ -6895,7 +6895,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_leaselost",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "leaselost"
     },
     {
@@ -6906,7 +6906,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_validate_safe_value",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "_validate_safe_value()"
     },
     {
@@ -6917,7 +6917,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_py_any",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "any"
     },
     {
@@ -6928,7 +6928,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_safe_error_code",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "_safe_error_code()"
     },
     {
@@ -6938,7 +6938,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine",
-      "community": 31,
+      "community": 71,
       "community_name": "JobEngine",
       "norm_label": "jobengine"
     },
@@ -6950,7 +6950,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_init",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".__init__()"
     },
     {
@@ -6961,7 +6961,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_py_datetime",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "datetime"
     },
     {
@@ -6972,7 +6972,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_py_timedelta",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "timedelta"
     },
     {
@@ -6982,7 +6982,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_random_jitter",
-      "community": 31,
+      "community": 71,
       "community_name": "JobEngine",
       "norm_label": "._random_jitter()"
     },
@@ -6994,7 +6994,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_enqueue",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".enqueue()"
     },
     {
@@ -7004,7 +7004,7 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_reclaim_expired",
-      "community": 31,
+      "community": 71,
       "community_name": "JobEngine",
       "norm_label": ".reclaim_expired()"
     },
@@ -7027,7 +7027,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_claim",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".claim()"
     },
     {
@@ -7038,7 +7038,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_lease_update",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "._lease_update()"
     },
     {
@@ -7049,7 +7049,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_py_uuid",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "uuid"
     },
     {
@@ -7060,7 +7060,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_renew",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".renew()"
     },
     {
@@ -7071,7 +7071,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_complete",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".complete()"
     },
     {
@@ -7082,7 +7082,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_finalize",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".finalize()"
     },
     {
@@ -7093,7 +7093,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_retry_delay",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "._retry_delay()"
     },
     {
@@ -7104,7 +7104,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_cooldown_due",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "._cooldown_due()"
     },
     {
@@ -7115,7 +7115,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_jobengine_fail",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": ".fail()"
     },
     {
@@ -7126,7 +7126,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_process_one",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "process_one()"
     },
     {
@@ -7170,7 +7170,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_33",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "base error for rejected job operations."
     },
     {
@@ -7181,7 +7181,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_37",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "payload or result contains data outside the referential safe contract."
     },
     {
@@ -7192,7 +7192,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_41",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "the job is not in a state that supports the requested operation."
     },
     {
@@ -7203,7 +7203,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_45",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "the caller no longer owns a valid lease."
     },
     {
@@ -7213,7 +7213,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_71",
-      "community": 31,
+      "community": 71,
       "community_name": "JobEngine",
       "norm_label": "owns all durable state transitions for background jobs."
     },
@@ -7236,7 +7236,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_274",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "apply a classified handler result while its lease is still valid."
     },
     {
@@ -7247,7 +7247,7 @@
       "_origin": "ast",
       "id": "backend_nfx_jobs_services_rationale_392",
       "community": 31,
-      "community_name": "JobEngine",
+      "community_name": "Job",
       "norm_label": "run one registered handler, finalizing only through the lease contract."
     },
     {
@@ -10729,7 +10729,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_job_engine.py"
     },
     {
@@ -10740,7 +10740,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_frozenclock",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "frozenclock"
     },
     {
@@ -10751,7 +10751,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_frozenclock_init",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": ".__init__()"
     },
     {
@@ -10762,7 +10762,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_frozenclock_call",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": ".__call__()"
     },
     {
@@ -10773,7 +10773,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_py_datetime",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "datetime"
     },
     {
@@ -10784,7 +10784,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_frozenclock_advance",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": ".advance()"
     },
     {
@@ -10817,7 +10817,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_py_django_db",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "django_db"
     },
     {
@@ -10828,7 +10828,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_enqueue_is_idempotent_only_while_the_key_is_active",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_enqueue_is_idempotent_only_while_the_key_is_active()"
     },
     {
@@ -10839,7 +10839,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_claim_renew_complete_and_stale_owner_rejection_are_atomic",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_claim_renew_complete_and_stale_owner_rejection_are_atomic()"
     },
     {
@@ -10850,7 +10850,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_expired_lease_is_reclaimed_and_overdue_job_can_be_claimed_again",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_expired_lease_is_reclaimed_and_overdue_job_can_be_claimed_again()"
     },
     {
@@ -10861,7 +10861,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_payload_and_result_reject_secret_or_content_material",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_payload_and_result_reject_secret_or_content_material()"
     },
     {
@@ -10872,7 +10872,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_idempotent_handler_effect_survives_worker_death_before_completion",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_idempotent_handler_effect_survives_worker_death_before_completion()"
     },
     {
@@ -10882,8 +10882,8 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_worker_loop_stops_gracefully_without_a_registered_handler",
-      "community": 71,
-      "community_name": "test_job_engine.py",
+      "community": 16,
+      "community_name": "HeartbeatService",
       "norm_label": "test_worker_loop_stops_gracefully_without_a_registered_handler()"
     },
     {
@@ -10893,8 +10893,8 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_scheduler_loop_stops_without_touching_a_fiscal_handler",
-      "community": 71,
-      "community_name": "test_job_engine.py",
+      "community": 16,
+      "community_name": "HeartbeatService",
       "norm_label": "test_scheduler_loop_stops_without_touching_a_fiscal_handler()"
     },
     {
@@ -10904,8 +10904,8 @@
       "source_location": "L215",
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_database_error_does_not_report_unsafe_progress",
-      "community": 71,
-      "community_name": "test_job_engine.py",
+      "community": 31,
+      "community_name": "Job",
       "norm_label": "test_database_error_does_not_report_unsafe_progress()"
     },
     {
@@ -10916,7 +10916,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_policy_selection_prefers_exact_scope_and_rejects_ambiguous_validity",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_policy_selection_prefers_exact_scope_and_rejects_ambiguous_validity()"
     },
     {
@@ -10927,7 +10927,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_temporary_and_partial_outcomes_use_capped_deterministic_backoff",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_temporary_and_partial_outcomes_use_capped_deterministic_backoff()"
     },
     {
@@ -10938,7 +10938,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_cooldown_precedes_local_backoff_and_permanent_outcome_blocks()"
     },
     {
@@ -10949,7 +10949,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_policy_configured_cooldown_is_used_when_handler_has_no_deadline",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_policy_configured_cooldown_is_used_when_handler_has_no_deadline()"
     },
     {
@@ -10960,7 +10960,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_effective_policy_cannot_change_after_job_is_scheduled",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_effective_policy_cannot_change_after_job_is_scheduled()"
     },
     {
@@ -10971,7 +10971,7 @@
       "_origin": "ast",
       "id": "tests_unit_test_job_engine_test_policy_job_handler_outcome_is_applied_by_worker",
       "community": 71,
-      "community_name": "test_job_engine.py",
+      "community_name": "JobEngine",
       "norm_label": "test_policy_job_handler_outcome_is_applied_by_worker()"
     },
     {
@@ -13115,17 +13115,6 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "issues_0008_reproducible_clean_checkout_build_resolution",
-      "community": 120,
-      "community_name": "0008_-_reproducible-clean-checkout-build.md",
-      "norm_label": "resolution"
-    },
-    {
-      "label": "Resolution",
-      "file_type": "document",
-      "source_file": "issues/0008_-_reproducible-clean-checkout-build.md",
-      "source_location": "L158",
-      "_origin": "ast",
-      "id": "issues_0008_reproducible_clean_checkout_build_resolution_158",
       "community": 120,
       "community_name": "0008_-_reproducible-clean-checkout-build.md",
       "norm_label": "resolution"
@@ -15446,8 +15435,8 @@
       "source_file": "IMPLEMENTATION_PLAN.md",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
-      "community_name": "Administra\u00e7\u00e3o de usu\u00e1rios",
+      "community": 5,
+      "community_name": "Plano de implementa\u00e7\u00e3o \u2014 NFX INOV",
       "norm_label": "implementation_plan.md",
       "id": "implementation_plan"
     },
@@ -18573,10 +18562,10 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 9,
+      "community": 5,
       "norm_label": "p0 fundacao",
       "_origin": "semantic",
-      "community_name": "Administra\u00e7\u00e3o de usu\u00e1rios",
+      "community_name": "Plano de implementa\u00e7\u00e3o \u2014 NFX INOV",
       "id": "p0_fundacao"
     },
     {
@@ -54150,17 +54139,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "issues/0008_-_reproducible-clean-checkout-build.md",
-      "source_location": "L158",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "issues_0008_reproducible_clean_checkout_build",
-      "target": "issues_0008_reproducible_clean_checkout_build_resolution_158",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "issues/0008_-_reproducible-clean-checkout-build.md",
       "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast",
@@ -60174,5 +60152,5 @@
       "source_file": "specs/p4-fiscal-document-ingestion-and-integrity.md"
     }
   ],
-  "built_at_commit": "b48958bb6079f85b6bc98b8e0287f0391cb2bda8"
+  "built_at_commit": "c62d22521b282c617d27ce8777c51b422f4e1b96"
 }

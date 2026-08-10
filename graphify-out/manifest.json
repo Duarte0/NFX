@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786326458.8337104,
-    "ast_hash": "c4e735e4e6e638faf3900df7f2b49db3",
+    "mtime": 1786326664.0846617,
+    "ast_hash": "c11e76671b5c0169607224fdaf5d4ecf",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "issues/0008_-_reproducible-clean-checkout-build.md": {
-    "mtime": 1786326458.8347104,
-    "ast_hash": "78763619a73a39693b12c7d1fbc2980e",
+    "mtime": 1786327772.471246,
+    "ast_hash": "16a112cd04caa959453579c5ff79365a",
     "semantic_hash": ""
   },
   "backend/nfx/documents/models.py": {

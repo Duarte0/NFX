@@ -70,18 +70,18 @@
     "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786325711.8843205,
-    "ast_hash": "fe0706f31e8f2518c0bd186723ae228a",
+    "mtime": 1786326458.8347104,
+    "ast_hash": "b32f800a2ba448d6021a316da805997b",
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786325250.2947903,
-    "ast_hash": "62c344aa24e4961af974798bdc571f4b",
+    "mtime": 1786326458.8337104,
+    "ast_hash": "c4e735e4e6e638faf3900df7f2b49db3",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
-    "mtime": 1786320381.1438036,
-    "ast_hash": "bdd6334f1b37751b9db511e9a1f422d0",
+    "mtime": 1786326458.8337104,
+    "ast_hash": "66b25656db9b329a20c3f95fa5f54122",
     "semantic_hash": ""
   },
   "specs/p0-safe-configuration-and-test-isolation.md": {
@@ -400,8 +400,8 @@
     "semantic_hash": ""
   },
   "docs/DEVELOPMENT.md": {
-    "mtime": 1786325307.2463427,
-    "ast_hash": "72ab72a96e42da7df98d2c7ba06effbd",
+    "mtime": 1786326458.8337104,
+    "ast_hash": "8b5b8e7d5060d6f4fdb5fcecb8130ca1",
     "semantic_hash": ""
   },
   "frontend/index.html": {
@@ -465,8 +465,8 @@
     "semantic_hash": "4a7a1dcf7939f053fa37862ccef77e01"
   },
   "tests/integration/test_migrations.py": {
-    "mtime": 1786325130.0277958,
-    "ast_hash": "7c7c2577f11acfb09d28ee0b7fb80e65",
+    "mtime": 1786325921.385436,
+    "ast_hash": "f92a3631d1ed8ac04c1ed3dfd9387019",
     "semantic_hash": ""
   },
   "backend/nfx/artifacts/models.py": {
@@ -775,8 +775,8 @@
     "semantic_hash": ""
   },
   "issues/0005_-_manual-collection-control.md": {
-    "mtime": 1786325397.6823106,
-    "ast_hash": "13f211c6fcc4fc89e2083cdf41e08585",
+    "mtime": 1786325897.919766,
+    "ast_hash": "44e8723bf2ed5786231574231c944ef4",
     "semantic_hash": ""
   },
   "issues/0006_-_fiscal-document-identity-and-persistence.md": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "issues/0008_-_reproducible-clean-checkout-build.md": {
-    "mtime": 1786321101.3909397,
-    "ast_hash": "f77257957325b43616561566d6a48cde",
+    "mtime": 1786326458.8347104,
+    "ast_hash": "78763619a73a39693b12c7d1fbc2980e",
     "semantic_hash": ""
   },
   "backend/nfx/documents/models.py": {
@@ -837,6 +837,11 @@
   "tests/unit/test_manual_collection.py": {
     "mtime": 1786325547.8601208,
     "ast_hash": "2a8bf6b9b89d1f1ece387347c1cf5ede",
+    "semantic_hash": ""
+  },
+  "tests/unit/test_build_contract.py": {
+    "mtime": 1786326540.5530295,
+    "ast_hash": "40710400fb184f0539dc26ac6767645f",
     "semantic_hash": ""
   }
 }
