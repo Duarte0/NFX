@@ -17,6 +17,7 @@ from nfx.documents.models import (
     DocumentEvent,
     DocumentEventEvidence,
     DocumentEvidence,
+    DocumentRender,
     NFeManifestation,
 )
 from nfx.exports.models import Export, ExportItem
@@ -48,6 +49,7 @@ __all__ = [
     "DocumentEvidence",
     "DocumentEvent",
     "DocumentEventEvidence",
+    "DocumentRender",
     "NFeManifestation",
     "Export",
     "ExportItem",

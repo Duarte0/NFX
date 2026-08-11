@@ -1,4 +1,4 @@
-import { get } from "../../shared/http";
+import { get, post } from "../../shared/http";
 import { DocumentDetail, DocumentResponse } from "./types";
 
 export function listDocuments(query: URLSearchParams): Promise<DocumentResponse> {
@@ -8,6 +8,16 @@ export function listDocuments(query: URLSearchParams): Promise<DocumentResponse>
 
 export function getDocument(id: string): Promise<DocumentDetail> {
   return get<DocumentDetail>(`/api/documents/${encodeURIComponent(id)}`);
+}
+
+export function requestPdf(
+  id: string,
+  regenerate = false,
+): Promise<{ pdf: DocumentDetail["pdf"] }> {
+  return post<{ pdf: DocumentDetail["pdf"] }>(
+    `/api/documents/${encodeURIComponent(id)}/pdf/render`,
+    { regenerate },
+  );
 }
 
 export async function downloadDocument(path: string): Promise<void> {

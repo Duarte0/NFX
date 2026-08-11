@@ -99,7 +99,10 @@ def test_dashboard_returns_period_cards_real_zero_and_explicit_capabilities() ->
         "filters": {"family": "nfe"},
     }
     assert payload["capabilities"]["fiscal_sources"]["status"] == "unavailable"
-    assert payload["capabilities"]["rendering"]["status"] == "unavailable"
+    assert payload["capabilities"]["rendering"] == {
+        "status": "available",
+        "reason": "brazilfiscalreport:1.0.1",
+    }
     assert "operational_health" not in payload
     assert all("dependencies" not in card for card in payload["cards"])
 

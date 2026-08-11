@@ -67,7 +67,7 @@ def test_operational_health_reports_safe_ready_and_degraded_states() -> None:
         "backup": "unavailable",
         "documents": "unavailable",
         "quarantine": "unavailable",
-        "rendering": "unavailable",
+        "rendering": "available",
     }
 
     degraded = service.evaluate(

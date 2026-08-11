@@ -14,6 +14,7 @@ from nfx.certificates.models import Certificate, CertificateState
 from nfx.collection.models import CollectionExecution, CollectionExecutionState
 from nfx.companies.models import Company, CompanyStatus
 from nfx.documents.models import Document, DocumentFamily
+from nfx.documents.rendering import RenderUnavailable, renderer_metadata
 from nfx.identity.models import Role
 from nfx.infrastructure.configuration import load_settings
 from nfx.infrastructure.dependencies import dependencies_from_environment
@@ -49,6 +50,17 @@ class DatePeriod:
 class DashboardPeriod:
     current: DatePeriod
     previous: DatePeriod
+
+
+def _rendering_capability() -> dict[str, str]:
+    try:
+        metadata = renderer_metadata()
+    except RenderUnavailable:
+        return {"status": "unavailable", "reason": "renderer_unavailable"}
+    return {
+        "status": "available",
+        "reason": f"{metadata.renderer_id}:{metadata.version}",
+    }
 
 
 def _single(query: Mapping[str, object], key: str) -> object | None:
@@ -420,7 +432,7 @@ def build_dashboard(
     capabilities: dict[str, object] = {
         "fiscal_sources": {"status": "unavailable", "reason": "not_implemented"},
         "documents": {"status": "available", "reason": "persisted_document_contract"},
-        "rendering": {"status": "unavailable", "reason": "renderer_not_implemented"},
+        "rendering": _rendering_capability(),
         "disk": {"status": "unavailable", "reason": "p9_operational_slice_pending"},
         "backup": {"status": "unavailable", "reason": "p9_backup_slice_pending"},
         "certificates": {"status": "available" if role != Role.VIEWER else "admin_only"},

@@ -138,7 +138,23 @@ erros do provedor não atravessam a fronteira. Uma falha de leitura não muta o 
 reconciliação continua responsável por classificar objetos ausentes ou divergentes.
 
 Os três papéis autenticados podem consultar e baixar individualmente; cada leitura é autorizada
-server-side e auditada com contexto bounded. PDF permanece indisponível até a decisão do P7-03.
+server-side e auditada com contexto bounded. O XML é a evidência primária; o PDF derivado mantém
+estado e metadados versionados sem substituir o original.
+
+## Renderização PDF derivada (P7-03)
+
+`nfx.documents.rendering` é o owner da integração com `BrazilFiscalReport[danfse]==1.0.1`.
+`renderer_metadata()` valida a versão instalada; `render_pdf_bytes()` chama `Danfe` ou `Danfse`
+diretamente e recebe bytes, sem CLI, subprocesso, shell ou rede. O worker registrado como
+`document.render_pdf` lê a evidência XML verificada, grava um artefato `document_derived_pdf` e
+só finaliza depois de confirmar hash, tamanho, MIME, bytes PDF e identidade do documento.
+
+O contrato `DocumentRender` separa fonte e derivado e usa a identidade documento + tipo +
+representação + renderer + versão para reuso concorrente e histórico de versões. As rotas
+`POST /api/documents/<id>/pdf/render` e `GET /api/documents/<id>/pdf` revalidam sessão/RBAC e
+integridade; a UI expõe estados de indisponível, pendente, disponível, falho e não suportado.
+Falhas preservam o XML e são representadas por erros bounded. Audite e teste somente metadados
+seguros; nunca coloque XML, PDF, chave de objeto ou exceção externa em payload, log ou métrica.
 
 ## Pipeline fiscal durável (P4-02)
 

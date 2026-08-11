@@ -53,6 +53,8 @@ urlpatterns = [
     path("api/documents", document_views.documents),
     path("api/documents/<uuid:document_id>", document_views.detail),
     path("api/documents/<uuid:document_id>/download", document_views.download_document),
+    path("api/documents/<uuid:document_id>/pdf/render", document_views.request_pdf),
+    path("api/documents/<uuid:document_id>/pdf", document_views.download_pdf),
     path("api/artifacts/<uuid:artifact_id>/download", document_views.download_artifact),
     path("api/exports", export_views.exports),
     path("api/exports/<uuid:export_id>", export_views.detail),

@@ -276,7 +276,7 @@ class OperationalHealth:
                 "backup": "unavailable",
                 "documents": "unavailable",
                 "quarantine": "unavailable",
-                "rendering": "unavailable",
+                "rendering": "available",
             },
             "evaluated_at": now.isoformat(),
         }

@@ -26,6 +26,7 @@ from nfx.documents.consultation import (
     parse_consultation_params,
 )
 from nfx.documents.models import Document, DocumentFamily
+from nfx.documents.rendering import render_payload
 
 _SAFE_REFERENCE = re.compile(r"^[A-Za-z0-9_.:/-]{1,64}$")
 _FAMILIES = frozenset(("nfe", "nfse"))
@@ -233,6 +234,7 @@ def _scoped_quarantine(params: DocumentListParams) -> QuerySet[ReceivedUnit]:
 
 
 def _document_payload(document: Document) -> dict[str, object]:
+    pdf = render_payload(document)
     return {
         "id": str(document.id),
         "company_id": str(document.company_id),
@@ -258,11 +260,16 @@ def _document_payload(document: Document) -> dict[str, object]:
         ),
         "xml_available": any(
             evidence.artifact.state == ArtifactState.FINALIZED
-            and evidence.artifact.detected_mime_type == "application/xml"
+            and (
+                evidence.artifact.detected_mime_type in {"application/xml", "text/xml"}
+                or evidence.artifact.declared_mime_type in {"application/xml", "text/xml"}
+            )
             and not evidence.conflicting
             for evidence in document.evidence.all()
         ),
-        "pdf_available": False,
+        "pdf_available": pdf["state"] == "available",
+        "pdf_state": pdf["state"],
+        "pdf_error": pdf.get("safe_error"),
         "detail_url": f"/api/documents/{document.id}",
         "download_url": f"/api/documents/{document.id}/download",
         "reason_code": "content_hash_mismatch" if document.state == "conflict" else None,

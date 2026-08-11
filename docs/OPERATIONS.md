@@ -9,10 +9,11 @@ mostra a frescura durável de worker e scheduler e diferencia `ready`, `stale`, 
 
 O contrato não expõe payload, resultado bruto, erro, certificado, XML, token, credencial,
 endpoint ou identificador de job como label de métrica. Capacidades futuras de fonte fiscal,
-disco, backup, documentos, quarentena e rendering são declaradas `unavailable` até que tenham
-uma implementação própria.
+disco, backup, documentos e quarentena são declaradas `unavailable` até que tenham uma
+implementação própria. Rendering expõe sua disponibilidade segura conforme a versão pinada
+instalada.
 
-## Backup e restore comprovados (P9-02)
+## Backup verificável e recuperação manual (P9-02)
 
 O backup local é escrito em `NFX_BACKUP_ROOT` (por padrão `/var/backups/nfx`) e captura uma
 serialização lógica determinística do PostgreSQL, todos os objetos finalizados, referências de
@@ -30,11 +31,17 @@ python backend/manage.py restore_backup BACKUP_ID \
   --runtime-root /var/lib/nfx/runtime
 ```
 
-O restore exige um destino absoluto e explicitamente isolado, fora do runtime e dos volumes ativos;
-configuração ausente ou ambígua falha fechado. Ele verifica manifesto, dump, tamanhos, hashes,
-contagens, vínculos, auditoria/jobs/cursors e descriptografia A1 sintética sem alterar volumes
-vivos. A evidência segura fica no registro de restore e no `restore-report.json`, sem payloads,
-senhas, chaves ou caminhos expostos na API.
+`restore_backup` exige um destino absoluto e explicitamente isolado, fora do runtime e dos volumes
+ativos; configuração ausente ou ambígua falha fechado. Ele é um exercício de validação do conjunto:
+verifica manifesto, dump, tamanhos, hashes, contagens, vínculos, auditoria/jobs/cursors e
+descriptografia A1 sintética sem alterar volumes vivos. A evidência segura fica no registro de
+validação e no `restore-report.json`, sem payloads, senhas, chaves ou caminhos expostos na API.
+
+Esse comando não é restore operacional completo: não cria PostgreSQL/MinIO, não importa o dump e
+não repopula objetos. Para recuperação após desastre, operador autorizado prepara host isolado,
+sobe PostgreSQL e MinIO, importa o dump, restaura os objetos indicados pelo manifesto, fornece a
+chave mestre pelo mecanismo seguro externo, sobe a aplicação e valida o estado. A chave mestre não
+faz parte do backup. Essa recuperação manual documentada é a estratégia aceita do MVP.
 
 Administradores consultam `GET /api/backups/status` ou `GET /api/backups`; os demais papéis recebem
 negação sem revelar existência ou localização. A seleção conserva independentemente 7 diários,
@@ -45,7 +52,8 @@ ser protegidos fora do repositório.
 
 O perfil de runtime HTTPS, a fronteira do proxy, os serviços privados, os limites e os
 procedimentos de reinício/upgrade/rollback estão documentados em
-[`docs/RUNTIME.md`](RUNTIME.md). Backup e restore continuam sendo o incremento P9-02.
+[`docs/RUNTIME.md`](RUNTIME.md). Backup verificável, validação do conjunto e recuperação manual
+documentada continuam sendo o incremento P9-02.
 
 Worker e scheduler gravam heartbeats por identidade de processo (`component` + `process_id`).
 Restart cria uma nova evidência sem apagar o processo anterior, e atualizações concorrentes de
@@ -68,6 +76,24 @@ Administradores, reutilizando o contrato de `/health/operational`. Operadores e 
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por
 URL direta. O endpoint não cria snapshots, jobs, auditoria adicional, cache ou migração.
 
+## DANFE/DANFSe derivado (P7-03)
+
+`POST /api/documents/<id>/pdf/render` solicita ou regenera o PDF de uma NF-e/NFS-e com o mesmo
+RBAC de consulta; a resposta informa `unavailable`, `pending`, `available`, `failed` ou
+`unsupported`. O worker `document.render_pdf` usa a API Python pinada de
+`BrazilFiscalReport[danfse]==1.0.1`, lê somente XML finalizado/verificado pelo
+`ArtifactStorageService` e não executa CLI, subprocesso, shell ou transporte fiscal.
+
+Cada PDF é um artefato derivado identificado por documento, representação, renderer e versão.
+Bytes, hash, tamanho e MIME são verificados antes da finalização; reintentos reutilizam o
+equivalente íntegro e versões futuras preservam o histórico. `GET /api/documents/<id>/pdf` repete
+autorização e verificação de integridade antes do download. Falhas do renderer ou storage não
+alteram nem removem o XML original, que continua baixável quando autorizado.
+
+Solicitação, negação, deduplicação, início, sucesso, falha, regeneração e download entram na
+auditoria com contexto bounded; os contadores de rendering não carregam conteúdo fiscal,
+segredos ou chaves de objeto. A retenção e a futura exclusão seguem o documento pai.
+
 ## Retenção (P8-03)
 
 A tela `#retencao` e as rotas `/api/retention/documents*` são exclusivamente administrativas e
@@ -78,5 +104,6 @@ antes de qualquer futura operação. A resposta não contém payload fiscal nem 
 A prévia é um inventário de metadados, não uma autorização de exclusão. Seu `scope-v1` inclui as
 referências, digests, tamanhos, versões e estados dos originais/XML e vínculos de eventos. Se a
 evidência mudar, a tentativa com o hash anterior retorna `409` e a prévia deve ser gerada de novo.
-Não existe comando, rota, job ou cleanup de exclusão nesta entrega; PDF/DANFE/DANFSe permanece
-dependente da decisão P7-03 e exclusão controlada depende do restore comprovado de P9-02.
+Não existe comando, rota, job ou cleanup de exclusão nesta entrega. A exclusão controlada depende dos contratos próprios de retenção,
+confirmação, motivo, auditoria e coerência de documento/artefatos; P9-02 já fornece seu backup
+verificável e procedimento manual de recuperação.

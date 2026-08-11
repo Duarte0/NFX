@@ -17,9 +17,28 @@ export type DocumentItem = {
   evidence_available: boolean;
   xml_available: boolean;
   pdf_available: boolean;
+  pdf_state: PdfState;
+  pdf_error: string | null;
   detail_url: string;
   download_url: string | null;
   reason_code: string | null;
+};
+
+export type PdfState = "available" | "pending" | "failed" | "unsupported" | "unavailable";
+
+export type PdfMetadata = {
+  id?: string;
+  state: PdfState;
+  safe_error?: string | null;
+  renderer_id?: string;
+  renderer_version?: string;
+  representation?: string;
+  pdf_type?: string;
+  digest_prefix?: string | null;
+  size_bytes?: number | null;
+  content_type?: string | null;
+  request_url: string;
+  download_url: string | null;
 };
 
 export type DocumentResponse = {
@@ -80,5 +99,6 @@ export type DocumentDetail = {
     artifacts: DocumentDetail["artifacts"];
   }>;
   availability: { xml: boolean; original: boolean; pdf: boolean };
+  pdf: PdfMetadata;
   download_url: string;
 };

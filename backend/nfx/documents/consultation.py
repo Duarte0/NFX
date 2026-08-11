@@ -23,6 +23,7 @@ from nfx.documents.models import (
     DocumentEventEvidence,
     DocumentEvidence,
 )
+from nfx.documents.rendering import render_payload
 
 _ALLOWED_KEYS = frozenset(
     {
@@ -207,7 +208,13 @@ def safe_filename(identity: str, content_type: str | None) -> str:
     normalized = unicodedata.normalize("NFKD", identity).encode("ascii", "ignore").decode()
     normalized = re.sub(r"[^A-Za-z0-9._-]+", "-", normalized).strip(".-").lower()[:80]
     normalized = normalized or "document"
-    extension = ".xml" if content_type == "application/xml" else ".bin"
+    extension = (
+        ".xml"
+        if content_type in {"application/xml", "text/xml"}
+        else ".pdf"
+        if content_type == "application/pdf"
+        else ".bin"
+    )
     return f"{normalized}{extension}"
 
 
@@ -288,7 +295,8 @@ def document_detail(document_id: UUID) -> dict[str, object] | None:
             }
         )
     available = [row for row in document_evidence if row["availability"] == "available"]
-    xml_available = any(row["content_type"] == "application/xml" for row in available)
+    xml_available = any(row["content_type"] in {"application/xml", "text/xml"} for row in available)
+    pdf = render_payload(document)
     return {
         "id": str(document.id),
         "company": {"id": str(document.company_id), "name": document.company.legal_name},
@@ -313,9 +321,10 @@ def document_detail(document_id: UUID) -> dict[str, object] | None:
         "availability": {
             "xml": xml_available,
             "original": bool(available),
-            "pdf": False,
+            "pdf": pdf["state"] == "available",
         },
         "download_url": f"/api/documents/{document.id}/download",
+        "pdf": pdf,
     }
 
 

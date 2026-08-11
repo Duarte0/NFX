@@ -12,6 +12,9 @@ cryptography==44.0.2
 # --- Storage e AWS ---
 boto3==1.35.99
 
+# Derived DANFE/DANFSe PDFs are generated through the in-process Python API.
+BrazilFiscalReport[danfse]==1.0.1
+
 # --- Qualidade, Testes e Ferramentas ---
 pytest
 pytest-django

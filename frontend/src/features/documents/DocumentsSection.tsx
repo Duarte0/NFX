@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Feedback } from "../../shared/ui/Feedback";
-import { downloadDocument, getDocument, listDocuments } from "./api";
-import { DocumentDetail, DocumentItem, DocumentResponse } from "./types";
+import { downloadDocument, getDocument, listDocuments, requestPdf } from "./api";
+import { DocumentDetail, DocumentItem, DocumentResponse, PdfState } from "./types";
 
 function documentStatusLabel(status: DocumentResponse["status"]): string {
   return (
@@ -22,6 +22,16 @@ function documentOutcomeLabel(outcome: DocumentItem["outcome"]): string {
   return { persisted: "Persistido", quarantine: "Quarentena", conflict: "Conflito" }[
     outcome
   ];
+}
+
+function pdfStatusLabel(state: PdfState): string {
+  return {
+    available: "Disponível",
+    pending: "Pendente",
+    failed: "Falhou",
+    unsupported: "Não suportado",
+    unavailable: "Indisponível",
+  }[state];
 }
 
 type DocumentsSectionProps = { loadSignal: number; notify: (message: string) => void };
@@ -62,6 +72,17 @@ export function DocumentsSection({ loadSignal, notify }: DocumentsSectionProps) 
       setDetail(await getDocument(id));
     } catch {
       notify("Não foi possível consultar o detalhe do documento.");
+    }
+  }
+
+  async function generatePdf(id: string, regenerate = false) {
+    try {
+      await requestPdf(id, regenerate);
+      notify(regenerate ? "Regeneração do PDF enfileirada." : "Geração do PDF enfileirada.");
+      await loadDocuments();
+      if (detail?.id === id) await showDetail(id);
+    } catch {
+      notify("Não foi possível solicitar o PDF.");
     }
   }
 
@@ -106,7 +127,7 @@ export function DocumentsSection({ loadSignal, notify }: DocumentsSectionProps) 
               <thead>
                 <tr>
                   <th>Empresa</th><th>Identidade</th><th>Família</th>
-                  <th>Competência</th><th>Resultado</th><th>Evidência</th><th>Ações</th>
+                  <th>Competência</th><th>Resultado</th><th>Evidência</th><th>PDF</th><th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,12 +143,32 @@ export function DocumentsSection({ loadSignal, notify }: DocumentsSectionProps) 
                     </td>
                     <td>{document.evidence_available ? "Disponível" : "Não disponível"}</td>
                     <td>
+                      {pdfStatusLabel(document.pdf_state)}
+                      {document.pdf_error ? ` · ${document.pdf_error}` : ""}
+                    </td>
+                    <td>
                       <button onClick={() => void showDetail(document.id)}>Detalhes</button>
                       {document.download_url && document.evidence_available && (
                         <button
                           onClick={() => void downloadDocument(document.download_url!).catch(() => notify("Download indisponível."))}
                         >
                           Baixar original
+                        </button>
+                      )}
+                      {document.pdf_available && (
+                        <button
+                          onClick={() =>
+                            void downloadDocument(`/api/documents/${document.id}/pdf`).catch(() =>
+                              notify("Download de PDF indisponível."),
+                            )
+                          }
+                        >
+                          Baixar PDF
+                        </button>
+                      )}
+                      {!document.pdf_available && document.pdf_state !== "unsupported" && (
+                        <button onClick={() => void generatePdf(document.id)}>
+                          {document.pdf_state === "failed" ? "Tentar PDF" : "Gerar PDF"}
                         </button>
                       )}
                     </td>
@@ -140,7 +181,25 @@ export function DocumentsSection({ loadSignal, notify }: DocumentsSectionProps) 
             <aside aria-label="Detalhe do documento">
               <h3>Detalhe do documento</h3>
               <p>{detail.identity.value} · {detail.family} · competência {detail.dates.competence}</p>
-              <p>XML: {detail.availability.xml ? "Disponível" : "Não disponível"} · PDF: indisponível</p>
+              <p>
+                XML: {detail.availability.xml ? "Disponível" : "Não disponível"} · PDF: {pdfStatusLabel(detail.pdf.state)}
+              </p>
+              {detail.pdf.download_url && (
+                <button
+                  onClick={() =>
+                    void downloadDocument(detail.pdf.download_url!).catch(() =>
+                      notify("Download de PDF indisponível."),
+                    )
+                  }
+                >
+                  Baixar PDF
+                </button>
+              )}
+              {detail.pdf.state !== "available" && detail.pdf.state !== "unsupported" && (
+                <button onClick={() => void generatePdf(detail.id, detail.pdf.state === "failed")}>
+                  {detail.pdf.state === "failed" ? "Regenerar PDF" : "Gerar PDF"}
+                </button>
+              )}
               <p>Eventos relacionados: {detail.events.length}</p>
               <button onClick={() => setDetail(null)}>Fechar detalhe</button>
             </aside>

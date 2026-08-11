@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import time
 from typing import cast
 from uuid import UUID
 
 from django.http import FileResponse, HttpRequest, HttpResponseBase, JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_http_methods
 
 from nfx.artifacts.storage import (
     ArtifactStorageService,
@@ -20,6 +21,14 @@ from nfx.documents.consultation import (
     safe_filename,
 )
 from nfx.documents.metrics import document_metrics
+from nfx.documents.models import Document
+from nfx.documents.rendering import (
+    RenderAccessDenied,
+    current_render,
+    render_payload,
+    request_render,
+)
+from nfx.documents.rendering_metrics import rendering_metrics
 from nfx.documents.status import (
     DocumentListParams,
     InvalidDocumentListParams,
@@ -191,3 +200,95 @@ def download_document(request: HttpRequest, document_id: UUID) -> HttpResponseBa
 @protected(Action.DOWNLOAD_DOCUMENTS)
 def download_artifact(request: HttpRequest, artifact_id: UUID) -> HttpResponseBase:
     return _download(request, document_id=None, artifact_id=artifact_id)
+
+
+def _json_body(request: HttpRequest) -> dict[str, object] | None:
+    try:
+        value = json.loads(request.body)
+    except (TypeError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+@require_http_methods(["POST"])
+@protected(Action.READ_DOCUMENTS)
+def request_pdf(request: HttpRequest, document_id: UUID) -> JsonResponse:
+    body = _json_body(request) or {}
+    representation = body.get("representation")
+    regenerate = body.get("regenerate", False)
+    if representation is not None and not isinstance(representation, str):
+        return JsonResponse({"detail": "Parâmetros inválidos."}, status=400)
+    if not isinstance(regenerate, bool):
+        return JsonResponse({"detail": "Parâmetros inválidos."}, status=400)
+    identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME), touch=False)
+    if identity is None:
+        return JsonResponse({"detail": "Acesso negado."}, status=403)
+    try:
+        result = request_render(
+            actor=identity,
+            document_id=document_id,
+            representation=representation,
+            regenerate=regenerate,
+        )
+    except RenderAccessDenied:
+        return JsonResponse({"detail": "Acesso negado."}, status=403)
+    document = Document.objects.filter(pk=document_id).first()
+    payload = (
+        render_payload(document, representation)
+        if document is not None
+        else {"state": "unavailable", "safe_error": "document_not_found"}
+    )
+    if result.render is None:
+        if result.safe_error:
+            payload["safe_error"] = result.safe_error
+        status = 409 if result.state == "unsupported" else 503
+        return JsonResponse({"pdf": payload}, status=status)
+    return JsonResponse({"pdf": payload}, status=200 if result.reused else 202)
+
+
+@require_GET
+@protected(Action.DOWNLOAD_DOCUMENTS)
+def download_pdf(request: HttpRequest, document_id: UUID) -> HttpResponseBase:
+    document = Document.objects.select_related("company").filter(pk=document_id).first()
+    if document is None:
+        return JsonResponse({"detail": "PDF não disponível."}, status=404)
+    representation = request.GET.get("representation")
+    try:
+        render = current_render(document, representation)
+    except (ValueError, RuntimeError):
+        render = None
+    if render is None or render_payload(document, representation).get("state") != "available":
+        return JsonResponse({"detail": "PDF não disponível."}, status=404)
+    try:
+        stream = ArtifactStorageService(
+            object_store_from_environment()  # type: ignore[arg-type]
+        ).read_verified(render.artifact_id)  # type: ignore[arg-type]
+    except Exception:
+        return JsonResponse({"detail": "PDF não disponível."}, status=404)
+    try:
+        audited = _audit_read(
+            request,
+            action="document.render.download",
+            entity_id=str(render.id),
+            result="success",
+            context={
+                "representation": render.representation,
+                "renderer_id": render.renderer_id,
+                "renderer_version": render.renderer_version,
+                "size_bytes": render.size_bytes,
+            },
+        )
+    except Exception:
+        stream.close()
+        return JsonResponse({"detail": "Download temporariamente indisponível."}, status=503)
+    if not audited:
+        stream.close()
+        return JsonResponse({"detail": "Download temporariamente indisponível."}, status=503)
+    rendering_metrics.record("download")
+    response = FileResponse(stream, content_type="application/pdf", as_attachment=True)
+    response["Content-Length"] = str(render.size_bytes)
+    response["Content-Disposition"] = (
+        f'attachment; filename="{safe_filename(document.normalized_identity, "application/pdf")}"'
+    )
+    response["Cache-Control"] = "no-store"
+    return response

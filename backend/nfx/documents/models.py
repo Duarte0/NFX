@@ -24,6 +24,28 @@ class DocumentSituation(models.TextChoices):
     UNKNOWN = "unknown", "Unknown"
 
 
+class PdfRepresentation(models.TextChoices):
+    DANFE = "danfe", "DANFE"
+    DANFSE = "danfse", "DANFSe"
+
+    @classmethod
+    def for_family(cls, family: str) -> PdfRepresentation:
+        if family == DocumentFamily.NFE:
+            return cls.DANFE
+        if family == DocumentFamily.NFSE:
+            return cls.DANFSE
+        raise ValueError("document family is unsupported")
+
+
+class DocumentRenderState(models.TextChoices):
+    PENDING = "pending", "Pending"
+    FINALIZED = "finalized", "Finalized"
+    FAILED = "failed", "Failed"
+    UNSUPPORTED = "unsupported", "Unsupported"
+    MISSING = "missing", "Missing"
+    DIVERGENT = "divergent", "Divergent"
+
+
 class DocumentRelationship(models.TextChoices):
     EVENT = "event", "Event"
     SUBSTITUTION = "substitution", "Substitution"
@@ -111,6 +133,76 @@ class DocumentEvidence(models.Model):
         ]
         indexes = [
             models.Index(fields=("document", "digest"), name="nfx_doc_evidence_digest_ix"),
+        ]
+
+
+class DocumentRender(models.Model):
+    """Versioned derived PDF metadata; source evidence remains immutable."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    document = models.ForeignKey(Document, on_delete=models.PROTECT, related_name="renders")
+    source_artifact = models.ForeignKey(
+        Artifact, on_delete=models.PROTECT, related_name="document_renders_source"
+    )
+    artifact = models.ForeignKey(
+        Artifact,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="document_renders",
+    )
+    pdf_type = models.CharField(max_length=16, choices=PdfRepresentation.choices)
+    representation = models.CharField(max_length=16, choices=PdfRepresentation.choices)
+    renderer_id = models.CharField(max_length=64)
+    renderer_version = models.CharField(max_length=32)
+    source_digest = models.CharField(max_length=64)
+    digest = models.CharField(max_length=64, blank=True)
+    size_bytes = models.BigIntegerField(null=True, blank=True)
+    mime_type = models.CharField(max_length=255, default="application/pdf")
+    state = models.CharField(
+        max_length=16, choices=DocumentRenderState.choices, default=DocumentRenderState.PENDING
+    )
+    safe_error = models.CharField(max_length=64, blank=True)
+    safe_result = models.JSONField(default=dict)
+    correlation_id = models.CharField(max_length=128, blank=True)
+    job = models.OneToOneField(
+        "nfx.Job",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="document_render",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "nfx_document_render"
+        indexes = [
+            models.Index(fields=("document", "state"), name="nfx_doc_render_state_ix"),
+            models.Index(
+                fields=("renderer_id", "renderer_version"), name="nfx_doc_render_version_ix"
+            ),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=(
+                    "document",
+                    "pdf_type",
+                    "representation",
+                    "renderer_id",
+                    "renderer_version",
+                ),
+                name="nfx_doc_render_identity_uq",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(size_bytes__isnull=True) | models.Q(size_bytes__gte=0),
+                name="nfx_doc_render_size_ck",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(mime_type="application/pdf"),
+                name="nfx_doc_render_mime_ck",
+            ),
         ]
 
 
