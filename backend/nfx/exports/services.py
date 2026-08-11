@@ -232,6 +232,8 @@ def _safe_segment(value: str, fallback: str) -> str:
 
 def archive_path(item: ExportItem) -> str:
     document = item.document
+    if document is None:
+        raise ExportError("document is unavailable")
     content_type = item.content_type or "application/octet-stream"
     filename = safe_filename(document.normalized_identity, content_type)
     company = _safe_segment(document.company.legal_name, f"company-{document.company_id.hex[:8]}")

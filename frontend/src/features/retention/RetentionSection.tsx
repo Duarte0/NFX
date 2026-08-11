@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Feedback } from "../../shared/ui/Feedback";
-import { getRetentionPreview, listRetention } from "./api";
-import { RetentionItem, RetentionPreview, RetentionResponse } from "./types";
+import { getDeletionStatus, getRetentionPreview, listRetention, requestDeletion, resumeDeletion } from "./api";
+import { DeletionOperation, RetentionItem, RetentionPreview, RetentionResponse } from "./types";
 
 function stateLabel(state: RetentionItem["state"]): string {
   return {
@@ -17,6 +17,9 @@ export function RetentionSection({ loadSignal, notify }: { loadSignal: number; n
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [stale, setStale] = useState(false);
+  const [reason, setReason] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [operation, setOperation] = useState<DeletionOperation | null>(null);
 
   const loadRetention = useCallback(async () => {
     setLoading(true);
@@ -41,6 +44,8 @@ export function RetentionSection({ loadSignal, notify }: { loadSignal: number; n
     setStale(false);
     try {
       setPreview(await getRetentionPreview(item.id, item.scope_hash));
+      setReason("");
+      setConfirmation("");
     } catch (caught) {
       if (caught instanceof Error && "status" in caught && (caught as { status: number }).status === 409) {
         setStale(true);
@@ -48,6 +53,48 @@ export function RetentionSection({ loadSignal, notify }: { loadSignal: number; n
         notify("Não foi possível gerar a prévia de retenção.");
       }
       setPreview(null);
+    }
+  }
+
+  function expectedConfirmation(): string {
+    return preview ? `EXCLUIR:${preview.document.id}:${preview.scope.hash}` : "";
+  }
+
+  async function submitDeletion() {
+    if (!preview) return;
+    try {
+      const created = await requestDeletion(preview.document.id, {
+        scope_hash: preview.scope.hash,
+        scope_version: preview.scope.version,
+        confirmation,
+        reason,
+      });
+      setOperation(created);
+      notify("Exclusão controlada enfileirada.");
+    } catch (caught) {
+      if (caught instanceof Error && "status" in caught && (caught as { status: number }).status === 409) {
+        setStale(true);
+      }
+      notify("Não foi possível solicitar a exclusão controlada.");
+    }
+  }
+
+  async function refreshOperation() {
+    if (!operation) return;
+    try {
+      setOperation(await getDeletionStatus(operation.id));
+    } catch {
+      notify("Não foi possível consultar a exclusão controlada.");
+    }
+  }
+
+  async function resumeOperation() {
+    if (!operation) return;
+    try {
+      setOperation(await resumeDeletion(operation.id));
+      notify("Recuperação da exclusão enfileirada.");
+    } catch {
+      notify("Não foi possível retomar a exclusão controlada.");
     }
   }
 
@@ -85,9 +132,33 @@ export function RetentionSection({ loadSignal, notify }: { loadSignal: number; n
           <h3>Prévia de retenção</h3>
           <p>Escopo {preview.scope.version}: {preview.scope.hash}</p>
           <p>Estado: {stateLabel(preview.decision.state)} · Regra: {preview.decision.rule_version}</p>
-          <p>Evidências originais/XML: {preview.evidence.length} · Eventos: {preview.events.length}</p>
+          <p>Evidências originais/XML: {preview.evidence.length} · Eventos: {preview.events.length} · PDFs derivados: {preview.renders.length}</p>
           <p>{preview.deletion.message}</p>
+          {preview.decision.state === "eligible" && (
+            <div>
+              <label>
+                Motivo bounded
+                <input value={reason} maxLength={1000} onChange={(event) => setReason(event.target.value)} />
+              </label>
+              <label>
+                Confirmação exata: <code>{expectedConfirmation()}</code>
+                <input value={confirmation} onChange={(event) => setConfirmation(event.target.value)} />
+              </label>
+              <button onClick={() => void submitDeletion()}>Solicitar exclusão</button>
+            </div>
+          )}
           <button onClick={() => setPreview(null)}>Fechar prévia</button>
+        </aside>
+      )}
+      {operation && (
+        <aside aria-label="Estado da exclusão controlada">
+          <h3>Exclusão controlada</h3>
+          <p>{operation.state}{operation.safe_error ? ` · ${operation.safe_error}` : ""}</p>
+          <p>Etapa: {operation.current_step ?? "—"}</p>
+          <button onClick={() => void refreshOperation()}>Atualizar exclusão</button>
+          {(operation.state === "recovery_required" || operation.state === "failed") && (
+            <button onClick={() => void resumeOperation()}>Retomar recuperação</button>
+          )}
         </aside>
       )}
     </section>

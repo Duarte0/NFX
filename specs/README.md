@@ -2,7 +2,7 @@
 
 ## Autoridade, baseline e regra de uso
 
-Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão concluídos; a higiene do template de ambiente foi verificada no issue 0007 e o contrato reproduzível de `make build` foi concluído no issue 0008. O issue 0011 concluiu a extração arquitetural transversal do frontend sem alterar o status ou o contrato de nenhuma spec P1–P4. O issue 0015 concluiu os slices P7-01/P7-02 de consulta e download individual; o issue 0019 concluiu P8-03 com cálculo-on-read e prévia administrativa; o issue 0023 concluiu P7-03 com renderer pinado, worker, artefatos derivados e UI.
+Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão concluídos; a higiene do template de ambiente foi verificada no issue 0007 e o contrato reproduzível de `make build` foi concluído no issue 0008. O issue 0011 concluiu a extração arquitetural transversal do frontend sem alterar o status ou o contrato de nenhuma spec P1–P4. O issue 0015 concluiu os slices P7-01/P7-02 de consulta e download individual; o issue 0019 concluiu P8-03 com cálculo-on-read e prévia administrativa; o issue 0023 concluiu P7-03 com renderer pinado, worker, artefatos derivados e UI; o issue 0024 concluiu P9-03 com saga de exclusão controlada e recovery.
 
 Uma spec individual fica concluída somente quando seu próprio DoD tem evidência. Uma fase fica concluída somente quando todas as specs da fase estão concluídas; marcar uma spec não marca automaticamente a fase.
 
@@ -32,7 +32,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 20 | [x] | [p8-retention-eligibility.md](p8-retention-eligibility.md) | P8 | P8-03 concluído no issue 0019; PDF permanece fora | P1-05, P4-01; P7-03 somente para PDFs |
 | 21 | [x] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 concluído no issue 0016 | P1-01, P1-03, P3-04 |
 | 22 | [x] | [p9-backup-and-restore.md](p9-backup-and-restore.md) | P9 | P9-02 implementado no issue 0017; cópia fisicamente separada permanece lacuna de produção | P1-06, P2-03, P3-04 |
-| 23 | [ ] | [p9-controlled-deletion.md](p9-controlled-deletion.md) | P9 | P9-03 pronto para issues | P8-03, P9-02 |
+| 23 | [x] | [p9-controlled-deletion.md](p9-controlled-deletion.md) | P9 | P9-03 concluído no issue 0024; saga, recovery, auditoria e UI verificadas | P8-03, P9-02 |
 | 24 | [ ] | [p9-hardening.md](p9-hardening.md) | P9 | P9-04 | P5–P8, P9-01/02/03 |
 | 25 | [ ] | [p9-internal-pilot-and-homologation.md](p9-internal-pilot-and-homologation.md) | P9 | P9-05 | P5, P6, P8, P9-01..04 |
 
@@ -52,7 +52,7 @@ Uma spec ativa define o contrato verificável de uma fatia. A passagem de issues
 - Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 foi concluído no issue 0016 após P1/P3, sem esperar todo P8.
 - P9-03 depende de P8-03 e P9-02; backup verificável, validação de integridade e recuperação manual documentada são suficientes, sem automação de restore.
 
-Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 concluídas; P2 tem 2 concluídas; P3 tem 4 concluídas, incluindo P3-05 na spec canônica de controle manual; P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5 e P6 têm 1 slice/spec concluídos; P7 tem P7-01/P7-02/P7-03 concluídos; P8 tem P8-01/P8-03 concluídos e P8-02 parcialmente entregue; P9 tem P9-01 concluído, P9-02 implementado com lacuna de cópia separada, e P9-03/P9-04/P9-05 pendentes. Total: 25 specs.
+Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 concluídas; P2 tem 2 concluídas; P3 tem 4 concluídas, incluindo P3-05 na spec canônica de controle manual; P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5 e P6 têm 1 slice/spec concluídos; P7 tem P7-01/P7-02/P7-03 concluídos; P8 tem P8-01/P8-03 concluídos e P8-02 parcialmente entregue; P9 tem P9-01/P9-02/P9-03 concluídos, com a lacuna de cópia fisicamente separada do P9-02, e P9-04/P9-05 pendentes. Total: 25 specs.
 
 ## Decisões Open, Blocked, Deferred e Proposed
 
@@ -61,9 +61,9 @@ Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 concluídas; P2 tem 
   AGPLv3; o projeto usa o arquivo LICENSE upstream como referência prática. A inconsistência não
   condiciona a implementação nem a pinagem.
 - **Open:** endpoints, envelopes, limites e leiautes vigentes bloqueiam somente transports reais/homologação P5/P6; simuladores/domínio continuam implementáveis.
-- **P9-03 pronto para issues:** P9-02 entrega conjunto verificável, validação isolada de integridade
-  e procedimento manual de recuperação. A ausência de automação para restaurar PostgreSQL/MinIO não
-  é blocker da exclusão controlada.
+- **P9-03 implementado no issue 0024:** P9-02 continua entregando conjunto verificável, validação
+  isolada de integridade e procedimento manual de recuperação. A exclusão usa saga idempotente,
+  checkpoints seguros e não automatiza restore PostgreSQL/MinIO.
 - **Lacuna de requisito:** o backup no mesmo host não cumpre OPS-BKP-002/006 nem AC-016 em produção;
   cópia separada bloqueia somente essa evidência de P9-05. CA confiável e broker/escalonamento
   horizontal continuam Deferred.
@@ -73,6 +73,6 @@ Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 concluídas; P2 tem 
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05, P4-01/P4-02/P4-03/P4-04, P6-01/P6-02, P7-01/P7-02/P7-03 e P8-01/P8-03 estão implementados. A próxima implementação pertence a P9-03, respeitando a ordem do backlog.
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05, P4-01/P4-02/P4-03/P4-04, P6-01/P6-02, P7-01/P7-02/P7-03, P8-01/P8-03 e P9-03 estão implementados. A próxima implementação pertence a P9-04, respeitando suas dependências e a ordem do backlog.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.

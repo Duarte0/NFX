@@ -17,6 +17,7 @@ class Action(StrEnum):
     DOWNLOAD_OWN_ZIP = "download_own_zip"
     DOWNLOAD_ANY_ZIP = "download_any_zip"
     READ_RETENTION = "read_retention"
+    DELETE_RETENTION = "delete_retention"
     ADMINISTER_SYSTEM = "administer_system"
 
 

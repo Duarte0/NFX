@@ -89,7 +89,13 @@ class ExportItem(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     export = models.ForeignKey(Export, on_delete=models.CASCADE, related_name="items")
-    document = models.ForeignKey(Document, on_delete=models.PROTECT, related_name="export_items")
+    document = models.ForeignKey(
+        Document,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="export_items",
+    )
     artifact = models.ForeignKey(
         Artifact, null=True, blank=True, on_delete=models.PROTECT, related_name="export_items"
     )

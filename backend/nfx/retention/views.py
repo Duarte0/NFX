@@ -1,17 +1,29 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import time
+from collections.abc import Callable
+from functools import wraps
 from typing import cast
 from uuid import UUID
 
-from django.http import HttpRequest, JsonResponse
-from django.views.decorators.http import require_GET
+from django.http import HttpRequest, HttpResponseBase, JsonResponse
+from django.views.decorators.http import require_GET, require_POST
 
 from nfx.audit.services import AuditService, AuditUnavailable
 from nfx.identity.policy import Action
-from nfx.identity.services import resolve_session
+from nfx.identity.services import require_authorized, resolve_session
 from nfx.identity.views import SESSION_COOKIE_NAME, protected
+from nfx.retention.deletion import (
+    DeletionError,
+    DeletionNotEligible,
+    DeletionNotFound,
+    DeletionStaleScope,
+    operation_payload,
+    request_deletion,
+    resume_deletion,
+)
 from nfx.retention.metrics import retention_metrics
 from nfx.retention.services import (
     RULE_VERSION,
@@ -149,3 +161,153 @@ def preview(request: HttpRequest, document_id: UUID) -> JsonResponse:
     if stale:
         return JsonResponse(payload, status=409)
     return JsonResponse(payload)
+
+
+def _body(request: HttpRequest) -> dict[str, object] | None:
+    try:
+        value = json.loads(request.body)
+    except (TypeError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def _audit_denial(request: HttpRequest, document_id: UUID, code: str, reason: str = "") -> bool:
+    retention_metrics.record_deletion("blocked")
+    identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME), touch=False)
+    if identity is None:
+        return True
+    try:
+        AuditService().append(
+            action="document.delete.denied",
+            entity_type="document",
+            entity_id=str(document_id),
+            result="denied",
+            actor_id=identity.user_id,
+            actor_role=identity.role,
+            ip_address=str(request.META.get("REMOTE_ADDR", "")),
+            correlation_id=hashlib.sha256(f"delete-denied:{document_id}".encode()).hexdigest()[:32],
+            reason=reason.strip()[:1000] or "request_rejected",
+            context={"code": code},
+        )
+    except AuditUnavailable:
+        return False
+    return True
+
+
+def _audit_access_denial(request: HttpRequest, *, entity_type: str, entity_id: str) -> bool:
+    identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME), touch=False)
+    if identity is None:
+        return True
+    try:
+        AuditService().append(
+            action="document.delete.denied",
+            entity_type=entity_type,
+            entity_id=entity_id,
+            result="denied",
+            actor_id=identity.user_id,
+            actor_role=identity.role,
+            ip_address=str(request.META.get("REMOTE_ADDR", "")),
+            correlation_id=hashlib.sha256(f"delete-access:{entity_id}".encode()).hexdigest()[:32],
+            reason="authorization_denied",
+            context={"code": "access_denied"},
+        )
+    except AuditUnavailable:
+        return False
+    return True
+
+
+def _protected_deletion(
+    view: Callable[..., HttpResponseBase],
+) -> Callable[..., HttpResponseBase]:
+    @wraps(view)
+    def wrapped(request: HttpRequest, *args: object, **kwargs: object) -> HttpResponseBase:
+        identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME))
+        if not require_authorized(identity, Action.DELETE_RETENTION.value):
+            retention_metrics.record_deletion("blocked")
+            entity_type = "document" if "document_id" in kwargs else "retention"
+            entity_id = str(kwargs.get("document_id") or kwargs.get("operation_id") or "")
+            if not _audit_access_denial(
+                request, entity_type=entity_type, entity_id=entity_id
+            ):
+                return JsonResponse(
+                    {"detail": "Operação temporariamente indisponível."}, status=503
+                )
+            return JsonResponse({"detail": "Acesso negado."}, status=403)
+        return view(request, *args, **kwargs)
+
+    return wrapped
+
+
+@require_POST
+@_protected_deletion
+def request(request: HttpRequest, document_id: UUID) -> JsonResponse:
+    body = _body(request)
+    if body is None:
+        return JsonResponse({"detail": "Parâmetros inválidos."}, status=400)
+    identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME), touch=False)
+    if identity is None:
+        return JsonResponse({"detail": "Acesso negado."}, status=403)
+    try:
+        result = request_deletion(
+            actor=identity,
+            document_id=document_id,
+            scope_hash_value=body.get("scope_hash"),
+            scope_version=body.get("scope_version"),
+            confirmation=body.get("confirmation"),
+            reason=body.get("reason"),
+        )
+    except DeletionNotFound:
+        _audit_denial(request, document_id, "not_found")
+        return JsonResponse({"detail": "Documento não encontrado."}, status=404)
+    except DeletionStaleScope:
+        if not _audit_denial(request, document_id, "scope_changed", str(body.get("reason", ""))):
+            return JsonResponse({"detail": "Operação temporariamente indisponível."}, status=503)
+        return JsonResponse(
+            {"detail": "A prévia está desatualizada.", "reason_code": "scope_changed"},
+            status=409,
+        )
+    except DeletionNotEligible as exc:
+        if not _audit_denial(request, document_id, exc.code, str(body.get("reason", ""))):
+            return JsonResponse({"detail": "Operação temporariamente indisponível."}, status=503)
+        return JsonResponse(
+            {"detail": "O documento não é elegível.", "reason_code": exc.code}, status=409
+        )
+    except DeletionError as exc:
+        if not _audit_denial(request, document_id, exc.code, str(body.get("reason", ""))):
+            return JsonResponse({"detail": "Operação temporariamente indisponível."}, status=503)
+        status = 409 if exc.code == "operation_active" else 400
+        return JsonResponse(
+            {"detail": "Não foi possível solicitar a exclusão.", "reason_code": exc.code},
+            status=status,
+        )
+    return JsonResponse(
+        operation_payload(result.operation), status=200 if result.duplicate else 202
+    )
+
+
+@require_GET
+@_protected_deletion
+def deletion_status(request: HttpRequest, operation_id: UUID) -> JsonResponse:
+    from nfx.retention.models import DeletionOperation
+
+    operation = DeletionOperation.objects.filter(pk=operation_id).first()
+    if operation is None:
+        return JsonResponse({"detail": "Operação não encontrada."}, status=404)
+    return JsonResponse(operation_payload(operation))
+
+
+@require_POST
+@_protected_deletion
+def resume(request: HttpRequest, operation_id: UUID) -> JsonResponse:
+    identity = resolve_session(request.COOKIES.get(SESSION_COOKIE_NAME), touch=False)
+    if identity is None:
+        return JsonResponse({"detail": "Acesso negado."}, status=403)
+    try:
+        operation = resume_deletion(actor=identity, operation_id=operation_id)
+    except DeletionNotFound:
+        return JsonResponse({"detail": "Operação não encontrada."}, status=404)
+    except DeletionError:
+        return JsonResponse({"detail": "Não foi possível retomar a operação."}, status=409)
+    return JsonResponse(
+        operation_payload(operation), status=200 if operation.state == "completed" else 202
+    )

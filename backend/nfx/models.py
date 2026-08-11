@@ -23,6 +23,7 @@ from nfx.documents.models import (
 from nfx.exports.models import Export, ExportItem
 from nfx.identity.models import IdentitySession, LoginThrottle, User
 from nfx.jobs.models import Job, JobPolicy, ProcessHeartbeat
+from nfx.retention.models import DeletionItem, DeletionOperation
 
 __all__ = [
     "Artifact",
@@ -53,4 +54,6 @@ __all__ = [
     "NFeManifestation",
     "Export",
     "ExportItem",
+    "DeletionOperation",
+    "DeletionItem",
 ]

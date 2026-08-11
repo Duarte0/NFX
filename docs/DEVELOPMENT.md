@@ -308,3 +308,25 @@ usa `scope-v1` e hash estável; passar um hash antigo retorna `409` quando o esc
 chaves de objeto, credenciais e erros de storage nunca atravessam a fronteira. Todos os três
 endpoints são Administrator-only, auditados com contexto redigido e bounded, e não criam jobs,
 alteram registros fiscais ou autorizam exclusão. PDF/DANFE/DANFSe continua no P7-03.
+
+## Exclusão controlada e recovery (P9-03)
+
+`nfx.retention.deletion` é o owner da intenção e da saga; `ArtifactStorageService` é a única
+fronteira de bytes. `POST /api/retention/documents/<id>/deletion` revalida o `scope-v1`, a
+elegibilidade, o papel Administrator, a confirmação literal e o motivo bounded antes de criar
+`DeletionOperation`/`DeletionItem` e enfileirar `retention.delete`. A migration `0020` é aditiva;
+`ExportItem.document` pode ser nulificado para não deixar referência protegida a documento
+apagado. O worker só informa sucesso quando todos os bytes verificados e as relações do conjunto
+chegam a estado terminal.
+
+O fluxo físico é deliberadamente uma saga: cada artefato exige digest, tamanho e versão atuais,
+depois uma transação relacional resolve `ReceivedUnit`, manifestação, exportação, eventos,
+evidências, renders e documento. `recovery_required` ou `failed` preserva o estado e permite
+`POST /api/retention/deletions/<id>/resume`; nenhum retry pode repetir um item já concluído de forma
+insegura. Não adicione restore automático, exclusão de backup, payload fiscal, chave de objeto ou
+exceção externa ao contrato. Atualize o escopo/hash quando mudar relações ou artefatos.
+
+Use fixtures sintéticas e valide o fluxo com `tests/unit/test_retention.py`,
+`tests/integration/test_retention.py`, `python backend/manage.py makemigrations nfx --check`,
+`make lint`, `make build` e `make test-integration`. A integração precisa de PostgreSQL/MinIO
+efêmeros; nunca aponte esses testes para volumes de runtime.

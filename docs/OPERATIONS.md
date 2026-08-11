@@ -104,6 +104,30 @@ antes de qualquer futura operação. A resposta não contém payload fiscal nem 
 A prévia é um inventário de metadados, não uma autorização de exclusão. Seu `scope-v1` inclui as
 referências, digests, tamanhos, versões e estados dos originais/XML e vínculos de eventos. Se a
 evidência mudar, a tentativa com o hash anterior retorna `409` e a prévia deve ser gerada de novo.
-Não existe comando, rota, job ou cleanup de exclusão nesta entrega. A exclusão controlada depende dos contratos próprios de retenção,
-confirmação, motivo, auditoria e coerência de documento/artefatos; P9-02 já fornece seu backup
+Não existe exclusão automática nem cleanup genérico. A exclusão controlada usa os contratos próprios
+de retenção, confirmação, motivo, auditoria e coerência de documento/artefatos; P9-02 já fornece seu backup
 verificável e procedimento manual de recuperação.
+
+## Exclusão fiscal controlada (P9-03)
+
+A exclusão nunca é automática. Um Administrador consulta a prévia atual e envia somente a
+confirmação exata `EXCLUIR:<document-id>:<scope-hash>` e um motivo de 1–1000 caracteres para:
+
+```text
+POST /api/retention/documents/<document-id>/deletion
+GET  /api/retention/deletions/<operation-id>
+POST /api/retention/deletions/<operation-id>/resume
+```
+
+As requisições mutantes exigem sessão válida, CSRF e o papel Administrator. O worker registra o
+handler `retention.delete`; a operação passa por `pending`, `executing`, `recovery_required`,
+`failed` ou `completed`. O status e os itens mostram somente IDs, prefixos, tamanhos, versões e
+códigos seguros — nunca chaves MinIO, bytes ou exceções do provedor.
+
+Ausência, divergência, inacessibilidade de objeto, perda de lease, falha de banco ou falha da
+cadeia de auditoria não é sucesso. Preserve a operação em recovery, corrija a causa somente pelo
+procedimento autorizado e use `resume`; se houver perda física ou divergência irrecuperável,
+execute a validação e a recuperação manual isolada do P9-02. Não restaure automaticamente, não
+apague backups e não use `down --volumes` no runtime. A confirmação de conclusão exige que os
+bytes e os vínculos relacionais do conjunto estejam reconciliados; empresas, usuários, backups,
+auditoria e documentos não relacionados permanecem intactos.

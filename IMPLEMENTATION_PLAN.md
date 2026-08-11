@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-11 |
 | Fontes avaliadas | Código/migrações/configuração, testes, PRD, arquitetura, specs, issues e histórico Git |
-| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02 concluídos; P8-02 tem slice inicial concluído; P9-03 está especificado e pronto para issue; P9-04/P9-05 seguem pendentes. |
+| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03 concluídos; P8-02 tem slice inicial concluído; P9-04/P9-05 seguem pendentes. |
 
 Código e migrações definem a baseline; testes definem o comportamento verificado. PRD e arquitetura definem o comportamento pretendido. Esta atualização não altera a árvore de produto nem reabre entregas concluídas sem evidência de lacuna.
 
@@ -28,6 +28,7 @@ Código e migrações definem a baseline; testes definem o comportamento verific
 | P7-03 — renderização DANFE/DANFSe | `DocumentRender`, renderer pinado, job `document.render_pdf`, rotas/UI e capacidade operacional | issue 0023; migração `0019`; testes unitários de fixtures, idempotência, integridade, RBAC do worker e reuso. |
 | P8-01 e P8-03 | `exports` + migração `0018`; `retention` calculate-on-read | issues 0021/0019; testes de exportação, retenção e integração. |
 | P9-01/P9-02 | Compose runtime/proxy, `backup`, migração `0016`, comandos e runbooks | issues 0016/0017; testes de topology e backup/restore isolado. |
+| P9-03 — exclusão controlada | `DeletionOperation`/`DeletionItem`, migration `0020`, saga `retention.delete`, recovery, auditoria, métricas e UI Admin | issue 0024; unitários, integração PostgreSQL/MinIO isolada, migration check, lint/mypy/build. |
 
 ### Implementado, porém parcial ou com documentação/teste a consolidar
 
@@ -42,9 +43,9 @@ Código e migrações definem a baseline; testes definem o comportamento verific
 
 | Prioridade | Marco/status | Resultado e critério de conclusão | Dependências, riscos e decisões |
 |---:|---|---|---|
-| 1 | **P9-03 Exclusão controlada — pending, pronta para issues** | Implementar solicitação Admin com motivo/confirmação/prévia atual, saga/checkpoint idempotente, tratamento coerente de documento/artefatos e recovery sem falso sucesso; auditar sem conteúdo fiscal. DoD em `specs/p9-controlled-deletion.md`. | P8-03/P9-02 concluídos. O desenho físico da saga ainda é Proposed; restauração operacional automática não é requisito/bloqueio. Risco máximo de dados: fault injection, rollback/recovery e runbook são critérios de entrega. |
+| 1 | **P9-03 Exclusão controlada — concluído no issue 0024** | Solicitação Admin com motivo/confirmação/prévia atual, saga/checkpoint idempotente, tratamento coerente de documento/artefatos, recovery sem falso sucesso, auditoria sem conteúdo fiscal e UI/worker entregues. DoD em `specs/p9-controlled-deletion.md`. | P8-03/P9-02 comprovados; restore PostgreSQL/MinIO continua manual conforme P9-02. P9-04 deve revisar a matriz de risco sem reabrir este incremento. |
 | 2 | **P8-02 expansões — in progress por incrementos** | Habilitar cada card hoje `unavailable` somente quando a fonte possuir owner, estado/frescura, filtro P7 equivalente e teste de reconciliação. | Depende de cada fonte (P5/P6/P7/P9); não criar snapshot/cache sem decisão documentada na spec. |
-| 3 | **P9-04 Hardening — blocked por P7-03 e P9-03** | Produzir matriz de ameaças/falhas, evidência de recovery e ensaio sintético ~200 empresas; corrigir ou bloquear release para achado crítico. DoD em `specs/p9-hardening.md`. | Requer P5–P8 e P9-01..03 completos. Thresholds de carga são Proposed e dependem de medição. |
+| 3 | **P9-04 Hardening — pending após P9-03** | Produzir matriz de ameaças/falhas, evidência de recovery e ensaio sintético ~200 empresas; corrigir ou bloquear release para achado crítico. DoD em `specs/p9-hardening.md`. | Requer P5–P8 e P9-01..03 completos. Thresholds de carga são Proposed e dependem de medição. |
 | 4 | **P9-05 Piloto/homologação — blocked por hardening e decisões externas** | Ambiente segregado, políticas oficiais versionadas e piloto com evidência redigida para AC-001..025. DoD em `specs/p9-internal-pilot-and-homologation.md`. | Depende de P9-04, de endpoints, envelopes, limites, certificados e homologação NF-e/ADN aprovados externamente, e de cópia de backup fisicamente separada para fechar AC-016/OPS-BKP-002/006. Dados reais nunca entram em Git/testes/logs. |
 | 5 | **Transporte real NF-e/ADN — blocked externo** | Criar adapter oficial/homologado somente após requisitos oficiais vigentes, allowlists, credenciais segregadas e política versionada com evidência. | Não inferir endpoints, leiautes, limites nem valores de produção. Simuladores P5/P6 permanecem a baseline segura. |
 
@@ -59,25 +60,25 @@ P9-03 (exclusão; alto risco) ────────┤
 Transporte real NF-e/ADN ─────────── bloqueado por decisões/evidência externas
 ```
 
-P7-03 está concluído; P9-03 segue como o próximo incremento de maior risco. Executar P9-03 com maior rigor de fault injection/review por ser irreversível. Não duplicar cursor, idempotência, retenção, objetos ou auditoria: P3/P4/P8 continuam os owners canônicos.
+P7-03 e P9-03 estão concluídos; P9-04 é o próximo incremento de maior risco. A saga de P9-03 usa fault injection e recovery explícito; não duplicar cursor, idempotência, retenção, objetos ou auditoria: P3/P4/P8 continuam os owners canônicos.
 
 ## Specs, inconsistências e trabalho operacional restante
 
 | Tema | Registro e impacto |
 |---|---|
-| Mapa de specs | Todas as 25 specs têm backlog proprietário. O índice marca 21 concluídas, uma parcialmente entregue (P8-02) e três pendentes (P9-03..05); esse estado corresponde ao código, salvo as caixas históricas de P1/P7 e o DoD ainda aberto de P8-02. |
+| Mapa de specs | Todas as 25 specs têm backlog proprietário. O índice marca 22 concluídas, uma parcialmente entregue (P8-02) e duas pendentes (P9-04/P9-05); esse estado corresponde ao código, salvo as caixas históricas de P1/P7 e o DoD ainda aberto de P8-02. |
 | Renderização | P7-03 usa `BrazilFiscalReport[danfse]==1.0.1`, API Python em processo, `DocumentRender`, migração `0019`, job durável, rotas/UI, métricas e fixtures sintéticas; o XML original permanece owner do acervo. A inconsistência de classificação de licença upstream é observação não bloqueante registrada na spec. |
-| Exclusão | Busca em rotas/modelos/jobs confirma apenas prévia de retenção e remoção de artefato temporário de ZIP; não há comando/rota/job de exclusão fiscal. A spec P9-03 é necessária e suficiente para desenhar a saga; política destrutiva detalhada não deve ser inventada fora dela. |
+| Exclusão | P9-03 está implementado no owner `retention`, com rota Admin, job durável `retention.delete`, checkpoints de bytes/relações, recovery manual e referências protegidas resolvidas sem apagar backups/auditoria. Não há exclusão automática. |
 | Runtime/backup | Runtime HTTPS, backup verificável e validação isolada são implementados. Recuperação completa continua manual e documentada. O backup no mesmo host é uma divergência conhecida do PRD: não satisfaz OPS-BKP-002/006 nem AC-016 para produção; não bloqueia P9-03, mas bloqueia a evidência correspondente de P9-05 até haver cópia fisicamente separada. CA confiável permanece limitação arquitetural separada. |
-| Testes/migrações | Migrações chegam a `0019`; P7-03 tem suite unitária de renderer/reuso/integridade e validação de migration check. P9-03 exigirá suite unitária, integração e fault/recovery. Nenhum teste está marcado skip/xfail/flaky, e a busca não encontrou TODO/FIXME/placeholder de domínio que altere o backlog. |
+| Testes/migrações | Migrações chegam a `0020`; P7-03 e P9-03 têm suites unitárias/integração, migration check e validação de lint/mypy/build. A integração P9-03 usa PostgreSQL/MinIO efêmeros e fixtures sintéticas; nenhum teste está marcado skip/xfail/flaky. |
 
 ## Decisões necessárias e riscos
 
 - **Open externo:** endpoints, envelopes, leiautes, limites e homologação para transportes NF-e/ADN. Bloqueia somente transporte real e piloto correspondente.
-- **Proposed, dono P9-03:** granularidade da saga/checkpoints de exclusão e regras de recuperação física. Deve ser decidida/testada na issue; não alterar sem isso o acervo fiscal.
+- **P9-03 adotado:** bytes são verificados e tratados individualmente; a remoção relacional ocorre numa transação posterior; divergência, ausência, falha de auditoria ou vínculo protegido fica visível e retomável, sem restore automático.
 - **Proposed, dono P8-02:** cache/materialização e limites padrão de período, somente se a agregação calculate-on-read deixar de atender um card.
 - **Lacuna de requisito:** cópia de backup fisicamente separada e recovery após perda do host são necessários para OPS-BKP-002/006 e AC-016 em produção; bloqueiam somente essa evidência do piloto, não P9-03. CA confiável, broker e escala horizontal continuam Deferred; registrar seus riscos residuais no piloto, sem expandir o MVP.
 
 ## Próxima ação recomendada
 
-**Próxima passagem: issues.** P7-03 foi concluído no issue 0023. A próxima passagem deve executar P9-03 como trilha de risco elevado com gates explícitos de recovery/fault injection. Depois, a passagem **build** pode executar a issue mais alta elegível.
+**Próxima passagem: issues.** P7-03 foi concluído no issue 0023 e P9-03 no issue 0024. A próxima passagem deve tratar P9-04 após a criação/seleção de issue elegível; a passagem **build** pode executar a issue mais alta elegível.

@@ -49,6 +49,18 @@ class ArtifactConflict(ArtifactError):
     pass
 
 
+class ArtifactDeletionMissing(ArtifactError):
+    """The expected fiscal object is absent and needs operational recovery."""
+
+
+class ArtifactDeletionDivergent(ArtifactError):
+    """The expected fiscal object no longer matches its durable metadata."""
+
+
+class ArtifactDeletionFailed(ArtifactError):
+    """The storage provider could not confirm the destructive step."""
+
+
 @dataclass(frozen=True)
 class ObjectMetadata:
     size_bytes: int
@@ -338,6 +350,43 @@ class ArtifactStorageService:
             if callable(delete):
                 delete(artifact.object_key)
             artifact.delete()
+
+    def delete_for_deletion(
+        self,
+        artifact_id: uuid.UUID,
+        *,
+        expected_digest_prefix: str,
+        expected_size_bytes: int,
+        expected_version: int,
+    ) -> None:
+        """Delete one verified fiscal object without deleting relational metadata.
+
+        The caller owns the durable saga checkpoint and removes the metadata only
+        after all protected relationships have been resolved in PostgreSQL.
+        """
+        with transaction.atomic():
+            artifact = Artifact.objects.select_for_update().filter(pk=artifact_id).first()
+            if artifact is None:
+                raise ArtifactDeletionMissing("Artifact metadata is unavailable")
+            if (
+                artifact.state != ArtifactState.FINALIZED
+                or artifact.version != expected_version
+                or artifact.size_bytes != expected_size_bytes
+                or not artifact.digest.startswith(expected_digest_prefix)
+            ):
+                raise ArtifactDeletionDivergent("Artifact metadata changed")
+            try:
+                metadata = self.store.head(artifact.object_key)
+            except Exception as exc:
+                raise ArtifactDeletionFailed("Object storage could not be checked") from exc
+            if metadata is None:
+                raise ArtifactDeletionMissing("Object is missing from storage")
+            if metadata.size_bytes != artifact.size_bytes or metadata.digest != artifact.digest:
+                raise ArtifactDeletionDivergent("Object integrity diverged")
+            try:
+                self.store.delete(artifact.object_key)
+            except Exception as exc:
+                raise ArtifactDeletionFailed("Object storage could not delete the object") from exc
 
     def _mark_problem(self, artifact: Artifact, state: str, error: str) -> None:
         Artifact.objects.filter(pk=artifact.pk, state=ArtifactState.FINALIZED).update(

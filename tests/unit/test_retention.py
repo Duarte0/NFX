@@ -1,6 +1,7 @@
 from datetime import UTC, date, datetime
 
 import pytest
+from nfx.retention.metrics import RetentionMetrics
 from nfx.retention.services import (
     InvalidRetentionParams,
     RetentionState,
@@ -58,3 +59,18 @@ def test_parse_retention_params_is_bounded_and_allowlisted() -> None:
         parse_retention_params({"delete": "true"})
     with pytest.raises(InvalidRetentionParams):
         parse_retention_params({"family": ["nfe", "nfse"]})
+
+
+def test_retention_deletion_metrics_use_bounded_outcomes() -> None:
+    metrics = RetentionMetrics()
+    for result in ("requested", "blocked", "failed", "recovery_required", "completed", "orphan"):
+        metrics.record_deletion(result)
+    metrics.record_deletion("document-id-must-not-be-a-label")
+
+    snapshot = metrics.snapshot()
+    assert snapshot.deletion_requested == 1
+    assert snapshot.deletion_blocked == 1
+    assert snapshot.deletion_failures == 1
+    assert snapshot.deletion_recoveries == 1
+    assert snapshot.deletion_completed == 1
+    assert snapshot.deletion_orphans == 1

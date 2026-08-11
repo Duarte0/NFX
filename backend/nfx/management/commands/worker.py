@@ -16,6 +16,7 @@ from nfx.exports.services import ensure_export_handler
 from nfx.infrastructure.http import configure_logging, safe_log
 from nfx.jobs.observability import HeartbeatService
 from nfx.jobs.services import JobEngine, run_worker_loop
+from nfx.retention.deletion import ensure_deletion_handler
 
 
 class Command(BaseCommand):
@@ -31,6 +32,7 @@ class Command(BaseCommand):
         ensure_nfe_followup_handler()
         ensure_export_handler()
         ensure_render_handler()
+        ensure_deletion_handler()
         running = True
 
         def stop(*_: object) -> None:

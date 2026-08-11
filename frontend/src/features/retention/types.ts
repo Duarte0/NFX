@@ -58,5 +58,60 @@ export type RetentionPreview = {
     availability: "available" | "unavailable";
   }>;
   events: Array<{ id: string; category: string; evidence: RetentionPreview["evidence"] }>;
+  renders: Array<{
+    id: string;
+    renderer_id: string;
+    renderer_version: string;
+    state: string;
+    source_digest: string;
+    source_artifact: {
+      id: string;
+      digest_prefix: string;
+      size_bytes: number | null;
+      version: number;
+      availability: "available" | "unavailable";
+    };
+    artifact: {
+      id: string;
+      digest_prefix: string;
+      size_bytes: number | null;
+      version: number;
+      availability: "available" | "unavailable";
+    } | null;
+  }>;
   deletion: { authorized: false; message: string };
+};
+
+export type DeletionOperationState =
+  | "pending"
+  | "executing"
+  | "recovery_required"
+  | "failed"
+  | "completed";
+
+export type DeletionOperation = {
+  id: string;
+  target_document_id: string;
+  state: DeletionOperationState;
+  scope: { hash: string; version: string };
+  reason: string;
+  current_step: string | null;
+  safe_error: string | null;
+  result_code: string | null;
+  requested_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  checkpoint: Record<string, unknown>;
+  items: Array<{
+    id: string;
+    kind: string;
+    target_id: string;
+    artifact_id: string | null;
+    digest_prefix: string | null;
+    size_bytes: number | null;
+    version: number | null;
+    state: string;
+    attempts: number;
+    safe_error: string | null;
+  }>;
 };

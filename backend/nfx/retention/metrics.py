@@ -12,6 +12,12 @@ class RetentionMetricsSnapshot:
     previews: int
     stale_previews: int
     preview_errors: int
+    deletion_requested: int
+    deletion_blocked: int
+    deletion_failures: int
+    deletion_recoveries: int
+    deletion_completed: int
+    deletion_orphans: int
 
 
 class RetentionMetrics:
@@ -26,6 +32,12 @@ class RetentionMetrics:
             "previews": 0,
             "stale_previews": 0,
             "preview_errors": 0,
+            "deletion_requested": 0,
+            "deletion_blocked": 0,
+            "deletion_failures": 0,
+            "deletion_recoveries": 0,
+            "deletion_completed": 0,
+            "deletion_orphans": 0,
         }
 
     def record_decision(self, state: str) -> None:
@@ -47,6 +59,20 @@ class RetentionMetrics:
     def snapshot(self) -> RetentionMetricsSnapshot:
         with self._lock:
             return RetentionMetricsSnapshot(**self._values)
+
+    def record_deletion(self, result: str) -> None:
+        counter = {
+            "requested": "deletion_requested",
+            "blocked": "deletion_blocked",
+            "failed": "deletion_failures",
+            "recovery_required": "deletion_recoveries",
+            "completed": "deletion_completed",
+            "orphan": "deletion_orphans",
+        }.get(result)
+        if counter is None:
+            return
+        with self._lock:
+            self._values[counter] += 1
 
 
 retention_metrics = RetentionMetrics()

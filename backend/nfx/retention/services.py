@@ -324,10 +324,10 @@ def _evidence_scope(row: DocumentEvidence | DocumentEventEvidence) -> dict[str, 
 
 
 def _scope_data(document: Document) -> dict[str, object]:
-    evidence = [row for row in document.evidence.all() if _in_scope(row.artifact)]
+    evidence = list(document.evidence.all())
     events: list[dict[str, object]] = []
     for event in document.events.all():
-        rows = [row for row in event.evidence.all() if _in_scope(row.artifact)]
+        rows = list(event.evidence.all())
         events.append(
             {
                 "id": str(event.id),
@@ -338,12 +338,41 @@ def _scope_data(document: Document) -> dict[str, object]:
                 "evidence": [_evidence_scope(row) for row in rows],
             }
         )
+    renders = [
+        {
+            "id": str(render.id),
+            "source_artifact_id": str(render.source_artifact_id),
+            "source_digest": render.source_digest,
+            "source_artifact": {
+                "digest": render.source_artifact.digest,
+                "size_bytes": render.source_artifact.size_bytes,
+                "version": render.source_artifact.version,
+                "state": render.source_artifact.state,
+            },
+            "renderer_id": render.renderer_id,
+            "renderer_version": render.renderer_version,
+            "state": render.state,
+            "artifact": (
+                {
+                    "id": str(render.artifact_id),
+                    "digest": render.artifact.digest,
+                    "size_bytes": render.artifact.size_bytes,
+                    "version": render.artifact.version,
+                    "state": render.artifact.state,
+                }
+                if render.artifact_id and render.artifact is not None
+                else None
+            ),
+        }
+        for render in document.renders.all()
+    ]
     return {
         "document_id": str(document.id),
         "document_state": document.state,
         "family": document.family,
         "evidence": [_evidence_scope(row) for row in evidence],
         "events": events,
+        "renders": renders,
     }
 
 
@@ -482,10 +511,10 @@ def retention_preview(
     if expected_scope_hash is not None and expected_scope_hash != current_hash:
         return {"reason_code": "scope_changed", "scope_hash": current_hash}, True
     decision = decision_for_document(document, as_of=as_of)
-    evidence = [row for row in document.evidence.all() if _in_scope(row.artifact)]
+    evidence = list(document.evidence.all())
     event_payload: list[dict[str, object]] = []
     for event in document.events.all():
-        event_rows = [row for row in event.evidence.all() if _in_scope(row.artifact)]
+        event_rows = list(event.evidence.all())
         event_payload.append(
             {
                 "id": str(event.id),
@@ -512,5 +541,43 @@ def retention_preview(
         "scope": {"hash": current_hash, "version": "scope-v1"},
         "evidence": [_artifact_payload(row) for row in evidence],
         "events": event_payload,
+        "renders": [
+            {
+                "id": str(render.id),
+                "renderer_id": render.renderer_id,
+                "renderer_version": render.renderer_version,
+                "state": render.state,
+                "source_digest": render.source_digest,
+                "source_artifact": {
+                    "id": str(render.source_artifact_id),
+                    "digest_prefix": render.source_artifact.digest[:16],
+                    "size_bytes": render.source_artifact.size_bytes,
+                    "version": render.source_artifact.version,
+                    "availability": (
+                        "available"
+                        if render.source_artifact.state == ArtifactState.FINALIZED
+                        and not render.source_artifact.safe_error
+                        else "unavailable"
+                    ),
+                },
+                "artifact": (
+                    {
+                        "id": str(render.artifact_id),
+                        "digest_prefix": render.artifact.digest[:16],
+                        "size_bytes": render.artifact.size_bytes,
+                        "version": render.artifact.version,
+                        "availability": (
+                            "available"
+                            if render.artifact.state == ArtifactState.FINALIZED
+                            and not render.artifact.safe_error
+                            else "unavailable"
+                        ),
+                    }
+                    if render.artifact_id and render.artifact is not None
+                    else None
+                ),
+            }
+            for render in document.renders.all()
+        ],
         "deletion": {"authorized": False, "message": "A prévia não autoriza exclusão."},
     }, False
