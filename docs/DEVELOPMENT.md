@@ -8,7 +8,7 @@ O bootstrap em `frontend/src/main.tsx` somente valida o elemento `#root` e monta
 contratos HTTP, estado, handlers e apresentação em `frontend/src/features/`:
 
 - `auth` — login, restauração, encerramento e shell de sessão;
-- `users`, `companies`, `certificates`, `collections`, `documents`, `dashboard` e `audit` — um limite por
+- `users`, `companies`, `certificates`, `collections`, `documents`, `exports`, `dashboard` e `audit` — um limite por
   domínio, sem estado ou regra de negócio compartilhado entre funcionalidades;
 - `shared/http.ts` — credenciais same-origin, CSRF, serialização e erros seguros; e
   `shared/ui/` — primitives sem regras de domínio.
@@ -59,6 +59,21 @@ integration suite and always removes its own containers, network and volumes. `m
 the same before starting web, worker and scheduler, verifies liveness/readiness and that both
 background processes start their durable loops. Set `TEST_RUN_ID` to run two suites in parallel
 with predictable distinct project/bucket names.
+
+## Exportação ZIP P8-01
+
+`nfx.exports` owns the request, frozen P7 filter snapshot, document/artifact items, composition
+job and 24-hour temporary lifecycle. It uses `nfx.documents.status.scoped_documents` for the
+selection and `ArtifactStorageService.read_verified` for every source read. The only output
+artifact class it creates is `export_zip_temp`; cleanup must never target `fiscal_original`, XML,
+event evidence or any collection artifact.
+
+The local bounded policy is 100 selected items, 50 MiB per entry and 100 MiB per ZIP. `POST
+/api/exports` requires an idempotency key and returns a durable queued record; `GET /api/exports`
+and `GET /api/exports/<id>` expose only safe progress metadata. `GET /api/exports/<id>/download`
+rechecks session, requester/Admin authorization, `available` state and the 24-hour deadline on
+each request. Missing or divergent inputs produce explicit item outcomes and a partial/failed
+export, never a falsely complete archive.
 
 `make check-services` returns zero only when PostgreSQL and MinIO are ready. On failure it returns
 non-zero and says only which dependency is unavailable; it never prints connection strings or

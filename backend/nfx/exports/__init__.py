@@ -1,1 +1,1 @@
-"""Export boundary (no domain implementation in P0)."""
+"""Durable, ownership-aware asynchronous ZIP exports."""

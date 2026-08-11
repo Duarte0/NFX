@@ -19,6 +19,7 @@ from nfx.documents.models import (
     DocumentEvidence,
     NFeManifestation,
 )
+from nfx.exports.models import Export, ExportItem
 from nfx.identity.models import IdentitySession, LoginThrottle, User
 from nfx.jobs.models import Job, JobPolicy, ProcessHeartbeat
 
@@ -48,4 +49,6 @@ __all__ = [
     "DocumentEvent",
     "DocumentEventEvidence",
     "NFeManifestation",
+    "Export",
+    "ExportItem",
 ]

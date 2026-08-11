@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-10 |
 | Fontes | Código/migrações, testes, PRD.md, ARCHITECTURE.md, specs/ e issues/ |
-| Status geral | Fundação, plataforma de processamento, P4-01/P4-02/P4-03/P4-04, P8-03, P9-01 e P9-02 concluídos e verificados; P8-01, P7-03 e P9-03..P9-05 permanecem pendentes. |
+| Status geral | Fundação, plataforma de processamento, P4-01/P4-02/P4-03/P4-04, P8-01/P8-03, P9-01 e P9-02 concluídos e verificados; P7-03/P9-03..P9-05 permanecem pendentes. |
 
 O código e as migrações são a baseline de implementação; testes são a evidência de comportamento verificado. PRD e arquitetura continuam a definir o comportamento pretendido. Este plano substitui a premissa anterior de que o repositório era apenas um scaffold.
 
@@ -59,7 +59,7 @@ runtime. A próxima implementação de produto continua sendo P5 follow-up/P7.
 | P6 NFS-e/ADN | **P6-01/P6-02 concluídos, issue 0014** | Adapter semântico simulator-only, cobertura versionada, distribuição por ator/fluxo/NSU, tomada/prestada/eventos/substituições, handoff ao P4, auditoria/métricas/UI segura; sem integrações municipais ou transporte oficial. Ver `p6-nfse-adn-distribution-and-coverage.md`. | P4-02, P2-03, P3-02/03. |
 | P7 consulta/download | **P7-01/P7-02 concluídos, issue 0015** | Busca bounded com filtros aprovados, cursor opaco, detalhe/eventos e download individual RBAC/auditado com verificação de digest/tamanho. PDF continua fora. Ver `p7-document-consultation-and-individual-download.md`. | P4-01/P4-04; P5/P6 ampliam a cobertura. |
 | P7 PDF | **blocked localmente** | DANFE/DANFSe versionado, isolado e regenerável. | P4-01/P7-01 e seleção de renderer; a decisão de biblioteca continua Open. |
-| P8 ZIP/dashboard/retenção | **P8-02 slice inicial concluído no issue 0018; P8-03 concluído no issue 0019; P8-01 pendente** | Dashboard read-only com períodos consecutivos, cards de empresas/documentos/coletas/jobs, drill-down e health Admin-only; retenção calculate-on-read com prévia metadata-only, hash de escopo e sem exclusão. ZIP assíncrono continua pendente. Ver specs P8. | Consulta/download; fontes P5–P7, rendering, disco e backup continuam capacidades ausentes; P8-03 dependeu somente das fontes P4. |
+| P8 ZIP/dashboard/retenção | **P8-01 concluído no issue 0021; P8-02 slice inicial concluído no issue 0018; P8-03 concluído no issue 0019** | Exportação assíncrona congela filtros/itens P7, compõe ZIP com verificação de artefatos, estados parciais explícitos, RBAC, expiração/cleanup de temporários e UI de progresso. Dashboard read-only e retenção calculate-on-read permanecem conforme seus slices. | Consulta/download; PDF só é necessário quando existir como artefato selecionado; fontes P5–P7, rendering e backup continuam capacidades independentes. |
 | P9 runtime/restore/exclusão/piloto | **P9-01 concluído no issue 0016; P9-02 concluído no issue 0017; P9-03/P9-04/P9-05 pendentes** | Runtime HTTPS interno e backup/restore local verificável com schema operacional, manifestos, retenção 7/4/12, status Admin-only e guardas de restore isolado; exclusão somente após restore, hardening e piloto segregado continuam pendentes. | P9-03 permanece bloqueado até evidência de restore P9-02; backup fisicamente separado é Deferred. |
 
 ## Sequência executável
@@ -112,6 +112,9 @@ nenhum transporte oficial ou municipal foi habilitado.
 - P4-03 concluído: manter a matriz de outcome/recovery como contrato único; novos adaptadores devem mapear respostas à classificação antes de alterar qualquer cursor/checkpoint.
 - Antes de P5/P6 reais: decidir/adquirir evidência de endpoints, certificados, leiautes e homologação segregada; isso é decisão externa, não assumir valores.
 - P9-01 entregue no issue 0016: runtime usa proxy HTTPS único, serviços internos sem portas publicadas, imagem comum por processo, volumes persistentes e runbook de upgrade/rollback. P9-02 entregue no issue 0017: captura lógica determinística, objetos verificados, probes A1 cifrados, manifestos hashados, retenção independente, restore isolado e status Admin-only. Antes de P9-03: repetir o exercício conforme runbook e preservar a evidência operacional.
+- P8-01 concluído no issue 0021: exportação mantém seleção congelada, itens e estado em PostgreSQL,
+  gera o ZIP em artifact temporário verificado, aplica limites bounded e nunca altera artefatos
+  fiscais; download revalida ownership/admin, estado e expiração.
 - P8-02 inicial entregue sem materialização: agregação calculate-on-read e capacidades futuras
   permanecem `unavailable` até seus slices proprietários; ampliar cards somente após as fontes
   correspondentes existirem.
@@ -120,5 +123,5 @@ nenhum transporte oficial ou municipal foi habilitado.
 
 ## Próxima ação recomendada
 
-**Próxima passagem: issues.** As issues `0001`–`0020` e `0022` estão concluídas; P9-03 continua bloqueado
-pela evidência operacional de restore, P8-01 permanece pendente e P5 transporte real/P7/P9 seguem conforme a tabela.
+**Próxima passagem: issues.** As issues `0001`–`0022` estão concluídas; P9-03 continua bloqueado
+pela evidência operacional de restore e P5 transporte real/P7/P9 seguem conforme a tabela.

@@ -2450,7 +2450,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_scenariovalidationerror",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": "scenariovalidationerror"
     },
@@ -2461,7 +2461,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_py_valueerror",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": "valueerror"
     },
@@ -2549,7 +2549,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_reference",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": "_reference()"
     },
@@ -2560,7 +2560,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_code",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": "_code()"
     },
@@ -2582,7 +2582,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_fiscalrequest_post_init",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": ".__post_init__()"
     },
@@ -2604,7 +2604,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_fiscalunit_post_init",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": ".__post_init__()"
     },
@@ -2626,7 +2626,7 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_fiscalresponse_post_init",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": ".__post_init__()"
     },
@@ -2681,7 +2681,7 @@
       "source_location": "L245",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_syntheticscenario_post_init",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": ".__post_init__()"
     },
@@ -2890,7 +2890,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "backend_nfx_adapters_simulation_rationale_28",
-      "community": 174,
+      "community": 191,
       "community_name": "ScenarioValidationError",
       "norm_label": "a generated scenario is invalid and must not be interpreted as empty."
     },
@@ -3022,8 +3022,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_models",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "artifacts/models.py"
     },
     {
@@ -3110,8 +3110,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_storage_artifactnotreadable",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 1,
+      "community_name": "storage.py",
       "norm_label": "artifactnotreadable"
     },
     {
@@ -3352,8 +3352,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_storage_object_store_from_environment",
-      "community": 187,
-      "community_name": "documents/views.py",
+      "community": 42,
+      "community_name": "exports/services.py",
       "norm_label": "object_store_from_environment()"
     },
     {
@@ -3363,7 +3363,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_storage_artifactstorageservice",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "artifactstorageservice"
     },
@@ -3385,7 +3385,7 @@
       "source_location": "L190",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_storage_artifactstorageservice_begin",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": ".begin()"
     },
@@ -3539,8 +3539,8 @@
       "source_location": "L169",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_storage_rationale_169",
-      "community": 187,
-      "community_name": "documents/views.py",
+      "community": 42,
+      "community_name": "exports/services.py",
       "norm_label": "build the adapter at the infrastructure edge, not in a domain caller."
     },
     {
@@ -3550,7 +3550,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "backend_nfx_artifacts_storage_rationale_182",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "creates pending metadata, verifies bytes, and finalizes atomically."
     },
@@ -5244,7 +5244,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_ingestioncontext",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "ingestioncontext"
     },
@@ -5398,7 +5398,7 @@
       "source_location": "L336",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_fiscalingestionservice_init",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": ".__init__()"
     },
@@ -5409,7 +5409,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "payloadfactory",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "payloadfactory"
     },
@@ -5420,7 +5420,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "documentmetadatafactory",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "documentmetadatafactory"
     },
@@ -5629,7 +5629,7 @@
       "source_location": "L986",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_reconcile_ingestion",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "reconcile_ingestion()"
     },
@@ -5640,7 +5640,7 @@
       "source_location": "L999",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_ingest_page",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "ingest_page()"
     },
@@ -5651,7 +5651,7 @@
       "source_location": "L1013",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_ingest_collection_response",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "ingest_collection_response()"
     },
@@ -5728,7 +5728,7 @@
       "source_location": "L993",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_rationale_993",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "retry pending/failed units without deleting objects or advancing blindly."
     },
@@ -5739,7 +5739,7 @@
       "source_location": "L1007",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_rationale_1007",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "convenience port used by workers and deterministic integration tests."
     },
@@ -5750,7 +5750,7 @@
       "source_location": "L1025",
       "_origin": "ast",
       "id": "backend_nfx_collection_ingestion_rationale_1025",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "bridge a claimed collection execution to the durable ingestion port."
     },
@@ -6377,7 +6377,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_body",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "_body()"
     },
@@ -6388,7 +6388,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_httprequest",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "httprequest"
     },
@@ -6399,7 +6399,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_ip",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "_ip()"
     },
@@ -6410,7 +6410,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_execution_payload",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "_execution_payload()"
     },
@@ -6421,7 +6421,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_flow_payload",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "_flow_payload()"
     },
@@ -6432,7 +6432,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_companyflow",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "companyflow"
     },
@@ -6443,7 +6443,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_error",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "_error()"
     },
@@ -6454,7 +6454,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_exception",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "exception"
     },
@@ -6465,7 +6465,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_jsonresponse",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "jsonresponse"
     },
@@ -6476,7 +6476,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_require_get",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "require_get"
     },
@@ -6487,7 +6487,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_collections",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "collections()"
     },
@@ -6498,7 +6498,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_status",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "status()"
     },
@@ -6509,7 +6509,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_uuid",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "uuid"
     },
@@ -6520,7 +6520,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_py_require_post",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "require_post"
     },
@@ -6531,7 +6531,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_request",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "request()"
     },
@@ -6542,7 +6542,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "backend_nfx_collection_views_retry",
-      "community": 39,
+      "community": 174,
       "community_name": "request",
       "norm_label": "retry()"
     },
@@ -7554,8 +7554,8 @@
       "source_location": "L205",
       "_origin": "ast",
       "id": "backend_nfx_documents_consultation_safe_filename",
-      "community": 187,
-      "community_name": "documents/views.py",
+      "community": 42,
+      "community_name": "exports/services.py",
       "norm_label": "safe_filename()"
     },
     {
@@ -7642,8 +7642,8 @@
       "source_location": "L206",
       "_origin": "ast",
       "id": "backend_nfx_documents_consultation_rationale_206",
-      "community": 187,
-      "community_name": "documents/views.py",
+      "community": 42,
+      "community_name": "exports/services.py",
       "norm_label": "build a short ascii filename from an untrusted fiscal identity."
     },
     {
@@ -7653,8 +7653,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "documents/metrics.py"
     },
     {
@@ -7664,8 +7664,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics_documentmetricssnapshot",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "documentmetricssnapshot"
     },
     {
@@ -7675,8 +7675,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics_documentmetrics",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "documentmetrics"
     },
     {
@@ -7686,8 +7686,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics_documentmetrics_init",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": ".__init__()"
     },
     {
@@ -7697,8 +7697,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics_documentmetrics_record",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": ".record()"
     },
     {
@@ -7708,8 +7708,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics_documentmetrics_snapshot",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": ".snapshot()"
     },
     {
@@ -7719,8 +7719,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "backend_nfx_documents_metrics_rationale_21",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "bounded in-process counters; no document identifiers become labels."
     },
     {
@@ -7730,8 +7730,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_nfx_documents_models",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "documents/models.py"
     },
     {
@@ -7796,8 +7796,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "backend_nfx_documents_models_document",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 137,
+      "community_name": "consultation.py",
       "norm_label": "document"
     },
     {
@@ -7862,8 +7862,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "backend_nfx_documents_models_rationale_44",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 137,
+      "community_name": "consultation.py",
       "norm_label": "fiscal identity and metadata; payload bytes remain owned by artifacts."
     },
     {
@@ -8698,8 +8698,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "backend_nfx_exports_models",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "exports/models.py"
     },
     {
@@ -8709,8 +8709,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "backend_nfx_exports_models_exportstate",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "exportstate"
     },
     {
@@ -8720,8 +8720,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "backend_nfx_exports_models_exportitemstate",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "exportitemstate"
     },
     {
@@ -8742,8 +8742,8 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "backend_nfx_exports_models_meta",
-      "community": 168,
-      "community_name": "exports/views.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "meta"
     },
     {
@@ -8753,8 +8753,8 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "backend_nfx_exports_models_exportitem",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "exportitem"
     },
     {
@@ -8775,8 +8775,8 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "backend_nfx_exports_models_rationale_88",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "one frozen document/artifact reference and its safe composition result."
     },
     {
@@ -16172,7 +16172,7 @@
       "label": "log()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L34",
+      "source_location": "L22",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16187,7 +16187,7 @@
       "label": "info()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L35",
+      "source_location": "L23",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16202,7 +16202,7 @@
       "label": "ok()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L36",
+      "source_location": "L24",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16217,7 +16217,7 @@
       "label": "warn()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L37",
+      "source_location": "L25",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16232,7 +16232,7 @@
       "label": "err()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L38",
+      "source_location": "L26",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16247,7 +16247,7 @@
       "label": "fmt_num()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L40",
+      "source_location": "L28",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16262,7 +16262,7 @@
       "label": "fmt_dur()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L44",
+      "source_location": "L32",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16277,7 +16277,7 @@
       "label": "print_summary()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L76",
+      "source_location": "L61",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16292,7 +16292,7 @@
       "label": "extract_usage()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L93",
+      "source_location": "L73",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -16307,7 +16307,7 @@
       "label": "render_stream()",
       "file_type": "code",
       "source_file": "loop.sh",
-      "source_location": "L113",
+      "source_location": "L92",
       "metadata": {
         "language": "bash",
         "kind": "bash_function"
@@ -17490,8 +17490,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_integration_test_exports",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 145,
+      "community_name": "ObjectMetadata",
       "norm_label": "integration/test_exports.py"
     },
     {
@@ -17765,7 +17765,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_ingestion.py"
     },
@@ -17776,7 +17776,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_memoryobjectstore",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "memoryobjectstore"
     },
@@ -17787,7 +17787,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_memoryobjectstore_init",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": ".__init__()"
     },
@@ -17820,7 +17820,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_memoryobjectstore_read",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": ".read()"
     },
@@ -17831,7 +17831,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_py_bytesio",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "bytesio"
     },
@@ -17842,7 +17842,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_memoryobjectstore_list_keys",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": ".list_keys()"
     },
@@ -17853,7 +17853,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_py_fixture",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "fixture"
     },
@@ -17864,7 +17864,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_company",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "company()"
     },
@@ -17875,7 +17875,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_storage",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "storage()"
     },
@@ -17886,7 +17886,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_context",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "_context()"
     },
@@ -17897,7 +17897,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_unit",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "_unit()"
     },
@@ -17908,7 +17908,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_metadata",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "_metadata()"
     },
@@ -17919,7 +17919,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_py_django_db",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "django_db"
     },
@@ -17930,7 +17930,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_page_is_durable_before_cursor_progress_and_replay_is_idempotent",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_page_is_durable_before_cursor_progress_and_replay_is_idempotent()"
     },
@@ -17941,7 +17941,7 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_object_failure_leaves_retryable_unit_and_reconciliation_advances",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_object_failure_leaves_retryable_unit_and_reconciliation_advances()"
     },
@@ -17952,7 +17952,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_quarantine_is_terminal_but_stale_and_repeated_positions_do_not_advance",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_quarantine_is_terminal_but_stale_and_repeated_positions_do_not_advance()"
     },
@@ -17963,7 +17963,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_py_parametrize",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "parametrize"
     },
@@ -17974,7 +17974,7 @@
       "source_location": "L260",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_response_failure_matrix_is_durable_and_does_not_advance",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_response_failure_matrix_is_durable_and_does_not_advance()"
     },
@@ -17985,7 +17985,7 @@
       "source_location": "L291",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_unavailable_page_can_retry_with_same_position_and_then_advance",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_unavailable_page_can_retry_with_same_position_and_then_advance()"
     },
@@ -17996,7 +17996,7 @@
       "source_location": "L329",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_divergent_hash_preserves_both_artifacts_and_adn_uses_an_independent_nsu",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_divergent_hash_preserves_both_artifacts_and_adn_uses_an_independent_nsu()"
     },
@@ -18007,7 +18007,7 @@
       "source_location": "L373",
       "_origin": "ast",
       "id": "tests_integration_test_ingestion_test_nfe_distribution_handoff_owns_independent_flow_checkpoints",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_nfe_distribution_handoff_owns_independent_flow_checkpoints()"
     },
@@ -18205,7 +18205,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "tests_integration_test_nfe_followup_memoryobjectstore_read",
-      "community": 188,
+      "community": 195,
       "community_name": ".read",
       "norm_label": ".read()"
     },
@@ -18216,7 +18216,7 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_integration_test_nfe_followup_py_bytesio",
-      "community": 188,
+      "community": 195,
       "community_name": ".read",
       "norm_label": "bytesio"
     },
@@ -18271,7 +18271,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "tests_integration_test_nfe_followup_storage",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "storage()"
     },
@@ -18337,7 +18337,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "tests_integration_test_nfe_followup_test_event_is_linked_and_event_before_parent_is_replayed_safely",
-      "community": 190,
+      "community": 39,
       "community_name": "ArtifactStorageService",
       "norm_label": "test_event_is_linked_and_event_before_parent_is_replayed_safely()"
     },
@@ -19173,8 +19173,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_unit_test_document_consultation",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "test_document_consultation.py"
     },
     {
@@ -19195,8 +19195,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "tests_unit_test_document_consultation_py_parametrize",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "parametrize"
     },
     {
@@ -19206,8 +19206,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "tests_unit_test_document_consultation_test_consultation_params_reject_unsupported_or_invalid_input",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "test_consultation_params_reject_unsupported_or_invalid_input()"
     },
     {
@@ -19228,8 +19228,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "tests_unit_test_document_consultation_test_safe_filename_is_bounded_and_does_not_allow_path_traversal",
-      "community": 187,
-      "community_name": "documents/views.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "test_safe_filename_is_bounded_and_does_not_allow_path_traversal()"
     },
     {
@@ -19239,8 +19239,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "tests_unit_test_document_consultation_test_document_metrics_keep_only_bounded_outcomes",
-      "community": 137,
-      "community_name": "consultation.py",
+      "community": 188,
+      "community_name": "test_document_consultation.py",
       "norm_label": "test_document_metrics_keep_only_bounded_outcomes()"
     },
     {
@@ -19404,8 +19404,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "tests_unit_test_exports",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "unit/test_exports.py"
     },
     {
@@ -19415,8 +19415,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "tests_unit_test_exports_test_export_idempotency_is_bounded_and_stored_as_a_digest",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "test_export_idempotency_is_bounded_and_stored_as_a_digest()"
     },
     {
@@ -19426,8 +19426,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "tests_unit_test_exports_test_export_archive_path_is_deterministic_safe_and_non_colliding",
-      "community": 42,
-      "community_name": "exports/services.py",
+      "community": 190,
+      "community_name": "documents/models.py",
       "norm_label": "test_export_archive_path_is_deterministic_safe_and_non_colliding()"
     },
     {
@@ -97319,7 +97319,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L38",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97330,7 +97330,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L93",
+      "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97341,7 +97341,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L44",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97352,7 +97352,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L40",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97363,7 +97363,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L35",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97374,7 +97374,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L34",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97385,7 +97385,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L36",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97396,7 +97396,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L76",
+      "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97407,7 +97407,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L113",
+      "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97429,7 +97429,7 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L37",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "loop",
@@ -97440,7 +97440,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L53",
+      "source_location": "L41",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97452,7 +97452,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L126",
+      "source_location": "L105",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97464,7 +97464,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L153",
+      "source_location": "L138",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97476,7 +97476,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L170",
+      "source_location": "L147",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97488,7 +97488,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L158",
+      "source_location": "L128",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97500,7 +97500,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L139",
+      "source_location": "L117",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97512,7 +97512,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L171",
+      "source_location": "L148",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97524,7 +97524,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L81",
+      "source_location": "L66",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",
@@ -97536,7 +97536,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "loop.sh",
-      "source_location": "L80",
+      "source_location": "L65",
       "weight": 1.0,
       "context": "call",
       "_origin": "ast",

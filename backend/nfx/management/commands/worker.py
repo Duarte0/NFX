@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand
 
 from nfx.adapters.nfe import ensure_nfe_followup_handler
 from nfx.collection.services import ensure_collection_handler
+from nfx.exports.services import ensure_export_handler
 from nfx.infrastructure.http import configure_logging, safe_log
 from nfx.jobs.observability import HeartbeatService
 from nfx.jobs.services import JobEngine, run_worker_loop
@@ -27,6 +28,7 @@ class Command(BaseCommand):
         configure_logging()
         ensure_collection_handler()
         ensure_nfe_followup_handler()
+        ensure_export_handler()
         running = True
 
         def stop(*_: object) -> None:

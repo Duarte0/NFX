@@ -53,6 +53,7 @@ def test_clean_install_and_rerun_produce_the_same_schema() -> None:
         "nfx.0015_adn_coverage_snapshot",
         "nfx.0016_backup_restore",
         "nfx.0017_nfe_manifestation",
+        "nfx.0018_export_exportitem_export_nfx_export_owner_time_ix_and_more",
     )
     assert second.applied == ()
     assert constraints == (
@@ -137,6 +138,7 @@ def test_failed_migration_is_not_recorded_and_a_safe_correction_can_continue() -
         "nfx.0015_adn_coverage_snapshot",
         "nfx.0016_backup_restore",
         "nfx.0017_nfe_manifestation",
+        "nfx.0018_export_exportitem_export_nfx_export_owner_time_ix_and_more",
     )
     assert schema_status().compatible
 
@@ -186,6 +188,7 @@ def test_two_migrators_are_serialized_and_only_one_applies_the_baseline() -> Non
             "nfx.0015_adn_coverage_snapshot",
             "nfx.0016_backup_restore",
             "nfx.0017_nfe_manifestation",
+            "nfx.0018_export_exportitem_export_nfx_export_owner_time_ix_and_more",
         ),
     ]
     assert schema_status().compatible

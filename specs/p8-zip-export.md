@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P8 — pronta após consulta/download; PDF é dependência somente quando solicitado.
+- **Fase/status:** P8 — concluída no issue 0021. PDF é dependência somente quando solicitado.
 - **Backlog:** P8-01. **Dependências:** P3-01, P7-01, P7-02 e P7-03 para incluir PDF.
 - **PRD:** FR-ZIP-001, FR-ZIP-002, FR-ZIP-003; BR-ZIP-001, BR-ZIP-002, BR-ZIP-003, BR-ZIP-004; NFR-006, AUD-006. **Aceite:** AC-012, AC-014.
 - **Arquitetura:** ADR-011; seções 14, 17, 20, 26, 27, 30, 33, 36, 37 e 40.
@@ -35,10 +35,17 @@ Morte do worker retoma sem duplicar itens; arquivo ausente produz parcial; falha
 
 ## Aceite e DoD
 
-- [ ] Filtros/seleção ficam congelados e auditáveis.
-- [ ] Estrutura de caminhos corresponde ao PRD e bloqueia traversal.
-- [ ] Parcial nunca é apresentado como completo.
-- [ ] Só solicitante/Admin baixa e expiração ocorre em 24h.
-- [ ] Cleanup nunca remove fonte fiscal.
+- [x] Filtros/seleção ficam congelados e auditáveis.
+- [x] Estrutura de caminhos corresponde ao PRD e bloqueia traversal.
+- [x] Parcial nunca é apresentado como completo.
+- [x] Só solicitante/Admin baixa e expiração ocorre em 24h.
+- [x] Cleanup nunca remove fonte fiscal.
 
-DoD: migrações, jobs, composição/cleanup, UI, auditoria/métricas e testes verdes. **Proposed:** limites/quota e forma física do snapshot.
+DoD: migrações, jobs, composição/cleanup, UI, auditoria/métricas e testes verdes.
+
+Implementado no issue 0021: `nfx.exports` congela a seleção P7 em itens
+documento/artefato, enfileira `export.zip`, compõe somente objetos finalizados e verificados,
+mantém resultados parciais explícitos e serve apenas ZIPs `available` dentro da janela de 24
+horas. O artifact lógico `export_zip_temp` é o único alvo do cleanup; fontes fiscais permanecem
+protegidas. Limites locais adotados: 100 itens, 50 MiB por entrada e 100 MiB por ZIP. O DoD foi
+validado com as suites unitária e de integração, lint/typecheck, build e smoke em 2026-08-11.

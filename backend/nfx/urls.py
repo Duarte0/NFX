@@ -7,6 +7,7 @@ from nfx.certificates import views as certificate_views
 from nfx.collection import views as collection_views
 from nfx.companies import views as company_views
 from nfx.documents import views as document_views
+from nfx.exports import views as export_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.health import operational
@@ -53,6 +54,10 @@ urlpatterns = [
     path("api/documents/<uuid:document_id>", document_views.detail),
     path("api/documents/<uuid:document_id>/download", document_views.download_document),
     path("api/artifacts/<uuid:artifact_id>/download", document_views.download_artifact),
+    path("api/exports", export_views.exports),
+    path("api/exports/<uuid:export_id>", export_views.detail),
+    path("api/exports/<uuid:export_id>/download", export_views.download),
+    path("api/exports/cleanup", export_views.cleanup),
     path("api/retention/documents", retention_views.documents),
     path("api/retention/documents/<uuid:document_id>", retention_views.detail),
     path("api/retention/documents/<uuid:document_id>/preview", retention_views.preview),

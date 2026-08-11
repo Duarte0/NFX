@@ -200,7 +200,7 @@ def test_document_consultation_filters_are_conjunctive_and_cursor_is_opaque() ->
     CompanyFlow.objects.create(company=first_company, family=FlowFamily.NFE)
     CompanyFlow.objects.create(company=second_company, family=FlowFamily.NFE)
     first = _document(first_company, "first-filter")
-    _document(first_company, "second-filter")
+    second = _document(first_company, "second-filter")
     _document(second_company, "other-filter")
 
     response = _client().get(
@@ -216,7 +216,7 @@ def test_document_consultation_filters_are_conjunctive_and_cursor_is_opaque() ->
     )
 
     assert response.status_code == 200
-    assert [row["id"] for row in response.json()["documents"]] == [str(first.id)]
+    assert [row["id"] for row in response.json()["documents"]] == [str(min(first.id, second.id))]
     assert response.json()["next_cursor"]
     assert response.json()["next_cursor"] != str(first.id)
 

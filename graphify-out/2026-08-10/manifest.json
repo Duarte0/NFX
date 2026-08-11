@@ -70,13 +70,13 @@
     "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786456567.101998,
-    "ast_hash": "e7725bb8682b09986f84155a7b14b90a",
+    "mtime": 1786393494.5726018,
+    "ast_hash": "dd82803e81e8461673a4a3c3d3090586",
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786456567.101998,
-    "ast_hash": "f7aa01c8daecc953302fcfacff18b322",
+    "mtime": 1786393517.0995677,
+    "ast_hash": "44fae7cba5cac892918699626b47cd11",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "specs/p8-zip-export.md": {
-    "mtime": 1786456567.099998,
-    "ast_hash": "6e46bc33f65b70cb2ceded59451de59a",
+    "mtime": 1786393494.5716019,
+    "ast_hash": "3a3cf52c467e535dbeaa327d59833f44",
     "semantic_hash": ""
   },
   "specs/p9-backup-and-restore.md": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "loop.sh": {
-    "mtime": 1786455779.254827,
-    "ast_hash": "018e401177dcd815d14c73528c5fca0c",
+    "mtime": 1786318044.443931,
+    "ast_hash": "763f821f67a84f688583cfebb98c8406",
     "semantic_hash": ""
   },
   "tests/integration/test_jobs.py": {
@@ -880,8 +880,8 @@
     "semantic_hash": ""
   },
   "tests/integration/test_document_status.py": {
-    "mtime": 1786456415.97719,
-    "ast_hash": "754a892c7a5739484f464d552804c6cb",
+    "mtime": 1786373555.7476835,
+    "ast_hash": "11ddc0b486c462f59c04f01330c1376d",
     "semantic_hash": ""
   },
   "tests/unit/test_document_status.py": {
@@ -1265,8 +1265,8 @@
     "semantic_hash": ""
   },
   "issues/0021_-_async-zip-export.md": {
-    "mtime": 1786456612.610944,
-    "ast_hash": "61970345daaf024b97cb5ec086ab39c5",
+    "mtime": 1786385918.6946275,
+    "ast_hash": "6958c1131d2a2890d8af88d6ecc12a4b",
     "semantic_hash": ""
   },
   "issues/0022_-_nfe-manifestation.md": {

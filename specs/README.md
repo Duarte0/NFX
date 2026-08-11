@@ -27,7 +27,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 15 | [x] | [p6-nfse-adn-distribution-and-coverage.md](p6-nfse-adn-distribution-and-coverage.md) | P6 | P6-01/P6-02 concluídos no issue 0014; transporte real permanece Open | P2-03, P3-02/03, P4-02 |
 | 16 | [x] | [p7-document-consultation-and-individual-download.md](p7-document-consultation-and-individual-download.md) | P7 | P7-01/P7-02 concluídos no issue 0015; PDF permanece fora | P1-03/04, P4-01/04 |
 | 17 | [ ] | [p7-danfe-danfse-rendering.md](p7-danfe-danfse-rendering.md) | P7 | P7-03 | P3-01, P4-01, P7-01, renderer Open |
-| 18 | [ ] | [p8-zip-export.md](p8-zip-export.md) | P8 | P8-01 | P3-01, P7-01/02; P7-03 se PDF |
+| 18 | [x] | [p8-zip-export.md](p8-zip-export.md) | P8 | P8-01 concluído no issue 0021 | P3-01, P7-01/02; P7-03 se PDF |
 | 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | **P8-02 slice inicial implementado (issue 0018); capacidades P5–P7/P9 permanecem indisponíveis** | P3-04 + dados P2–P7 disponíveis; entrega progressiva permitida |
 | 20 | [x] | [p8-retention-eligibility.md](p8-retention-eligibility.md) | P8 | P8-03 concluído no issue 0019; PDF permanece fora | P1-05, P4-01; P7-03 somente para PDFs |
 | 21 | [x] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 concluído no issue 0016 | P1-01, P1-03, P3-04 |
@@ -52,7 +52,7 @@ Uma spec ativa define o contrato verificável de uma fatia. A passagem de issues
 - Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 foi concluído no issue 0016 após P1/P3, sem esperar todo P8.
 - P9-03 depende de restore comprovado, mas esse gate não bloqueia outras specs.
 
-Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5, 1 slice; P6, 1 spec concluída; P7, 2; P8, P8-02 inicial e P8-03 concluídos, com P8-01 pendente; P9, 5. Total: 25.
+Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P2 tem 2 specs concluídas; P3, 4 (P3-01/02/03/04 e P3-05 concluídos); P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5, 1 slice; P6, 1 spec concluída; P7, 2; P8, P8-01/P8-02/P8-03 concluídos; P9, 5. Total: 25.
 
 ## Decisões Open, Blocked, Deferred e Proposed
 
@@ -66,6 +66,6 @@ Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 specs concluídas; P
 
 ## Como escolher a próxima spec
 
-Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05, P4-01/P4-02/P4-03/P4-04, P6-01/P6-02 e P8-03 estão implementados. A próxima implementação pertence a P5/P7 follow-up ou P8-01, respeitando os bloqueios e a ordem do backlog.
+Escolha a primeira linha não marcada cujas dependências diretas tenham DoD comprovado e cujo blocker local não se aplique. Não espere conclusão de uma fase inteira quando a tabela permite paralelismo, nem crie aprovação global. Em empate, priorize o caminho crítico do plano e a menor spec que produz evidência integrada. P0 está concluída; P1-01 a P1-07, P2-01/P2-02/P2-03/P2-04, P3-05, P4-01/P4-02/P4-03/P4-04, P6-01/P6-02 e P8-01/P8-03 estão implementados. A próxima implementação pertence a P5/P7 follow-up, respeitando os bloqueios e a ordem do backlog.
 
 Testes automatizados normais usam somente simuladores e fixtures sintéticas: nunca certificado, CNPJ de cliente, XML, credencial ou endpoint produtivo. Cada implementação atualiza apenas sua caixa; a fase é registrada separadamente no acompanhamento do projeto quando todas as caixas daquela fase estiverem concluídas.

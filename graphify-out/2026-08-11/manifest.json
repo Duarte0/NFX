@@ -70,13 +70,13 @@
     "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786456567.101998,
-    "ast_hash": "e7725bb8682b09986f84155a7b14b90a",
+    "mtime": 1786393780.5252771,
+    "ast_hash": "be57f2245eb6a96e0a020d86f6edff22",
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786456567.101998,
-    "ast_hash": "f7aa01c8daecc953302fcfacff18b322",
+    "mtime": 1786393780.5252771,
+    "ast_hash": "c883b992e55cfb976b075e016684e544",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "specs/p8-zip-export.md": {
-    "mtime": 1786456567.099998,
-    "ast_hash": "6e46bc33f65b70cb2ceded59451de59a",
+    "mtime": 1786393780.5242772,
+    "ast_hash": "1371918f43b1cbd6fadc7110efed49d5",
     "semantic_hash": ""
   },
   "specs/p9-backup-and-restore.md": {
@@ -880,8 +880,8 @@
     "semantic_hash": ""
   },
   "tests/integration/test_document_status.py": {
-    "mtime": 1786456415.97719,
-    "ast_hash": "754a892c7a5739484f464d552804c6cb",
+    "mtime": 1786373555.7476835,
+    "ast_hash": "11ddc0b486c462f59c04f01330c1376d",
     "semantic_hash": ""
   },
   "tests/unit/test_document_status.py": {
@@ -1265,8 +1265,8 @@
     "semantic_hash": ""
   },
   "issues/0021_-_async-zip-export.md": {
-    "mtime": 1786456612.610944,
-    "ast_hash": "61970345daaf024b97cb5ec086ab39c5",
+    "mtime": 1786393780.5262773,
+    "ast_hash": "c5fc1efd8718b5a8ebb95d97a8dfeed2",
     "semantic_hash": ""
   },
   "issues/0022_-_nfe-manifestation.md": {

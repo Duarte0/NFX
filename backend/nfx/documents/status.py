@@ -208,6 +208,11 @@ def _scoped_documents(params: DocumentListParams) -> QuerySet[Document]:
     return queryset
 
 
+def scoped_documents(params: DocumentListParams) -> QuerySet[Document]:
+    """Return the canonical P7 document selection for read-only consumers."""
+    return _scoped_documents(params)
+
+
 def _scoped_quarantine(params: DocumentListParams) -> QuerySet[ReceivedUnit]:
     queryset = ReceivedUnit.objects.select_related("company").filter(
         state=ReceivedUnitState.QUARANTINE, document__isnull=True

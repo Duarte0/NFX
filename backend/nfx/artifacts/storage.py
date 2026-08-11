@@ -84,6 +84,8 @@ class ObjectStore(Protocol):
 
     def list_keys(self, prefix: str) -> Iterator[str]: ...
 
+    def delete(self, object_key: str) -> None: ...
+
 
 class S3ObjectStore:
     """The only adapter that knows S3/MinIO credentials and bucket details."""
@@ -158,6 +160,9 @@ class S3ObjectStore:
         for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
             for item in page.get("Contents", []):
                 yield str(item["Key"])
+
+    def delete(self, object_key: str) -> None:
+        self.client.delete_object(Bucket=self.bucket, Key=object_key)
 
 
 def object_store_from_environment() -> S3ObjectStore:
@@ -322,6 +327,17 @@ class ArtifactStorageService:
         ):
             raise ArtifactNotReadable("Artifact is not available for reading")
         return io.BytesIO(payload)
+
+    def delete_temporary(self, artifact_id: uuid.UUID, *, logical_class: str) -> None:
+        """Delete only an explicitly temporary artifact and its object."""
+        with transaction.atomic():
+            artifact = Artifact.objects.select_for_update().get(pk=artifact_id)
+            if artifact.logical_class != logical_class:
+                raise ArtifactError("Only temporary artifacts can be deleted")
+            delete = getattr(self.store, "delete", None)
+            if callable(delete):
+                delete(artifact.object_key)
+            artifact.delete()
 
     def _mark_problem(self, artifact: Artifact, state: str, error: str) -> None:
         Artifact.objects.filter(pk=artifact.pk, state=ArtifactState.FINALIZED).update(
