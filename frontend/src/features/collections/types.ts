@@ -35,3 +35,34 @@ export type CollectionCompany = {
   status: string;
   flows: CollectionFlow[];
 };
+
+export type CollectionExecutionFilter = {
+  from: string;
+  to: string;
+  state: string;
+};
+
+export type CollectionExecutionSummary = {
+  id: string;
+  company_id: string;
+  company_name: string;
+  family: string;
+  requested_scope: string;
+  state: string;
+  outcome: string;
+  recovery: string;
+  safe_error: string;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+};
+
+export type CollectionExecutionResponse = {
+  read_only: true;
+  filter: CollectionExecutionFilter;
+  boundary: "[from,to)";
+  total: number;
+  limit: number;
+  truncated: boolean;
+  executions: CollectionExecutionSummary[];
+};

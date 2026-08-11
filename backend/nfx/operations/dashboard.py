@@ -14,7 +14,11 @@ from django.utils import timezone
 from nfx.backup.models import BackupState, RestoreState
 from nfx.backup.services import backup_status
 from nfx.certificates.models import Certificate, CertificateState
-from nfx.collection.models import CollectionExecution, CollectionExecutionState
+from nfx.collection.models import CollectionExecutionState
+from nfx.collection.services import (
+    COLLECTION_DASHBOARD_STATE_FILTERS,
+    collection_execution_queryset,
+)
 from nfx.companies.models import Company, CompanyStatus
 from nfx.documents.models import Document, DocumentFamily
 from nfx.documents.rendering import RenderUnavailable, renderer_metadata
@@ -320,17 +324,24 @@ def _document_counts(period: DatePeriod) -> dict[str, int]:
 
 
 def _collection_counts(period: DatePeriod) -> dict[str, int]:
-    start, end = _local_bounds(period)
-    executions = CollectionExecution.objects.filter(created_at__gte=start, created_at__lt=end)
+    executions = collection_execution_queryset(period.start, period.end)
     return {
         "recent": executions.count(),
         "completed": executions.filter(
             state__in=(CollectionExecutionState.CONCLUDED, CollectionExecutionState.EMPTY)
         ).count(),
-        "running": executions.filter(state=CollectionExecutionState.RUNNING).count(),
-        "failed": executions.filter(state=CollectionExecutionState.FAILED).count(),
-        "blocked": executions.filter(state=CollectionExecutionState.BLOCKED).count(),
-        "partial": executions.filter(state=CollectionExecutionState.PARTIAL).count(),
+        "running": collection_execution_queryset(
+            period.start, period.end, state="running"
+        ).count(),
+        "failed": collection_execution_queryset(
+            period.start, period.end, state="failed"
+        ).count(),
+        "blocked": collection_execution_queryset(
+            period.start, period.end, state="blocked"
+        ).count(),
+        "partial": collection_execution_queryset(
+            period.start, period.end, state="partial"
+        ).count(),
     }
 
 
@@ -492,13 +503,20 @@ def build_dashboard(
     collection_previous, _ = _safe_source(
         lambda: _collection_counts(period.previous), evaluated_at=evaluated_at
     )
-    for key, label, status in (
-        ("recent", "Coletas recentes", "ready"),
-        ("running", "Coletas em execução", "ready"),
-        ("failed", "Coletas com falha", "degraded"),
-        ("blocked", "Coletas bloqueadas", "degraded"),
-        ("partial", "Coletas parciais", "partial"),
-    ):
+    collection_labels = {
+        "recent": ("Coletas recentes", "ready"),
+        "running": ("Coletas em execução", "ready"),
+        "failed": ("Coletas com falha", "degraded"),
+        "blocked": ("Coletas bloqueadas", "degraded"),
+        "partial": ("Coletas parciais", "partial"),
+    }
+    period_filters = {
+        "from": period.current.start.isoformat(),
+        "to": period.current.end.isoformat(),
+    }
+    for key in COLLECTION_DASHBOARD_STATE_FILTERS:
+        label, status = collection_labels[key]
+        filters = {**period_filters, "state": key}
         cards.append(
             _period_card(
                 card_id=f"collections.{key}",
@@ -506,7 +524,10 @@ def build_dashboard(
                 current=collection_current.get(key) if collection_current else None,
                 previous=collection_previous.get(key) if collection_previous else None,
                 evaluated_at=evaluated_at,
-                href="#coletas",
+                href=(
+                    f"?from={filters['from']}&to={filters['to']}&state={filters['state']}#coletas"
+                ),
+                filters=filters,
                 nonzero_status=status,
             )
         )

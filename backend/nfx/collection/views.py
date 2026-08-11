@@ -16,9 +16,12 @@ from nfx.collection.services import (
     CollectionCertificateUnavailable,
     CollectionCooldown,
     CollectionError,
+    CollectionExecutionQueryError,
     CollectionFlowPaused,
     CollectionPolicyUnavailable,
     CollectionRetryNotEligible,
+    list_collection_execution_summaries,
+    normalize_collection_execution_filter,
     request_collection,
 )
 from nfx.companies.models import AdnCoverageSnapshot, Company, CompanyFlow
@@ -129,6 +132,24 @@ def collections(_: HttpRequest) -> JsonResponse:
             }
         )
     return JsonResponse({"collections": rows})
+
+
+@require_GET
+@protected(Action.READ_DOCUMENTS)
+def execution_list(request: HttpRequest) -> JsonResponse:
+    try:
+        selected = normalize_collection_execution_filter(request.GET)
+    except CollectionExecutionQueryError:
+        return JsonResponse({"detail": "Parâmetros de execução inválidos."}, status=400)
+    try:
+        payload = list_collection_execution_summaries(selected)
+    except Exception:
+        return JsonResponse(
+            {"detail": "Não foi possível consultar as execuções de coleta."}, status=503
+        )
+    response = JsonResponse(payload)
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 @require_GET

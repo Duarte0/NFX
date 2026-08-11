@@ -288,12 +288,19 @@ completa cria uma execução independente para cada família; locks e a constrai
 impedem duplicidade por empresa/família. O scheduler consome o handoff e o worker executa somente o
 handler sintético `collection.synthetic` até que P4 forneça ingestão durável.
 
-As rotas são `GET /api/collections`, `GET /api/companies/<id>/collection`,
-`POST /api/companies/<id>/collection/request` e
+As rotas são `GET /api/collections`, `GET /api/collections/executions`,
+`GET /api/companies/<id>/collection`, `POST /api/companies/<id>/collection/request` e
 `POST /api/companies/<id>/collection/retry/<execution_id>`. Admin/Operador podem mutar; Viewer
 recebe apenas estado operacional. Todos os pedidos, conflitos, recusas, retry e resultados usam
 auditoria append-only com códigos seguros. `empty` significa somente consulta sintética válida sem
 unidades; indisponibilidade, parcial, retry, cooldown e bloqueio permanecem estados distintos.
+
+`GET /api/collections/executions` é uma leitura autenticada para o drill-down P8-02. Exige
+`from`, `to` e `state` (`recent`, `running`, `failed`, `blocked` ou `partial`), usa datas civis
+de Brasília em `[from,to)`, retorna o total server-side e no máximo 50 resumos ordenados por
+`created_at`/UUID. `recent` reutiliza o total de todas as execuções e não é um novo estado do
+domínio. A resposta não inclui payload fiscal, XML/PDF, chaves de objeto, certificados,
+correlação ou exceções brutas; falha de fonte retorna `503` seguro.
 
 ## Retenção e prévia administrativa (P8-03)
 

@@ -49,6 +49,7 @@ urlpatterns = [
     path("api/users/password", identity_views.user_password_change),
     path("api/users/<uuid:user_id>/active", identity_views.user_active),
     path("api/audit/events", audit_views.events),
+    path("api/collections/executions", collection_views.execution_list),
     path("api/collections", collection_views.collections),
     path("api/documents", document_views.documents),
     path("api/documents/<uuid:document_id>", document_views.detail),

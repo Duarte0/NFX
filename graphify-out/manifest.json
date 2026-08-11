@@ -70,13 +70,13 @@
     "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786485167.5493326,
-    "ast_hash": "eb2a1327e50a83ccc27cb5723680a8c2",
+    "mtime": 1786488225.4221454,
+    "ast_hash": "a7b5ff122ad46085f5254b7fffe4cae7",
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786485167.5493326,
-    "ast_hash": "73814eb36b342030b6f2c1c9f3b1fead",
+    "mtime": 1786488247.3392718,
+    "ast_hash": "f34548966b3455a1b156449cc0a46de1",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "specs/p8-dashboard-and-operational-health.md": {
-    "mtime": 1786485167.5493326,
-    "ast_hash": "e8d27f5928a44927ea3f6321d2198b2d",
+    "mtime": 1786488212.3760693,
+    "ast_hash": "780d6dd5056bd43e4fb21ff93e1c4b44",
     "semantic_hash": ""
   },
   "specs/p8-retention-eligibility.md": {
@@ -320,8 +320,8 @@
     "semantic_hash": ""
   },
   "backend/nfx/urls.py": {
-    "mtime": 1786481240.1233084,
-    "ast_hash": "35e4d7ed97e7dc55c2fd5a97bcdbe39c",
+    "mtime": 1786487794.361275,
+    "ast_hash": "3dfc931c3e3be969e121c8fa217b3c02",
     "semantic_hash": ""
   },
   "backend/nfx/wsgi.py": {
@@ -400,8 +400,8 @@
     "semantic_hash": ""
   },
   "docs/DEVELOPMENT.md": {
-    "mtime": 1786482906.9127371,
-    "ast_hash": "14e051587a88303523fa6cec8db7b84d",
+    "mtime": 1786488262.1183565,
+    "ast_hash": "9e83e8aacae84a624203d3809f1af928",
     "semantic_hash": ""
   },
   "frontend/index.html": {
@@ -765,8 +765,8 @@
     "semantic_hash": ""
   },
   "docs/OPERATIONS.md": {
-    "mtime": 1786485176.2213197,
-    "ast_hash": "3980dfa809b194ef5f59eb63fd69f6f2",
+    "mtime": 1786488262.1183565,
+    "ast_hash": "bc3eb566704b194890b5ea5e8b76b424",
     "semantic_hash": ""
   },
   "issues/0004_-_job-observability-and-initial-health.md": {
@@ -820,13 +820,13 @@
     "semantic_hash": ""
   },
   "backend/nfx/collection/services.py": {
-    "mtime": 1786369035.452482,
-    "ast_hash": "7957284b6dcd7d62fc0f8ae5498c5a1b",
+    "mtime": 1786487882.4979362,
+    "ast_hash": "2963f9626c011050ea7e2d884c7e3836",
     "semantic_hash": ""
   },
   "backend/nfx/collection/views.py": {
-    "mtime": 1786371962.485964,
-    "ast_hash": "80b3937e295144c37b516c107e532f27",
+    "mtime": 1786487876.634894,
+    "ast_hash": "2d0a2a8109b3486fdd7202c1b4d205d7",
     "semantic_hash": ""
   },
   "backend/nfx/migrations/0012_companyflow_blocked_reason_and_more.py": {
@@ -995,18 +995,18 @@
     "semantic_hash": ""
   },
   "frontend/src/features/collections/CollectionsSection.tsx": {
-    "mtime": 1786371962.485964,
-    "ast_hash": "86edca8713394436f34f06d9a75b3b07",
+    "mtime": 1786487846.8316746,
+    "ast_hash": "88fa6546339baf27d0a1816f2294b7b1",
     "semantic_hash": ""
   },
   "frontend/src/features/collections/api.ts": {
-    "mtime": 1786369898.2866745,
-    "ast_hash": "b2b4fa120d02fa0e83d2efc803654a34",
+    "mtime": 1786487846.8316746,
+    "ast_hash": "1be062ba1f83ecd90c3f27246fd4bc73",
     "semantic_hash": ""
   },
   "frontend/src/features/collections/types.ts": {
-    "mtime": 1786371962.485964,
-    "ast_hash": "a23257adad6193df0d9db846f3af5aed",
+    "mtime": 1786487846.8306744,
+    "ast_hash": "e4936d6bcace8746d4daefe50faf869d",
     "semantic_hash": ""
   },
   "frontend/src/features/companies/CompaniesSection.tsx": {
@@ -1110,8 +1110,8 @@
     "semantic_hash": ""
   },
   "backend/nfx/operations/dashboard.py": {
-    "mtime": 1786485069.4894803,
-    "ast_hash": "431b6583257a75787163d0aa9474b514",
+    "mtime": 1786487783.3481889,
+    "ast_hash": "f7b77336d8a7a1adeacc73cba79f5f27",
     "semantic_hash": ""
   },
   "backend/nfx/operations/views.py": {
@@ -1140,8 +1140,8 @@
     "semantic_hash": ""
   },
   "tests/unit/test_dashboard.py": {
-    "mtime": 1786485069.4894803,
-    "ast_hash": "53e7a97e726f9758e2726b7f564b15ee",
+    "mtime": 1786488337.5867794,
+    "ast_hash": "87c29eef6ff6df82c7a26b7bf8442782",
     "semantic_hash": ""
   },
   "backend/nfx/retention/metrics.py": {
@@ -1387,6 +1387,41 @@
   "backend/nfx/retention/models.py": {
     "mtime": 1786481576.5077705,
     "ast_hash": "f39605a635aecf966fdec9025844149b",
+    "semantic_hash": ""
+  },
+  "tests/integration/test_collection_execution_endpoint.py": {
+    "mtime": 1786488337.5867794,
+    "ast_hash": "c698ccd08d7a2b8dcb4df8b52b2c081d",
+    "semantic_hash": ""
+  },
+  "tests/unit/test_collection_execution_query.py": {
+    "mtime": 1786487702.3825283,
+    "ast_hash": "d64f0dab5cec67f83117d604925872a9",
+    "semantic_hash": ""
+  },
+  "issues/0026_-_dashboard-collection-drilldown-reconciliation.md": {
+    "mtime": 1786488970.2849424,
+    "ast_hash": "fdf32e261fd2e15c05ac3987b46318df",
+    "semantic_hash": ""
+  },
+  "issues/0027_-_dashboard-document-drilldown-reconciliation.md": {
+    "mtime": 1786486339.2325695,
+    "ast_hash": "1a17f0f002d708b9225c38ba602a67d3",
+    "semantic_hash": ""
+  },
+  "issues/0028_-_dashboard-company-drilldown-reconciliation.md": {
+    "mtime": 1786486635.9259388,
+    "ast_hash": "dd9e3e54e1aa810e910d30ef1f0d5b3d",
+    "semantic_hash": ""
+  },
+  "issues/0029_-_dashboard-certificate-drilldown-reconciliation.md": {
+    "mtime": 1786486865.6871247,
+    "ast_hash": "62863f19d7151097e59ccc82818aa004",
+    "semantic_hash": ""
+  },
+  "issues/0030_-_dashboard-job-drilldown-reconciliation.md": {
+    "mtime": 1786487096.0540795,
+    "ast_hash": "22829d0db1080397e9b0a062aea35ad3",
     "semantic_hash": ""
   }
 }

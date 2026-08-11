@@ -71,6 +71,14 @@ resposta sempre informa o período anterior de mesma duração. `zero`, `unavail
 suportados. Valores fiscais ainda não persistidos, fontes P5/P6, rendering e disco não são
 inventados: aparecem como capacidade indisponível.
 
+Os cinco cards de coleta (`recent`, `running`, `failed`, `blocked` e `partial`) abrem o drill-down
+`GET /api/collections/executions` com o período exibido e o estado correspondente. A consulta é
+autenticada, somente leitura e bounded: exige `from`, `to` e `state`, aplica `[from,to)` em
+Brasília, informa o total reconciliado e mostra até 50 execuções com metadados redigidos. `recent`
+é o total das execuções no período, não um novo estado persistido. Período inválido retorna erro
+seguro; indisponibilidade não é apresentada como zero. A tela distingue carregamento, vazio válido,
+filtro inválido, indisponibilidade e degradação.
+
 Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por

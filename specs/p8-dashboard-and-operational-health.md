@@ -8,7 +8,8 @@
 - **Arquitetura:** seções 14, 26, 32, 35, 36, 39 e 40; ADR-012 quanto à limitação de backup.
 - **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering e
   disco continuam explicitamente indisponíveis para incrementos posteriores; o status seguro de
-  backup P9-02 foi integrado no issue 0025.
+  backup P9-02 foi integrado no issue 0025; o drill-down de execuções de coleta foi concluído no
+  issue 0026. Os drill-downs de empresa, certificado, documento e job continuam em slices próprios.
 
 ## Propósito e resultado
 
@@ -20,13 +21,13 @@ Métricas iniciais vêm P3; dados de empresas/certificados/documentos surgem P2�
 
 ## Contratos e dados Proposed
 
-Operação é dona de health; domínios são donos dos dados agregados. Contrato de dashboard recebe intervalo com limites claros e retorna valor atual, anterior, status/frescura e filtro de drill-down. Período anterior tem mesma duração, termina exatamente no início do atual e não sobrepõe. **Proposed:** consultas diretas/indexadas ou snapshots locais; se materialização for necessária, registrar origem/frescura e reconciliação. Não duplicar autoridade do domínio.
+Operação é dona de health; domínios são donos dos dados agregados. Contrato de dashboard recebe intervalo com limites claros e retorna valor atual, anterior, status/frescura e filtro de drill-down. Período anterior tem mesma duração, termina exatamente no início do atual e não sobrepõe. O owner `nfx.collection` expõe `GET /api/collections/executions` para o slice de coleta, com `from`, `to` e o filtro allowlisted dos cinco cards, total server-side e página limitada. **Proposed:** consultas diretas/indexadas ou snapshots locais; se materialização for necessária, registrar origem/frescura e reconciliação. Não duplicar autoridade do domínio.
 
 Indicadores: empresas ativas/inativas; documentos/quantidades/valores; NF-e/NFS-e e categorias; certificados expirados/próximos; coletas recentes/em execução; pendências/falhas/bloqueios/atrasos. Saúde Admin: espaço, DB, MinIO, fontes, processamento e backup. Cada indicador clicável usa filtros suportados por P7 e deve reconciliar contagem com a lista.
 
 ## UI, autorização e observabilidade
 
-Todos veem dashboard fiscal permitido; apenas Admin vê detalhes técnicos/backup/configuração. Interface pt-BR, Brasília/BRL, com loading, parcial, stale, degradado e indisponível. Health distingue liveness/readiness/dependência. Métricas próprias: latência, freshness, erro e divergência de drill-down; logs sem dados fiscais agregados desnecessários.
+Todos veem dashboard fiscal permitido; apenas Admin vê detalhes técnicos/backup/configuração. Interface pt-BR, Brasília/BRL, com loading, parcial, stale, degradado e indisponível. O drill-down de coleta mantém o período e o estado na URL, consulta o servidor e mostra total, vazio válido, indisponível, inválido ou degradado sem filtrar no browser. Health distingue liveness/readiness/dependência. Métricas próprias: latência, freshness, erro e divergência de drill-down; logs sem dados fiscais agregados desnecessários.
 
 ## Falhas e testes
 
@@ -54,3 +55,15 @@ e última validação, sem caminhos, IDs ou manifesto. Falhas da fonte degradam 
 backup; não há migration, snapshot, cache ou escrita fiscal. Evidência: testes unitários de
 intervalo/falha isolada/mapeamento seguro e testes de integração de agregação, zero, RBAC, health,
 backup e leituras repetidas, além de Ruff/mypy/TypeScript/Vite.
+
+### Evidência do slice de coleta — issue 0026
+
+`GET /api/collections/executions?from=YYYY-MM-DD&to=YYYY-MM-DD&state=recent|running|failed|blocked|partial`
+é uma leitura autenticada, bounded e sem cursor. O owner `nfx.collection` compartilha com o
+dashboard a consulta `CollectionExecution`, as fronteiras civis de Brasília `[from,to)` e o mapa
+canônico de estados; `recent` é o filtro já existente de todas as execuções, não um novo estado
+persistido. A resposta limita a página a 50 linhas, ordena por timestamp/UUID, retorna total e
+somente metadados redigidos. Falha da fonte retorna indisponibilidade/degradação sem zero inventado.
+O slice é coberto por testes unitários de parsing e integração PostgreSQL/MinIO de reconciliação,
+limites, RBAC, redaction, erro e no-write, além do contrato TypeScript/ESLint/Vite. Os demais
+cards clicáveis permanecem pendentes nos issues 0027–0030.

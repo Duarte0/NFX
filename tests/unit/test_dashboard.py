@@ -67,6 +67,33 @@ def test_document_source_failure_does_not_erase_unrelated_cards(
     assert cards["documents.total"]["drilldown"]["href"] == "#documentos"
 
 
+def test_collection_source_failure_is_unavailable_without_erasing_other_cards(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "nfx.operations.dashboard._collection_counts",
+        lambda period: (_ for _ in ()).throw(RuntimeError("synthetic collection failure")),
+    )
+    monkeypatch.setattr(
+        "nfx.operations.dashboard._company_counts", lambda: {"active": 2, "inactive": 0}
+    )
+    monkeypatch.setattr(
+        "nfx.operations.dashboard._document_counts", _empty_document_counts, raising=False
+    )
+    monkeypatch.setattr("nfx.operations.dashboard._job_counts", _empty_job_counts)
+
+    payload = build_dashboard(
+        period=normalize_period({"from": "2026-08-01", "to": "2026-09-01"}),
+        role=Role.VIEWER,
+    )
+    cards = {card["id"]: card for card in payload["cards"]}
+
+    assert cards["collections.recent"]["status"] == "unavailable"
+    assert cards["collections.recent"]["current"]["value"] is None
+    assert cards["documents.total"]["status"] == "zero"
+    assert cards["companies.active"]["current"]["value"] == 2
+
+
 def _empty_document_counts(period: object) -> dict[str, int]:
     del period
     return {"total": 0, "nfe": 0, "nfse": 0, "entrada": 0, "saida": 0, "tomados": 0, "prestados": 0}

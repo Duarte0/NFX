@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 from uuid import UUID, uuid4
 
 from django.db import IntegrityError, transaction
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from nfx.audit.services import AuditService
@@ -74,6 +75,43 @@ class CollectionRetryNotEligible(CollectionError):
     code = "retry_not_eligible"
 
 
+class CollectionExecutionQueryError(ValueError):
+    """A filtered execution read is outside its bounded contract."""
+
+
+COLLECTION_DASHBOARD_STATE_FILTERS: dict[str, str | None] = {
+    "recent": None,
+    "running": CollectionExecutionState.RUNNING,
+    "failed": CollectionExecutionState.FAILED,
+    "blocked": CollectionExecutionState.BLOCKED,
+    "partial": CollectionExecutionState.PARTIAL,
+}
+COLLECTION_EXECUTION_QUERY_KEYS = frozenset(("from", "to", "state"))
+MAX_COLLECTION_EXECUTION_QUERY_DAYS = 366
+MAX_COLLECTION_EXECUTION_QUERY_ROWS = 50
+_SAFE_EXECUTION_ERRORS = frozenset(
+    {
+        "official_cooldown",
+        "partial_result",
+        "permanent_failure",
+        "retry_exhausted",
+        "temporary_failure",
+    }
+)
+
+
+@dataclass(frozen=True)
+class CollectionExecutionFilter:
+    start: date
+    end: date
+    state: str
+    model_state: str | None
+
+    @property
+    def boundary(self) -> str:
+        return "[from,to)"
+
+
 @dataclass(frozen=True)
 class CollectionRequest:
     executions: tuple[CollectionExecution, ...]
@@ -92,6 +130,122 @@ def _scope(value: CollectionScope | str) -> CollectionScope:
         return value if isinstance(value, CollectionScope) else CollectionScope(value)
     except (TypeError, ValueError) as exc:
         raise InvalidCollectionScope("scope is invalid") from exc
+
+
+def _query_value(query: Mapping[str, object], key: str) -> object | None:
+    getlist = getattr(query, "getlist", None)
+    values: list[object] = list(getlist(key)) if callable(getlist) else []
+    if len(values) > 1:
+        raise CollectionExecutionQueryError("query parameter is repeated")
+    if values:
+        return values[0]
+    return query.get(key)
+
+
+def _query_date(query: Mapping[str, object], key: str) -> date:
+    value = _query_value(query, key)
+    if not isinstance(value, str) or not value:
+        raise CollectionExecutionQueryError("query date is required")
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise CollectionExecutionQueryError("query date is invalid") from exc
+
+
+def normalize_collection_execution_filter(
+    query: Mapping[str, object],
+) -> CollectionExecutionFilter:
+    """Parse the dashboard's required civil-date and card-state read filter."""
+    if set(query.keys()) - COLLECTION_EXECUTION_QUERY_KEYS:
+        raise CollectionExecutionQueryError("unsupported query parameter")
+    start = _query_date(query, "from")
+    end = _query_date(query, "to")
+    state = _query_value(query, "state")
+    if not isinstance(state, str) or state not in COLLECTION_DASHBOARD_STATE_FILTERS:
+        raise CollectionExecutionQueryError("execution state is invalid")
+    duration = (end - start).days
+    if duration < 1 or duration > MAX_COLLECTION_EXECUTION_QUERY_DAYS:
+        raise CollectionExecutionQueryError("query period is outside the allowed range")
+    return CollectionExecutionFilter(
+        start=start,
+        end=end,
+        state=state,
+        model_state=COLLECTION_DASHBOARD_STATE_FILTERS[state],
+    )
+
+
+def _collection_execution_bounds(start: date, end: date) -> tuple[datetime, datetime]:
+    zone = timezone.get_current_timezone()
+    return (
+        timezone.make_aware(datetime.combine(start, datetime.min.time()), timezone=zone),
+        timezone.make_aware(datetime.combine(end, datetime.min.time()), timezone=zone),
+    )
+
+
+def collection_execution_queryset(
+    start: date, end: date, *, state: str | None = None
+) -> QuerySet[CollectionExecution]:
+    """Return the canonical, half-open execution query used by dashboard and drill-down."""
+    if state is not None and state not in COLLECTION_DASHBOARD_STATE_FILTERS:
+        raise CollectionExecutionQueryError("execution state is invalid")
+    start_at, end_at = _collection_execution_bounds(start, end)
+    queryset = CollectionExecution.objects.filter(created_at__gte=start_at, created_at__lt=end_at)
+    model_state = COLLECTION_DASHBOARD_STATE_FILTERS.get(state) if state is not None else None
+    if model_state is not None:
+        queryset = queryset.filter(state=model_state)
+    return queryset
+
+
+def _safe_execution_error(value: str) -> str:
+    return value if value in _SAFE_EXECUTION_ERRORS else ""
+
+
+def collection_execution_summary(execution: CollectionExecution) -> dict[str, object]:
+    """Serialize only bounded collection metadata for a read-only drill-down."""
+    return {
+        "id": str(execution.id),
+        "company_id": str(execution.company_id),
+        "company_name": execution.company.legal_name,
+        "family": execution.family,
+        "requested_scope": execution.requested_scope,
+        "state": execution.state,
+        "outcome": execution.outcome,
+        "recovery": execution.recovery,
+        "safe_error": _safe_execution_error(execution.safe_error),
+        "created_at": execution.created_at.isoformat(),
+        "started_at": execution.started_at.isoformat() if execution.started_at else None,
+        "finished_at": execution.finished_at.isoformat() if execution.finished_at else None,
+    }
+
+
+def list_collection_execution_summaries(
+    selected: CollectionExecutionFilter,
+) -> dict[str, object]:
+    queryset = collection_execution_queryset(
+        selected.start,
+        selected.end,
+        state=selected.state,
+    ).select_related("company")
+    rows = list(
+        queryset.order_by("-created_at", "-id")[: MAX_COLLECTION_EXECUTION_QUERY_ROWS + 1]
+    )
+    filter_payload = {
+        "from": selected.start.isoformat(),
+        "to": selected.end.isoformat(),
+        "state": selected.state,
+    }
+    return {
+        "read_only": True,
+        "filter": filter_payload,
+        "boundary": selected.boundary,
+        "total": queryset.count(),
+        "limit": MAX_COLLECTION_EXECUTION_QUERY_ROWS,
+        "truncated": len(rows) > MAX_COLLECTION_EXECUTION_QUERY_ROWS,
+        "executions": [
+            collection_execution_summary(row)
+            for row in rows[:MAX_COLLECTION_EXECUTION_QUERY_ROWS]
+        ],
+    }
 
 
 def _families(scope: CollectionScope) -> tuple[str, ...]:
