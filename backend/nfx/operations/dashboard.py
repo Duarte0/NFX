@@ -20,7 +20,7 @@ from nfx.collection.services import (
     COLLECTION_DASHBOARD_STATE_FILTERS,
     collection_execution_queryset,
 )
-from nfx.companies.models import Company, CompanyStatus
+from nfx.companies.services import company_queryset_for_lifecycle
 from nfx.documents.models import Document
 from nfx.documents.rendering import RenderUnavailable, renderer_metadata
 from nfx.documents.status import DOCUMENT_DASHBOARD_FILTERS, document_model_filters
@@ -362,10 +362,8 @@ def _job_counts(period: DatePeriod) -> dict[str, int]:
 
 def _company_counts() -> dict[str, int]:
     return {
-        "active": Company.objects.filter(status=CompanyStatus.ACTIVE).count(),
-        "inactive": Company.objects.filter(
-            status__in=(CompanyStatus.DEACTIVATED, CompanyStatus.REGISTERED)
-        ).count(),
+        "active": company_queryset_for_lifecycle("active").count(),
+        "inactive": company_queryset_for_lifecycle("inactive").count(),
     }
 
 
@@ -412,6 +410,7 @@ def build_dashboard(
     cards: list[dict[str, object]] = []
 
     company_counts, _ = _safe_source(_company_counts, evaluated_at=evaluated_at)
+    company_drilldowns = role != Role.VIEWER
     if company_counts is not None:
         cards.extend(
             (
@@ -420,14 +419,16 @@ def build_dashboard(
                     label="Empresas ativas",
                     value=company_counts["active"],
                     evaluated_at=evaluated_at,
-                    href="#coletas",
+                    href="?lifecycle=active#empresas" if company_drilldowns else None,
+                    filters={"lifecycle": "active"} if company_drilldowns else None,
                 ),
                 _snapshot_card(
                     card_id="companies.inactive",
                     label="Empresas inativas",
                     value=company_counts["inactive"],
                     evaluated_at=evaluated_at,
-                    href="#coletas",
+                    href="?lifecycle=inactive#empresas" if company_drilldowns else None,
+                    filters={"lifecycle": "inactive"} if company_drilldowns else None,
                 ),
             )
         )
@@ -438,7 +439,20 @@ def build_dashboard(
                 label=label,
                 value=None,
                 evaluated_at=evaluated_at,
-                href="#coletas",
+                href=(
+                    "?lifecycle=active#empresas"
+                    if card_id == "companies.active" and company_drilldowns
+                    else "?lifecycle=inactive#empresas"
+                    if company_drilldowns
+                    else None
+                ),
+                filters=(
+                    {"lifecycle": "active"}
+                    if card_id == "companies.active" and company_drilldowns
+                    else {"lifecycle": "inactive"}
+                    if company_drilldowns
+                    else None
+                ),
             )
             for card_id, label in (
                 ("companies.active", "Empresas ativas"),

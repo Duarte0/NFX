@@ -1,8 +1,9 @@
 import { get, patch, post } from "../../shared/http";
-import { Company } from "./types";
+import { CompanyListResponse } from "./types";
 
-export function listCompanies(): Promise<{ companies: Company[] }> {
-  return get<{ companies: Company[] }>("/api/companies");
+export function listCompanies(query = new URLSearchParams()): Promise<CompanyListResponse> {
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return get<CompanyListResponse>(`/api/companies${suffix}`);
 }
 
 export function createCompany(company: { cnpj: string; legal_name: string }): Promise<unknown> {

@@ -10,7 +10,7 @@ import {
   listCompanies,
   updateCompany as updateCompanyApi,
 } from "./api";
-import { Company } from "./types";
+import { Company, CompanyListResponse } from "./types";
 
 function statusLabel(status: Company["status"]): string {
   return { cadastrada: "Cadastrada", ativa: "Ativa", desativada: "Desativada" }[status];
@@ -21,24 +21,48 @@ type CompaniesSectionProps = {
   notify: (message: string) => void;
 };
 
+type CompanyLocationFilter = { lifecycle: string } | null;
+
+function companyFilterFromLocation(): CompanyLocationFilter {
+  const query = new URLSearchParams(window.location.search);
+  if (!query.has("lifecycle")) return null;
+  return { lifecycle: query.get("lifecycle") ?? "" };
+}
+
+function lifecycleFilterLabel(lifecycle: string): string {
+  return { active: "Empresas ativas", inactive: "Empresas inativas" }[lifecycle] ?? lifecycle;
+}
+
 export function CompaniesSection({ loadSignal, notify }: CompaniesSectionProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [companyResult, setCompanyResult] = useState<CompanyListResponse | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [queryError, setQueryError] = useState<"unavailable" | "invalid" | "degraded" | "">("");
   const [newCompany, setNewCompany] = useState({ cnpj: "", legal_name: "" });
   const [editCompany, setEditCompany] = useState({ cnpj: "", legal_name: "" });
 
-  const loadCompanies = useCallback(async () => {
+  const loadCompanies = useCallback(async (locationFilter?: CompanyLocationFilter) => {
+    const filter = locationFilter === undefined ? companyFilterFromLocation() : locationFilter;
     setLoading(true);
     setError("");
+    setQueryError("");
     try {
-      const payload = await listCompanies();
+      const query = new URLSearchParams();
+      if (filter !== null) query.set("lifecycle", filter.lifecycle);
+      const payload = await listCompanies(query);
       const first = payload.companies[0] ?? null;
+      setCompanyResult(payload);
       setCompanies(payload.companies);
       setSelectedCompany(first);
       setEditCompany(first ? { cnpj: first.cnpj, legal_name: first.legal_name } : { cnpj: "", legal_name: "" });
-    } catch {
+    } catch (caught: unknown) {
+      const status = caught instanceof ApiError ? caught.status : 0;
+      setQueryError(status === 400 ? "invalid" : status === 503 ? "degraded" : "unavailable");
+      setCompanyResult(null);
+      setCompanies([]);
+      setSelectedCompany(null);
       setError("Não foi possível carregar empresas. Tente novamente.");
     } finally {
       setLoading(false);
@@ -46,8 +70,18 @@ export function CompaniesSection({ loadSignal, notify }: CompaniesSectionProps) 
   }, []);
 
   useEffect(() => {
-    if (loadSignal > 0) void loadCompanies();
+    if (loadSignal > 0 || companyFilterFromLocation() !== null) void loadCompanies();
   }, [loadCompanies, loadSignal]);
+
+  useEffect(() => {
+    const loadLocation = () => {
+      if (window.location.hash === "#empresas" && companyFilterFromLocation() !== null) {
+        void loadCompanies();
+      }
+    };
+    window.addEventListener("hashchange", loadLocation);
+    return () => window.removeEventListener("hashchange", loadLocation);
+  }, [loadCompanies]);
 
   async function companyAction(company: Company, action: "activate" | "deactivate") {
     let body: object = {};
@@ -118,7 +152,25 @@ export function CompaniesSection({ loadSignal, notify }: CompaniesSectionProps) 
       <button onClick={() => void loadCompanies()}>Atualizar empresas</button>
       {loading && <p role="status">Carregando empresas…</p>}
       <Feedback message={error} error />
-      {!loading && !error && companies.length === 0 && <p>Nenhuma empresa cadastrada.</p>}
+      {queryError === "invalid" && <p role="status">O filtro de empresas é inválido.</p>}
+      {queryError === "unavailable" && <p role="status">As empresas estão indisponíveis.</p>}
+      {queryError === "degraded" && <p role="status">A consulta de empresas está degradada.</p>}
+      {!loading && !error && companyResult && (
+        <p role="status">
+          {companyResult.filter.lifecycle
+            ? `Filtro aplicado: ${lifecycleFilterLabel(companyResult.filter.lifecycle)}`
+            : "Lista completa de empresas"}
+          {" · "}Total reconciliado: {companyResult.total}
+          {companyResult.truncated ? " (mostrando somente a primeira página limitada)" : ""}
+        </p>
+      )}
+      {!loading && !error && companyResult && companies.length === 0 && (
+        <p>
+          {companyResult.filter.lifecycle
+            ? "Nenhuma empresa encontrada para este filtro."
+            : "Nenhuma empresa cadastrada."}
+        </p>
+      )}
       <form onSubmit={createCompany}>
         <h3>Cadastrar empresa</h3>
         <label>

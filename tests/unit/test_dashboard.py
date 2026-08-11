@@ -69,6 +69,40 @@ def test_document_source_failure_does_not_erase_unrelated_cards(
     )
 
 
+@pytest.mark.parametrize(
+    ("role", "expected_href"),
+    [
+        (Role.ADMINISTRATOR, "?lifecycle=active#empresas"),
+        (Role.OPERATOR, "?lifecycle=active#empresas"),
+        (Role.VIEWER, None),
+    ],
+)
+def test_company_cards_use_role_safe_lifecycle_drilldowns(
+    role: str,
+    expected_href: str | None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "nfx.operations.dashboard._company_counts", lambda: {"active": 2, "inactive": 3}
+    )
+    payload = build_dashboard(
+        period=normalize_period({"from": "2026-08-01", "to": "2026-09-01"}),
+        role=role,
+        now=None,
+    )
+    cards = {card["id"]: card for card in payload["cards"]}
+
+    for card_id, lifecycle in (("companies.active", "active"), ("companies.inactive", "inactive")):
+        drilldown = cards[card_id]["drilldown"]
+        if expected_href is None:
+            assert drilldown is None
+        else:
+            assert drilldown == {
+                "href": expected_href.replace("active", lifecycle),
+                "filters": {"lifecycle": lifecycle},
+            }
+
+
 def test_collection_source_failure_is_unavailable_without_erasing_other_cards(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -3,13 +3,14 @@ from __future__ import annotations
 import logging
 import re
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, cast
 from uuid import UUID
 
 from django.db import IntegrityError, transaction
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.utils import timezone
 
 from nfx.adapters.opencnpj import OpenCnpjClient, OpenCnpjResponse
@@ -64,6 +65,157 @@ class CompanyInactive(CompanyError):
 
 class InvalidCompanyFlow(CompanyError):
     pass
+
+
+class CompanyListQueryError(ValueError):
+    """A company list query is outside its bounded read contract."""
+
+
+COMPANY_LIFECYCLE_STATUS_FILTERS: dict[str, tuple[str, ...]] = {
+    "active": (CompanyStatus.ACTIVE,),
+    "inactive": (CompanyStatus.REGISTERED, CompanyStatus.DEACTIVATED),
+}
+COMPANY_LIST_QUERY_KEYS = frozenset(("lifecycle", "status", "search", "limit", "cursor"))
+MAX_COMPANY_LIST_SEARCH_LENGTH = 255
+MAX_COMPANY_LIST_ROWS = 100
+
+
+@dataclass(frozen=True)
+class CompanyListFilter:
+    lifecycle: str | None
+    status: str | None
+    search: str | None
+    limit: int
+    cursor: UUID | None
+
+    @property
+    def statuses(self) -> tuple[str, ...] | None:
+        if self.lifecycle is not None:
+            return COMPANY_LIFECYCLE_STATUS_FILTERS[self.lifecycle]
+        if self.status is not None:
+            return (self.status,)
+        return None
+
+    @property
+    def filter_payload(self) -> dict[str, str]:
+        payload: dict[str, str] = {}
+        if self.lifecycle is not None:
+            payload["lifecycle"] = self.lifecycle
+        elif self.status is not None:
+            payload["status"] = self.status
+        if self.search is not None:
+            payload["search"] = self.search
+        return payload
+
+
+def _company_query_values(query: Mapping[str, object], key: str) -> list[object]:
+    getlist = getattr(query, "getlist", None)
+    if callable(getlist):
+        return list(getlist(key))
+    value = query.get(key)
+    if isinstance(value, list | tuple):
+        return list(value)
+    return [] if value is None else [value]
+
+
+def _company_query_single(query: Mapping[str, object], key: str) -> object | None:
+    values = _company_query_values(query, key)
+    if len(values) > 1:
+        raise CompanyListQueryError("company list parameter is repeated")
+    return values[0] if values else None
+
+
+def normalize_company_list_filter(query: Mapping[str, object]) -> CompanyListFilter:
+    """Normalize the legacy company filters plus one dashboard lifecycle filter."""
+    if set(query.keys()) - COMPANY_LIST_QUERY_KEYS:
+        raise CompanyListQueryError("unsupported company list parameter")
+
+    lifecycle_value = _company_query_single(query, "lifecycle")
+    lifecycle: str | None
+    if lifecycle_value is None:
+        lifecycle = None
+    elif (
+        not isinstance(lifecycle_value, str)
+        or lifecycle_value not in COMPANY_LIFECYCLE_STATUS_FILTERS
+    ):
+        raise CompanyListQueryError("company lifecycle filter is invalid")
+    else:
+        lifecycle = lifecycle_value
+
+    status_value = _company_query_single(query, "status")
+    status: str | None
+    if status_value in (None, ""):
+        status = None
+    elif not isinstance(status_value, str) or status_value not in CompanyStatus.values:
+        raise CompanyListQueryError("company status filter is invalid")
+    else:
+        status = status_value
+    if lifecycle is not None and status is not None:
+        raise CompanyListQueryError("company filters conflict")
+
+    search_value = _company_query_single(query, "search")
+    if search_value in (None, ""):
+        search = None
+    elif not isinstance(search_value, str):
+        raise CompanyListQueryError("company search is invalid")
+    else:
+        search = search_value.strip()
+        if len(search) > MAX_COMPANY_LIST_SEARCH_LENGTH or any(
+            ord(character) < 32 for character in search
+        ):
+            raise CompanyListQueryError("company search is invalid")
+        search = search or None
+
+    limit_value = _company_query_single(query, "limit")
+    try:
+        limit = int(str(limit_value)) if limit_value is not None else 50
+    except (TypeError, ValueError) as exc:
+        raise CompanyListQueryError("company limit is invalid") from exc
+    limit = min(max(limit, 1), MAX_COMPANY_LIST_ROWS)
+
+    cursor_value = _company_query_single(query, "cursor")
+    if cursor_value in (None, ""):
+        cursor = None
+    elif not isinstance(cursor_value, str):
+        raise CompanyListQueryError("company cursor is invalid")
+    else:
+        try:
+            cursor = UUID(cursor_value)
+        except ValueError as exc:
+            raise CompanyListQueryError("company cursor is invalid") from exc
+
+    return CompanyListFilter(
+        lifecycle=lifecycle,
+        status=status,
+        search=search,
+        limit=limit,
+        cursor=cursor,
+    )
+
+
+def company_queryset_for_lifecycle(lifecycle: str) -> QuerySet[Company]:
+    """Return the canonical company status queryset used by dashboard cards."""
+    try:
+        statuses = COMPANY_LIFECYCLE_STATUS_FILTERS[lifecycle]
+    except KeyError as exc:
+        raise CompanyListQueryError("company lifecycle filter is invalid") from exc
+    return Company.objects.filter(status__in=statuses)
+
+
+def company_list_queryset(
+    selected: CompanyListFilter, *, apply_cursor: bool = True
+) -> QuerySet[Company]:
+    """Build the bounded list query from the same lifecycle/status predicates as the dashboard."""
+    queryset = Company.objects.prefetch_related("flows", "enrichment_snapshots").order_by("id")
+    if selected.statuses is not None:
+        queryset = queryset.filter(status__in=selected.statuses)
+    if selected.search is not None:
+        queryset = queryset.filter(
+            Q(legal_name__icontains=selected.search) | Q(cnpj__icontains=selected.search)
+        )
+    if apply_cursor and selected.cursor is not None:
+        queryset = queryset.filter(id__gt=selected.cursor)
+    return queryset
 
 
 def normalize_cnpj(value: str) -> str:

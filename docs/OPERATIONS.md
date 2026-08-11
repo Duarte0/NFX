@@ -86,6 +86,19 @@ linhas distintas. `tomada` e `prestada` são as categorias NFS-e válidas; falha
 503 seguro e não vira zero. A leitura não cria jobs, transições, artefatos ou auditoria adicional
 além da consulta P7 existente.
 
+Os cards `companies.active` e `companies.inactive` abrem, para Administradores e Operadores, a
+seção `#empresas` com `lifecycle=active` ou `lifecycle=inactive`. O primeiro corresponde somente
+a empresas `ativa`; o segundo reúne `cadastrada` e `desativada`, como a agregação do dashboard.
+Visualizadores não recebem esses links porque a lista de empresas permanece protegida por
+`ADMINISTER_COMPANIES`.
+
+`GET /api/companies?lifecycle=active|inactive` retorna uma página limitada, total server-side,
+filtro normalizado e cursor estável por UUID. O total cobre toda a seleção, inclusive quando a
+página é continuada por cursor. O endpoint preserva `status`, `search`, `limit` e `cursor` legados;
+filtros lifecycle repetidos, conflitantes ou desconhecidos retornam `400`. Uma falha na fonte
+retorna `503` e degrada somente a consulta de empresas; não é apresentada como zero e não gera
+escrita operacional.
+
 Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por

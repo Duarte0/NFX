@@ -144,6 +144,23 @@ chaves de objeto, correlação sem limite ou erros brutos; falhas de fonte retor
 Consultas autenticadas são somente leitura, e a auditoria de consulta continua sendo a única
 auditoria P7 aplicável.
 
+## Drill-down de empresas do dashboard (P8-02)
+
+Os cards `companies.active` e `companies.inactive` do `GET /api/dashboard` usam, para
+Administradores e Operadores, `?lifecycle=active#empresas` e `?lifecycle=inactive#empresas`.
+Visualizadores continuam sem link para a área protegida de administração de empresas. A tela
+`#empresas` hidrata o filtro da URL e não recalcula nem autoriza a consulta no navegador.
+
+`GET /api/companies` mantém os filtros legados `status`, `search`, `limit` e `cursor` e adiciona
+o filtro allowlisted `lifecycle=active|inactive`. `active` seleciona somente `ativa`; `inactive`
+seleciona `cadastrada` e `desativada`. Filtros de lifecycle repetidos, conflitantes, desconhecidos
+ou inválidos falham com `400`, sem fallback para a lista completa. A resposta aditiva informa o
+filtro aplicado, o total server-side da seleção inteira, limite, truncamento e cursor estável por
+UUID, com os metadados de empresa já redigidos; a página e o total usam a mesma seleção canônica.
+
+A autorização continua em `Action.ADMINISTER_COMPANIES` no servidor. Falha de banco/fonte retorna
+`503` seguro, nunca zero; leituras repetidas não criam auditoria, mutação, job ou transição.
+
 ## Consulta e download individual (P7-01/P7-02)
 
 `GET /api/documents/<id>` fornece detalhe seguro, incluindo eventos/substituições e disponibilidade

@@ -9,8 +9,8 @@
 - **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering e
   disco continuam explicitamente indisponíveis para incrementos posteriores; o status seguro de
   backup P9-02 foi integrado no issue 0025; o drill-down de execuções de coleta foi concluído no
-  issue 0026; o drill-down de documentos foi concluído no issue 0027. Os drill-downs de empresa,
-  certificado e job continuam em slices próprios.
+  issue 0026; o drill-down de documentos foi concluído no issue 0027; o drill-down de empresas foi
+  concluído no issue 0028. Os drill-downs de certificado e job continuam em slices próprios.
 
 ## Propósito e resultado
 
@@ -84,3 +84,23 @@ falhas de fonte retornam `503` sem zero inventado. A autorização continua serv
 três papéis, a auditoria segue somente a política P7 e leituras não criam estado durável. Testes
 unitários e a integração PostgreSQL/MinIO cobrem as sete reconciliações, fronteiras, zero,
 redaction, erro e ausência de escrita; o contrato React é validado por TypeScript/ESLint/Vite.
+
+### Evidência do slice de empresas — issue 0028
+
+Os cards `companies.active` e `companies.inactive` compartilham com `GET /api/companies` o mapa
+allowlisted `lifecycle=active|inactive`: `active` seleciona `CompanyStatus.ACTIVE`, e `inactive`
+seleciona exatamente `REGISTERED` e `DEACTIVATED`. Administradores e Operadores recebem links
+para `#empresas` com o filtro explícito; Visualizadores não recebem link para a área protegida
+por `ADMINISTER_COMPANIES`.
+
+A resposta da lista preserva `status`, `search`, `limit` e `cursor`, adiciona filtro normalizado,
+total da seleção completa, truncamento e paginação determinística por UUID. O total e a página
+usam a mesma queryset de status, inclusive em páginas continuadas; filtro lifecycle repetido,
+conflitante, desconhecido ou inválido retorna `400`. Falha da fonte retorna `503` sem zero
+inventado. A UI hidrata o filtro pela URL e exibe total reconciliado, vazio válido, carregamento,
+indisponibilidade, degradação e filtro inválido sem autorizar ou recalcular no browser.
+
+O incremento não cria migration, cache, snapshot, job, auditoria, mutação ou transição de empresa.
+Testes unitários e integração PostgreSQL/MinIO cobrem os três estados, reconciliação, zero,
+paginação, RBAC, sessão expirada, filtros inválidos, falha isolada, redaction e no-write; o
+contrato frontend é verificado por TypeScript/ESLint/Vite.

@@ -16,3 +16,18 @@ export type Company = {
     error_code: string;
   } | null;
 };
+
+export type CompanyListFilter = {
+  lifecycle?: "active" | "inactive";
+  status?: "cadastrada" | "ativa" | "desativada";
+  search?: string;
+};
+
+export type CompanyListResponse = {
+  companies: Company[];
+  filter: CompanyListFilter;
+  total: number;
+  limit: number;
+  truncated: boolean;
+  next_cursor: string | null;
+};

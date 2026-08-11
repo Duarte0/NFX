@@ -12,14 +12,17 @@ from nfx.companies.services import (
     CompanyCnpjImmutable,
     CompanyError,
     CompanyInactive,
+    CompanyListQueryError,
     CompanyNotFound,
     CompanyVersionConflict,
     DuplicateCompanyCnpj,
     InvalidCnpj,
     InvalidCompanyFlow,
     activate_company,
+    company_list_queryset,
     create_company,
     deactivate_company,
+    normalize_company_list_filter,
     request_enrichment,
     set_flow_state,
     update_company,
@@ -89,27 +92,26 @@ def _error(exc: Exception) -> JsonResponse:
 @require_GET
 @protected(Action.ADMINISTER_COMPANIES)
 def companies(request: HttpRequest) -> JsonResponse:
-    queryset = Company.objects.prefetch_related("flows", "enrichment_snapshots").order_by("id")
-    status = request.GET.get("status")
-    search = request.GET.get("search", "").strip()
-    if status:
-        queryset = queryset.filter(status=status)
-    if search:
-        queryset = queryset.filter(legal_name__icontains=search) | queryset.filter(
-            cnpj__icontains=search
-        )
     try:
-        limit = min(max(int(request.GET.get("limit", "50")), 1), 100)
-        cursor = UUID(request.GET["cursor"]) if request.GET.get("cursor") else None
-    except (KeyError, ValueError):
+        selected = normalize_company_list_filter(request.GET)
+    except CompanyListQueryError:
         return JsonResponse({"detail": "Parâmetros inválidos."}, status=400)
-    if cursor:
-        queryset = queryset.filter(id__gt=cursor)
-    rows = list(queryset[: limit + 1])
+    try:
+        total = company_list_queryset(selected, apply_cursor=False).count()
+        rows = list(company_list_queryset(selected)[: selected.limit + 1])
+        payload = [_company_payload(row) for row in rows[: selected.limit]]
+    except Exception:
+        return JsonResponse({"detail": "Não foi possível consultar empresas."}, status=503)
     return JsonResponse(
         {
-            "companies": [_company_payload(row) for row in rows[:limit]],
-            "next_cursor": str(rows[limit].id) if len(rows) > limit else None,
+            "companies": payload,
+            "filter": selected.filter_payload,
+            "total": total,
+            "limit": selected.limit,
+            "truncated": len(rows) > selected.limit,
+            "next_cursor": (
+                str(rows[selected.limit - 1].id) if len(rows) > selected.limit else None
+            ),
         }
     )
 
