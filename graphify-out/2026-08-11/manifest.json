@@ -70,13 +70,13 @@
     "semantic_hash": ""
   },
   "IMPLEMENTATION_PLAN.md": {
-    "mtime": 1786483161.418353,
-    "ast_hash": "0d8220798b19ad5fa285c38ca612bb52",
+    "mtime": 1786485167.5493326,
+    "ast_hash": "eb2a1327e50a83ccc27cb5723680a8c2",
     "semantic_hash": ""
   },
   "specs/README.md": {
-    "mtime": 1786482834.0378473,
-    "ast_hash": "620af2a4491b258d6617fcf13f775942",
+    "mtime": 1786485167.5493326,
+    "ast_hash": "73814eb36b342030b6f2c1c9f3b1fead",
     "semantic_hash": ""
   },
   "specs/p0-project-foundation.md": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "specs/p8-dashboard-and-operational-health.md": {
-    "mtime": 1786374630.7375798,
-    "ast_hash": "cf338fcdb34fee0d5ba0534ac32ec3b1",
+    "mtime": 1786485167.5493326,
+    "ast_hash": "e8d27f5928a44927ea3f6321d2198b2d",
     "semantic_hash": ""
   },
   "specs/p8-retention-eligibility.md": {
@@ -765,8 +765,8 @@
     "semantic_hash": ""
   },
   "docs/OPERATIONS.md": {
-    "mtime": 1786482914.222726,
-    "ast_hash": "c6444398f6e7c1aa9199cddbc7004217",
+    "mtime": 1786485176.2213197,
+    "ast_hash": "3980dfa809b194ef5f59eb63fd69f6f2",
     "semantic_hash": ""
   },
   "issues/0004_-_job-observability-and-initial-health.md": {
@@ -1110,8 +1110,8 @@
     "semantic_hash": ""
   },
   "backend/nfx/operations/dashboard.py": {
-    "mtime": 1786479521.2270985,
-    "ast_hash": "2eeb325839bec0f430c2f5ea76be6240",
+    "mtime": 1786485069.4894803,
+    "ast_hash": "431b6583257a75787163d0aa9474b514",
     "semantic_hash": ""
   },
   "backend/nfx/operations/views.py": {
@@ -1120,8 +1120,8 @@
     "semantic_hash": ""
   },
   "frontend/src/features/dashboard/DashboardSection.tsx": {
-    "mtime": 1786374370.9409032,
-    "ast_hash": "780c79df4953659c7da4ec190f80e323",
+    "mtime": 1786485180.9763124,
+    "ast_hash": "21e59e5c4a4ccc79f0e8d6a9c3655f23",
     "semantic_hash": ""
   },
   "frontend/src/features/dashboard/api.ts": {
@@ -1130,18 +1130,18 @@
     "semantic_hash": ""
   },
   "frontend/src/features/dashboard/types.ts": {
-    "mtime": 1786374370.9409032,
-    "ast_hash": "79101d9262f416110fed6575397db4c2",
+    "mtime": 1786484964.9716375,
+    "ast_hash": "7759cbb76929286d085e4c17272503dc",
     "semantic_hash": ""
   },
   "tests/integration/test_dashboard_endpoint.py": {
-    "mtime": 1786479521.2280984,
-    "ast_hash": "54953ff1591f894f450fa0d267d9b779",
+    "mtime": 1786485027.1185439,
+    "ast_hash": "8baa95701c8451adcb98cebd7e0a2db0",
     "semantic_hash": ""
   },
   "tests/unit/test_dashboard.py": {
-    "mtime": 1786374689.0035052,
-    "ast_hash": "49b35c294b5b831892368ce4e3fe26af",
+    "mtime": 1786485069.4894803,
+    "ast_hash": "53e7a97e726f9758e2726b7f564b15ee",
     "semantic_hash": ""
   },
   "backend/nfx/retention/metrics.py": {
@@ -1155,8 +1155,8 @@
     "semantic_hash": ""
   },
   "backend/nfx/retention/views.py": {
-    "mtime": 1786482678.045083,
-    "ast_hash": "3c20471423d05210bd93d7a3efd51ffe",
+    "mtime": 1786484258.9387002,
+    "ast_hash": "25879cd9e70c398a29fe479b417559d2",
     "semantic_hash": ""
   },
   "frontend/src/features/retention/RetentionSection.tsx": {
@@ -1175,8 +1175,8 @@
     "semantic_hash": ""
   },
   "tests/integration/test_retention.py": {
-    "mtime": 1786482939.9576871,
-    "ast_hash": "2a97496fce2785bfa94ced6765e68a30",
+    "mtime": 1786484271.5036812,
+    "ast_hash": "b85736a5caaad4a18b3c172d9312e2f6",
     "semantic_hash": ""
   },
   "tests/unit/test_retention.py": {
@@ -1370,8 +1370,8 @@
     "semantic_hash": ""
   },
   "issues/0025_-_dashboard-backup-health.md": {
-    "mtime": 1786475806.8324664,
-    "ast_hash": "22700191597e52392a1feb7a44bc2e2d",
+    "mtime": 1786485455.795899,
+    "ast_hash": "16901a23861e9b45d06dc8309c7b0b79",
     "semantic_hash": ""
   },
   "backend/nfx/migrations/0020_alter_exportitem_document_deletionoperation_and_more.py": {

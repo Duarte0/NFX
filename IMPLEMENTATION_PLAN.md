@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-11 |
 | Fontes avaliadas | Código/migrações/configuração, testes, PRD, arquitetura, specs, issues e histórico Git |
-| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03 concluídos; P8-02 tem slice inicial concluído; P9-04/P9-05 seguem pendentes. |
+| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03 concluídos; P8-02 tem slice inicial e integração Admin-only do status de backup concluídos nos issues 0018/0025; P9-04/P9-05 seguem pendentes. |
 
 Código e migrações definem a baseline; testes definem o comportamento verificado. PRD e arquitetura definem o comportamento pretendido. Esta atualização não altera a árvore de produto nem reabre entregas concluídas sem evidência de lacuna.
 
@@ -34,7 +34,7 @@ Código e migrações definem a baseline; testes definem o comportamento verific
 
 | Item | Situação atual | Ação de acompanhamento |
 |---|---|---|
-| P8-02 dashboard | Slice inicial (`/api/dashboard` e `#dashboard`) é calculate-on-read, com períodos comparáveis, RBAC e capacidades indisponíveis explícitas. A spec ainda deixa todo o DoD aberto e prevê cards/fontes posteriores. | Não marcar a spec/fase inteira concluída. Ao adicionar uma fonte/card, fechar apenas seu critério de drill-down, frescura e reconciliação. |
+| P8-02 dashboard | Slice inicial (`/api/dashboard` e `#dashboard`) é calculate-on-read, com períodos comparáveis, RBAC e capacidades indisponíveis explícitas. O issue 0025 integra o status seguro P9-02 no ramo Admin-only, com idade medida, retenção limitada, estado da última validação e degradação isolada; P5–P7, rendering e disco seguem indisponíveis. A spec ainda deixa DoD posterior aberto. | Não marcar a spec/fase inteira concluída. Ao adicionar uma fonte/card, fechar apenas seu critério de drill-down, frescura e reconciliação. |
 | P1 auth e P7 consulta/download | Código, índice e issues registram conclusão; as listas preliminares de planejamento foram rotuladas como históricas nas respectivas specs, enquanto a evidência canônica permanece nas seções finais/notas de implementação. | Resolvido nesta passagem de **specs**. Não há evidência para reabrir implementação. |
 | Frontend | Build/lint TypeScript validam a UI; há testes HTTP/backend, mas não há runner de interação de browser configurado. | Manter como dívida de qualidade operacional, não como bloqueio retroativo. Para P7-03/P9-03, escolher cobertura de interação se os fluxos críticos não ficarem adequadamente demonstrados por testes de contrato. |
 | Dependências | Integração emite avisos externos de depreciação de `botocore` (`datetime.utcnow`), sem falha funcional. | Avaliar atualização/mitigação em manutenção de dependências; não mistura com as próximas features. |
@@ -44,7 +44,7 @@ Código e migrações definem a baseline; testes definem o comportamento verific
 | Prioridade | Marco/status | Resultado e critério de conclusão | Dependências, riscos e decisões |
 |---:|---|---|---|
 | 1 | **P9-03 Exclusão controlada — concluído no issue 0024** | Solicitação Admin com motivo/confirmação/prévia atual, saga/checkpoint idempotente, tratamento coerente de documento/artefatos, recovery sem falso sucesso, auditoria sem conteúdo fiscal e UI/worker entregues. DoD em `specs/p9-controlled-deletion.md`. | P8-03/P9-02 comprovados; restore PostgreSQL/MinIO continua manual conforme P9-02. P9-04 deve revisar a matriz de risco sem reabrir este incremento. |
-| 2 | **P8-02 expansões — in progress por incrementos** | Habilitar cada card hoje `unavailable` somente quando a fonte possuir owner, estado/frescura, filtro P7 equivalente e teste de reconciliação. | Depende de cada fonte (P5/P6/P7/P9); não criar snapshot/cache sem decisão documentada na spec. |
+| 2 | **P8-02 expansões — in progress por incrementos** | O incremento de saúde de backup foi concluído no issue 0025: `backup_status()` é lido somente para Admin e expõe estado/idade/retenção/última validação em campos seguros. Habilitar cada capacidade restante somente quando a fonte possuir owner, estado/frescura, filtro P7 equivalente e teste de reconciliação. | P5–P7, rendering e disco continuam indisponíveis; não criar snapshot/cache sem decisão documentada na spec. |
 | 3 | **P9-04 Hardening — pending após P9-03** | Produzir matriz de ameaças/falhas, evidência de recovery e ensaio sintético ~200 empresas; corrigir ou bloquear release para achado crítico. DoD em `specs/p9-hardening.md`. | Requer P5–P8 e P9-01..03 completos. Thresholds de carga são Proposed e dependem de medição. |
 | 4 | **P9-05 Piloto/homologação — blocked por hardening e decisões externas** | Ambiente segregado, políticas oficiais versionadas e piloto com evidência redigida para AC-001..025. DoD em `specs/p9-internal-pilot-and-homologation.md`. | Depende de P9-04, de endpoints, envelopes, limites, certificados e homologação NF-e/ADN aprovados externamente, e de cópia de backup fisicamente separada para fechar AC-016/OPS-BKP-002/006. Dados reais nunca entram em Git/testes/logs. |
 | 5 | **Transporte real NF-e/ADN — blocked externo** | Criar adapter oficial/homologado somente após requisitos oficiais vigentes, allowlists, credenciais segregadas e política versionada com evidência. | Não inferir endpoints, leiautes, limites nem valores de produção. Simuladores P5/P6 permanecem a baseline segura. |

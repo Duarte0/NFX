@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Feedback } from "../../shared/ui/Feedback";
 import { getDashboard } from "./api";
-import { DashboardCard, DashboardResponse } from "./types";
+import { BackupHealth, DashboardCard, DashboardResponse } from "./types";
 
 type DashboardSectionProps = { loadSignal: number; notify: (message: string) => void };
 
@@ -19,6 +19,59 @@ function statusLabel(status: DashboardCard["status"]): string {
 
 function valueLabel(card: DashboardCard): string {
   return card.current.value === null ? "—" : String(card.current.value);
+}
+
+function backupStatusLabel(status: BackupHealth["status"]): string {
+  return {
+    success: "Sucesso",
+    failure: "Falha",
+    unavailable: "Indisponível",
+  }[status];
+}
+
+function backupCoverageLabel(backup: BackupHealth): string {
+  if (backup.status === "success" && backup.latest_backup.state !== null && backup.latest_backup.state !== "complete") {
+    return `Sucesso anterior; último conjunto ${backupStateLabel(backup.latest_backup.state).toLowerCase()}`;
+  }
+  return backupStatusLabel(backup.status);
+}
+
+function backupStateLabel(state: string | null): string {
+  return {
+    running: "Em execução",
+    complete: "Concluído",
+    partial: "Parcial",
+    failed: "Falhou",
+    expired: "Expirado",
+    success: "Sucesso",
+  }[state ?? ""] ?? "Desconhecido";
+}
+
+function safeErrorLabel(code: string): string {
+  return {
+    capture_failed: "Falha segura na captura.",
+    database_dump_failed: "Falha segura no snapshot do banco.",
+    object_missing: "Objeto necessário ausente.",
+    object_divergent: "Objeto divergente.",
+    key_unavailable: "Chave de recuperação indisponível.",
+    key_invalid: "Chave de recuperação inválida.",
+    manifest_invalid: "Manifesto inválido.",
+    archive_corrupt: "Conjunto de backup corrompido.",
+    insufficient_space: "Espaço insuficiente.",
+    interrupted: "Operação interrompida.",
+    live_target: "Destino ativo rejeitado.",
+    target_invalid: "Destino isolado inválido.",
+    source_unavailable: "Fonte de backup indisponível.",
+  }[code] ?? "Falha operacional sem detalhes.";
+}
+
+function backupAgeLabel(ageSeconds: number | null): string {
+  if (ageSeconds === null) return "Idade desconhecida";
+  const total = Math.max(0, Math.floor(ageSeconds));
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  return `${days}d ${hours}h ${minutes}min`;
 }
 
 export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) {
@@ -94,6 +147,26 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
               <h3>Saúde operacional</h3>
               <p>{dashboard.operational_health.status}</p>
               {dashboard.operational_health.backlog && <p>Backlog: {dashboard.operational_health.backlog.status}</p>}
+              {dashboard.operational_health.backup && (
+                <section aria-label="Saúde do backup">
+                  <h4>Backup</h4>
+                  <p>Estado da cobertura: {backupCoverageLabel(dashboard.operational_health.backup)}</p>
+                  <p>Último conjunto: {backupStateLabel(dashboard.operational_health.backup.latest_backup.state)}</p>
+                  {dashboard.operational_health.backup.latest_backup.safe_error && (
+                    <p role="status">{safeErrorLabel(dashboard.operational_health.backup.latest_backup.safe_error)}</p>
+                  )}
+                  <p>Idade do último sucesso: {backupAgeLabel(dashboard.operational_health.backup.latest_success_age_seconds)}</p>
+                  <p>
+                    Retenção concluída: diária {dashboard.operational_health.backup.retention.daily ?? "desconhecida"}, semanal {dashboard.operational_health.backup.retention.weekly ?? "desconhecida"}, mensal {dashboard.operational_health.backup.retention.monthly ?? "desconhecida"}
+                  </p>
+                  <p>Última validação: {backupStateLabel(dashboard.operational_health.backup.latest_restore.state)}</p>
+                  {dashboard.operational_health.backup.latest_restore.state === "failed" && (
+                    <p role="status">
+                      Falha na última validação: {safeErrorLabel(dashboard.operational_health.backup.latest_restore.safe_error)}
+                    </p>
+                  )}
+                </section>
+              )}
             </aside>
           )}
         </>

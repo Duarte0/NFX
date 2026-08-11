@@ -28,7 +28,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 | 16 | [x] | [p7-document-consultation-and-individual-download.md](p7-document-consultation-and-individual-download.md) | P7 | P7-01/P7-02 concluídos no issue 0015; PDF permanece fora | P1-03/04, P4-01/04 |
 | 17 | [x] | [p7-danfe-danfse-rendering.md](p7-danfe-danfse-rendering.md) | P7 | P7-03 concluído no issue 0023; BrazilFiscalReport 1.0.1 pinado | P3-01, P4-01, P7-01 |
 | 18 | [x] | [p8-zip-export.md](p8-zip-export.md) | P8 | P8-01 concluído no issue 0021 | P3-01, P7-01/02; P7-03 se PDF |
-| 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | **P8-02 slice inicial implementado (issue 0018); capacidades P5–P7/P9 permanecem indisponíveis** | P3-04 + dados P2–P7 disponíveis; entrega progressiva permitida |
+| 19 | [ ] | [p8-dashboard-and-operational-health.md](p8-dashboard-and-operational-health.md) | P8 | **P8-02 slice inicial (issue 0018) + saúde de backup Admin-only (issue 0025); P5–P7, rendering e disco permanecem indisponíveis** | P3-04 + dados P2–P7 disponíveis; entrega progressiva permitida |
 | 20 | [x] | [p8-retention-eligibility.md](p8-retention-eligibility.md) | P8 | P8-03 concluído no issue 0019; PDF permanece fora | P1-05, P4-01; P7-03 somente para PDFs |
 | 21 | [x] | [p9-runtime-and-https.md](p9-runtime-and-https.md) | P9 | P9-01 concluído no issue 0016 | P1-01, P1-03, P3-04 |
 | 22 | [x] | [p9-backup-and-restore.md](p9-backup-and-restore.md) | P9 | P9-02 implementado no issue 0017; cópia fisicamente separada permanece lacuna de produção | P1-06, P2-03, P3-04 |
@@ -52,7 +52,7 @@ Uma spec ativa define o contrato verificável de uma fatia. A passagem de issues
 - Dashboard pode crescer desde P3-04, declarando capacidades ausentes; runtime P9-01 foi concluído no issue 0016 após P1/P3, sem esperar todo P8.
 - P9-03 depende de P8-03 e P9-02; backup verificável, validação de integridade e recuperação manual documentada são suficientes, sem automação de restore.
 
-Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 concluídas; P2 tem 2 concluídas; P3 tem 4 concluídas, incluindo P3-05 na spec canônica de controle manual; P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5 e P6 têm 1 slice/spec concluídos; P7 tem P7-01/P7-02/P7-03 concluídos; P8 tem P8-01/P8-03 concluídos e P8-02 parcialmente entregue; P9 tem P9-01/P9-02/P9-03 concluídos, com a lacuna de cópia fisicamente separada do P9-02, e P9-04/P9-05 pendentes. Total: 25 specs.
+Fases: P0 tem 2 specs implementadas e verificadas; P1 tem 5 concluídas; P2 tem 2 concluídas; P3 tem 4 concluídas, incluindo P3-05 na spec canônica de controle manual; P4 tem P4-01/P4-02/P4-03/P4-04 implementados dentro da spec; P5 e P6 têm 1 slice/spec concluídos; P7 tem P7-01/P7-02/P7-03 concluídos; P8 tem P8-01/P8-03 concluídos e P8-02 parcialmente entregue, com a saúde de backup Admin-only integrada no issue 0025; P9 tem P9-01/P9-02/P9-03 concluídos, com a lacuna de cópia fisicamente separada do P9-02, e P9-04/P9-05 pendentes. Total: 25 specs.
 
 ## Decisões Open, Blocked, Deferred e Proposed
 

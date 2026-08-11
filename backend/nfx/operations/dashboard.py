@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -10,6 +11,8 @@ from typing import Any
 from django.db.models import QuerySet
 from django.utils import timezone
 
+from nfx.backup.models import BackupState, RestoreState
+from nfx.backup.services import backup_status
 from nfx.certificates.models import Certificate, CertificateState
 from nfx.collection.models import CollectionExecution, CollectionExecutionState
 from nfx.companies.models import Company, CompanyStatus
@@ -30,6 +33,25 @@ from nfx.jobs.observability import (
 MAX_PERIOD_DAYS = 366
 _ALLOWED_PERIOD_KEYS = frozenset(("from", "to"))
 _CERTIFICATE_WARNING_DAYS = 30
+_BACKUP_RETENTION_LIMITS = {"daily": 7, "weekly": 4, "monthly": 12}
+_BACKUP_STATUS_VALUES = frozenset(("success", "failure", "unavailable"))
+_BACKUP_SAFE_ERRORS = frozenset(
+    {
+        "capture_failed",
+        "database_dump_failed",
+        "object_missing",
+        "object_divergent",
+        "key_unavailable",
+        "key_invalid",
+        "manifest_invalid",
+        "archive_corrupt",
+        "insufficient_space",
+        "interrupted",
+        "live_target",
+        "target_invalid",
+        "source_unavailable",
+    }
+)
 
 
 class InvalidDashboardParams(ValueError):
@@ -198,6 +220,85 @@ def _safe_source(
     except Exception:
         # A bounded safe code is returned; database/provider details stay server-side.
         return None, {"status": "unavailable", "evaluated_at": None, "error": "source_unavailable"}
+
+
+def _safe_mapping(value: object) -> Mapping[str, object]:
+    return value if isinstance(value, Mapping) else {}
+
+
+def _safe_backup_error(value: object) -> str:
+    return value if isinstance(value, str) and value in _BACKUP_SAFE_ERRORS else ""
+
+
+def _safe_backup_state(value: object) -> str | None:
+    return value if isinstance(value, str) and value in BackupState.values else None
+
+
+def _safe_restore_state(value: object) -> str | None:
+    return value if isinstance(value, str) and value in RestoreState.values else None
+
+
+def _safe_age_seconds(value: object) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        return None
+    if not math.isfinite(value) or value < 0:
+        return None
+    return int(value)
+
+
+def _bounded_retention_count(value: object, *, limit: int) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return max(0, min(value, limit))
+
+
+def _unavailable_backup_summary() -> dict[str, object]:
+    return {
+        "status": "unavailable",
+        "latest_backup": {"state": None, "safe_error": "source_unavailable"},
+        "latest_success_age_seconds": None,
+        "retention": {key: None for key in _BACKUP_RETENTION_LIMITS},
+        "latest_restore": {"state": None, "safe_error": "source_unavailable"},
+    }
+
+
+def _backup_summary(*, now: datetime) -> dict[str, object]:
+    """Expose only the bounded, Administrator-safe subset of P9-02 status."""
+    try:
+        source = _safe_mapping(backup_status(now=now))
+    except Exception:
+        return _unavailable_backup_summary()
+
+    status = source.get("status")
+    if status not in _BACKUP_STATUS_VALUES:
+        return _unavailable_backup_summary()
+
+    latest_backup = _safe_mapping(source.get("latest_backup"))
+    latest_restore = _safe_mapping(source.get("latest_restore"))
+    retention = _safe_mapping(source.get("retention"))
+    has_success = status == "success"
+    return {
+        "status": status,
+        "latest_backup": {
+            "state": _safe_backup_state(latest_backup.get("state")),
+            "safe_error": _safe_backup_error(latest_backup.get("safe_error")),
+        },
+        "latest_success_age_seconds": (
+            _safe_age_seconds(source.get("latest_success_age_seconds")) if has_success else None
+        ),
+        "retention": {
+            key: (
+                _bounded_retention_count(retention.get(key), limit=limit)
+                if has_success
+                else None
+            )
+            for key, limit in _BACKUP_RETENTION_LIMITS.items()
+        },
+        "latest_restore": {
+            "state": _safe_restore_state(latest_restore.get("state")),
+            "safe_error": _safe_backup_error(latest_restore.get("safe_error")),
+        },
+    }
 
 
 def _period_documents(period: DatePeriod) -> QuerySet[Document]:
@@ -434,7 +535,10 @@ def build_dashboard(
         "documents": {"status": "available", "reason": "persisted_document_contract"},
         "rendering": _rendering_capability(),
         "disk": {"status": "unavailable", "reason": "p9_operational_slice_pending"},
-        "backup": {"status": "unavailable", "reason": "p9_backup_slice_pending"},
+        "backup": {
+            "status": "available" if role == Role.ADMINISTRATOR else "admin_only",
+            "reason": "p9_backup_status" if role == Role.ADMINISTRATOR else "restricted",
+        },
         "certificates": {"status": "available" if role != Role.VIEWER else "admin_only"},
         "operational_health": {
             "status": "available" if role == Role.ADMINISTRATOR else "admin_only"
@@ -478,11 +582,13 @@ def build_dashboard(
     }
     if role == Role.ADMINISTRATOR:
         try:
-            result["operational_health"] = _health_payload(evaluated_at)
+            health = _health_payload(evaluated_at)
         except Exception:
-            result["operational_health"] = {
+            health = {
                 "status": "unavailable",
                 "read_only": True,
                 "reason": "health_unavailable",
             }
+        health["backup"] = _backup_summary(now=evaluated_at)
+        result["operational_health"] = health
     return result

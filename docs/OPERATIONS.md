@@ -68,13 +68,18 @@ que agrega apenas dados já duráveis de empresas, documentos, coletas e jobs. O
 `to` são datas civis de Brasília em intervalo semiaberto `[from,to)`, com máximo de 366 dias; a
 resposta sempre informa o período anterior de mesma duração. `zero`, `unavailable`, `degraded` e
 `unknown` são estados distintos, e cada card disponível aponta para a lista existente com filtros
-suportados. Valores fiscais ainda não persistidos, fontes P5/P6, rendering, disco e backup não são
+suportados. Valores fiscais ainda não persistidos, fontes P5/P6, rendering e disco não são
 inventados: aparecem como capacidade indisponível.
 
 Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por
-URL direta. O endpoint não cria snapshots, jobs, auditoria adicional, cache ou migração.
+URL direta. Para Administradores, `operational_health.backup` reutiliza `backup_status()` como
+única fonte e mostra apenas `success`, `failure` ou `unavailable`, estado seguro do último conjunto,
+idade medida do último sucesso, contagens concluídas limitadas a 7/4/12 e estado/código seguro da
+última validação. Caminhos, manifesto, chaves de objeto, IDs e exceções do provedor não entram na
+resposta. Falha na fonte degrada somente esse resumo. O endpoint não cria snapshots, jobs,
+auditoria adicional, cache ou migração.
 
 ## DANFE/DANFSe derivado (P7-03)
 

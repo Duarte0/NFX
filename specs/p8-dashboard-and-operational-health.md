@@ -6,8 +6,9 @@
 - **Backlog:** P8-02. **Dependências:** P3-04 e capacidades P2–P7 disponíveis.
 - **PRD:** FR-DASH-001, FR-DASH-002, FR-DASH-003; FR-OPS-001, BR-OPS-001, BR-DASH-001; NFR-001, NFR-002, NFR-008. **Aceite:** AC-013, AC-023, AC-024.
 - **Arquitetura:** seções 14, 26, 32, 35, 36, 39 e 40; ADR-012 quanto à limitação de backup.
-- **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering,
-  disco e backup continuam explicitamente indisponíveis para incrementos posteriores.
+- **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering e
+  disco continuam explicitamente indisponíveis para incrementos posteriores; o status seguro de
+  backup P9-02 foi integrado no issue 0025.
 
 ## Propósito e resultado
 
@@ -36,7 +37,7 @@ Falha de uma fonte não derruba demais cards. Cache/snapshot antigo mostra idade
 - [ ] Atual/anterior têm duração igual, são consecutivos e não sobrepostos.
 - [ ] Todo card clicável abre lista com filtro equivalente e contagem reconciliada.
 - [ ] Ausência/frescura é explícita, não zero silencioso.
-- [ ] Saúde/backup técnico é Admin-only server-side.
+- [x] Saúde/backup técnico é Admin-only server-side.
 - [ ] Não há notificação ou relatório fora do MVP.
 
 DoD: contrato, queries/snapshots decididos, UI, RBAC, telemetria e testes verdes. **Proposed:** estratégia de agregação/cache e limites padrão de período.
@@ -46,7 +47,10 @@ DoD: contrato, queries/snapshots decididos, UI, RBAC, telemetria e testes verdes
 `GET /api/dashboard` e a seção React `#dashboard` implementam agregação calculate-on-read para
 empresas, documentos persistidos, coletas e jobs, com intervalo `[from,to)`, comparação de mesma
 duração, drill-down bounded e estados de frescura/degradação. Saúde de dependências permanece
-Admin-only e reutiliza o avaliador P3-04; documentos/fonte fiscal futura, PDF, disco e backup
-continuam `unavailable`. Não há migration, snapshot, cache ou escrita fiscal. Evidência: testes
-unitários de intervalo/falha isolada e testes de integração de agregação, zero, RBAC e health,
-além de Ruff/mypy/TypeScript/Vite.
+Admin-only e reutiliza o avaliador P3-04; documentos/fonte fiscal futura, PDF e disco continuam
+`unavailable`. O incremento do issue 0025 integra, somente para Administradores, o resumo de
+`backup_status()` com estado do último conjunto, idade medida do último sucesso, retenção limitada
+e última validação, sem caminhos, IDs ou manifesto. Falhas da fonte degradam somente o resumo de
+backup; não há migration, snapshot, cache ou escrita fiscal. Evidência: testes unitários de
+intervalo/falha isolada/mapeamento seguro e testes de integração de agregação, zero, RBAC, health,
+backup e leituras repetidas, além de Ruff/mypy/TypeScript/Vite.

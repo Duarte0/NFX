@@ -19,6 +19,14 @@ export type DashboardCard = {
   drilldown: { href: string; filters: Record<string, string> } | null;
 };
 
+export type BackupHealth = {
+  status: "success" | "failure" | "unavailable";
+  latest_backup: { state: string | null; safe_error: string };
+  latest_success_age_seconds: number | null;
+  retention: { daily: number | null; weekly: number | null; monthly: number | null };
+  latest_restore: { state: string | null; safe_error: string };
+};
+
 export type DashboardResponse = {
   read_only: true;
   evaluated_at: string;
@@ -35,5 +43,6 @@ export type DashboardResponse = {
     processes?: Record<string, { status: string; age_seconds: number | null }>;
     jobs?: { status: string; queue_counts?: Record<string, number> };
     backlog?: { status: string; oldest_due_age_seconds: number | null };
+    backup?: BackupHealth;
   };
 };
