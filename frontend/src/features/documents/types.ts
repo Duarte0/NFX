@@ -60,6 +60,17 @@ export type DocumentResponse = {
     status: string;
     reason_code: string;
   }>;
+  total: number;
+  limit: number;
+  truncated: boolean;
+  filter?: {
+    from: string;
+    to: string;
+    family?: string;
+    direction?: string;
+    nfse_category?: string;
+  };
+  boundary?: "[from,to)";
   next_cursor: string | null;
 };
 

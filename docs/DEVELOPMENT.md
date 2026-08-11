@@ -129,6 +129,21 @@ e a disponibilidade booleana de evidência. Bytes, chaves de objeto e erros exte
 essa fronteira. A seção React `#documentos` mantém ramos explícitos para carregamento, vazio válido,
 degradação, detalhe e download; ela não cria cursor, checkpoint, retry ou estado durável.
 
+## Drill-down de documentos do dashboard (P8-02)
+
+Os sete cards de documentos do `GET /api/dashboard` usam o mapa allowlisted canônico de filtros
+P7 (`family`, `direction` e `nfse_category`) e carregam o período civil exibido como `from`/`to`.
+O dashboard e o arquivo usam a mesma seleção de `Document`; a direção NF-e é aplicada ao campo
+`role` e as categorias NFS-e persistidas são exatamente `tomada` e `prestada`.
+
+O `GET /api/documents` aceita esse período adicional e traduz o intervalo civil semiaberto
+`[from,to)` para `emitted_from`/`emitted_to` inclusivos no owner P7. A resposta aditiva `total`
+conta somente documentos persistidos da mesma seleção, enquanto linhas de quarentena continuam
+separadas no resultado existente. A página permanece bounded e determinística, sem payloads,
+chaves de objeto, correlação sem limite ou erros brutos; falhas de fonte retornam `503` seguro.
+Consultas autenticadas são somente leitura, e a auditoria de consulta continua sendo a única
+auditoria P7 aplicável.
+
 ## Consulta e download individual (P7-01/P7-02)
 
 `GET /api/documents/<id>` fornece detalhe seguro, incluindo eventos/substituições e disponibilidade

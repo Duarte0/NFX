@@ -9,7 +9,8 @@
 - **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering e
   disco continuam explicitamente indisponíveis para incrementos posteriores; o status seguro de
   backup P9-02 foi integrado no issue 0025; o drill-down de execuções de coleta foi concluído no
-  issue 0026. Os drill-downs de empresa, certificado, documento e job continuam em slices próprios.
+  issue 0026; o drill-down de documentos foi concluído no issue 0027. Os drill-downs de empresa,
+  certificado e job continuam em slices próprios.
 
 ## Propósito e resultado
 
@@ -66,4 +67,20 @@ persistido. A resposta limita a página a 50 linhas, ordena por timestamp/UUID, 
 somente metadados redigidos. Falha da fonte retorna indisponibilidade/degradação sem zero inventado.
 O slice é coberto por testes unitários de parsing e integração PostgreSQL/MinIO de reconciliação,
 limites, RBAC, redaction, erro e no-write, além do contrato TypeScript/ESLint/Vite. Os demais
-cards clicáveis permanecem pendentes nos issues 0027–0030.
+cards clicáveis permanecem pendentes nos issues 0028–0030.
+
+### Evidência do slice de documentos — issue 0027
+
+Os sete cards (`total`, `nfe`, `nfse`, `entrada`, `saida`, `tomados` e `prestados`) compartilham
+com `GET /api/documents` um mapa allowlisted de filtros P7. Os links preservam o período atual
+`from`/`to` e usam `tomada`/`prestada` como categorias NFS-e; o arquivo traduz esse período para
+o contrato inclusivo de emissão sem incluir a data final. A resposta mantém a lista P7 bounded e
+adiciona `total`, calculado somente sobre documentos persistidos da mesma seleção; quarentena e
+estados de coleta continuam separados.
+
+O slice retorna página determinística, filtro/boundary normalizados e apenas metadados seguros.
+Parâmetros repetidos, desconhecidos, incompletos, reversos ou acima de 366 dias são rejeitados;
+falhas de fonte retornam `503` sem zero inventado. A autorização continua server-side para os
+três papéis, a auditoria segue somente a política P7 e leituras não criam estado durável. Testes
+unitários e a integração PostgreSQL/MinIO cobrem as sete reconciliações, fronteiras, zero,
+redaction, erro e ausência de escrita; o contrato React é validado por TypeScript/ESLint/Vite.

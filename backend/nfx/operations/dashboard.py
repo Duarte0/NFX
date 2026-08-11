@@ -7,6 +7,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any
+from urllib.parse import urlencode
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -20,8 +21,9 @@ from nfx.collection.services import (
     collection_execution_queryset,
 )
 from nfx.companies.models import Company, CompanyStatus
-from nfx.documents.models import Document, DocumentFamily
+from nfx.documents.models import Document
 from nfx.documents.rendering import RenderUnavailable, renderer_metadata
+from nfx.documents.status import DOCUMENT_DASHBOARD_FILTERS, document_model_filters
 from nfx.identity.models import Role
 from nfx.infrastructure.configuration import load_settings
 from nfx.infrastructure.dependencies import dependencies_from_environment
@@ -313,13 +315,8 @@ def _period_documents(period: DatePeriod) -> QuerySet[Document]:
 def _document_counts(period: DatePeriod) -> dict[str, int]:
     documents = _period_documents(period)
     return {
-        "total": documents.count(),
-        "nfe": documents.filter(family=DocumentFamily.NFE).count(),
-        "nfse": documents.filter(family=DocumentFamily.NFSE).count(),
-        "entrada": documents.filter(family=DocumentFamily.NFE, role="entrada").count(),
-        "saida": documents.filter(family=DocumentFamily.NFE, role="saida").count(),
-        "tomados": documents.filter(family=DocumentFamily.NFSE, category="tomada").count(),
-        "prestados": documents.filter(family=DocumentFamily.NFSE, category="prestada").count(),
+        key: documents.filter(**document_model_filters(filters)).count()
+        for key, filters in DOCUMENT_DASHBOARD_FILTERS.items()
     }
 
 
@@ -455,35 +452,30 @@ def build_dashboard(
     document_previous, _ = _safe_source(
         lambda: _document_counts(period.previous), evaluated_at=evaluated_at
     )
-    document_cards: list[tuple[str, str, str, dict[str, str]]] = [
-        ("total", "Documentos no período", "#documentos", {}),
-        ("nfe", "NF-e", "?family=nfe#documentos", {"family": "nfe"}),
-        ("nfse", "NFS-e", "?family=nfse#documentos", {"family": "nfse"}),
-        (
-            "entrada",
-            "NF-e de entrada",
-            "?family=nfe&direction=entrada#documentos",
-            {"family": "nfe", "direction": "entrada"},
-        ),
-        (
-            "saida",
-            "NF-e de saída",
-            "?family=nfe&direction=saida#documentos",
-            {"family": "nfe", "direction": "saida"},
-        ),
-        (
-            "tomados",
-            "NFS-e tomadas",
-            "?family=nfse&nfse_category=tomado#documentos",
-            {"family": "nfse", "nfse_category": "tomado"},
-        ),
-        (
-            "prestados",
-            "NFS-e prestadas",
-            "?family=nfse&nfse_category=prestado#documentos",
-            {"family": "nfse", "nfse_category": "prestado"},
-        ),
-    ]
+    document_labels = {
+        "total": "Documentos no período",
+        "nfe": "NF-e",
+        "nfse": "NFS-e",
+        "entrada": "NF-e de entrada",
+        "saida": "NF-e de saída",
+        "tomados": "NFS-e tomadas",
+        "prestados": "NFS-e prestadas",
+    }
+    document_period_filters = {
+        "from": period.current.start.isoformat(),
+        "to": period.current.end.isoformat(),
+    }
+    document_cards: list[tuple[str, str, str, dict[str, str]]] = []
+    for key, filter_values in DOCUMENT_DASHBOARD_FILTERS.items():
+        filters = {**document_period_filters, **filter_values}
+        document_cards.append(
+            (
+                key,
+                document_labels[key],
+                f"?{urlencode(filters)}#documentos",
+                filters,
+            )
+        )
     cards.extend(
         _period_card(
             card_id=f"documents.{key}",

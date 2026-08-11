@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from enum import StrEnum
 from typing import cast
@@ -31,6 +31,24 @@ from nfx.documents.rendering import render_payload
 _SAFE_REFERENCE = re.compile(r"^[A-Za-z0-9_.:/-]{1,64}$")
 _FAMILIES = frozenset(("nfe", "nfse"))
 
+# The dashboard and archive share this allowlisted mapping. Values are the
+# canonical P7 fields, including the persisted NFS-e category spellings.
+DOCUMENT_DASHBOARD_FILTERS: dict[str, dict[str, str]] = {
+    "total": {},
+    "nfe": {"family": DocumentFamily.NFE},
+    "nfse": {"family": DocumentFamily.NFSE},
+    "entrada": {"family": DocumentFamily.NFE, "direction": "entrada"},
+    "saida": {"family": DocumentFamily.NFE, "direction": "saida"},
+    "tomados": {"family": DocumentFamily.NFSE, "nfse_category": "tomada"},
+    "prestados": {"family": DocumentFamily.NFSE, "nfse_category": "prestada"},
+}
+
+
+def document_model_filters(filters: Mapping[str, str]) -> dict[str, str]:
+    """Translate canonical P7 filter names to persisted Document fields."""
+    field_names = {"direction": "role", "nfse_category": "category"}
+    return {field_names.get(key, key): value for key, value in filters.items()}
+
 
 class InvalidDocumentListParams(ValueError):
     """A client parameter is invalid or exceeds the bounded read contract."""
@@ -57,6 +75,8 @@ class CollectionStatus:
 class DocumentListParams:
     company_id: UUID | None = None
     company_ids: tuple[UUID, ...] = ()
+    dashboard_from: date | None = None
+    dashboard_to: date | None = None
     family: str | None = None
     flow: str | None = None
     competence_from: date | None = None
@@ -81,6 +101,8 @@ class DocumentListParams:
         return cls(
             company_id=company_id,
             company_ids=params.company_ids,
+            dashboard_from=params.dashboard_from,
+            dashboard_to=params.dashboard_to,
             family=params.family,
             flow=params.flow,
             competence_from=params.competence_from,
@@ -94,6 +116,20 @@ class DocumentListParams:
             limit=params.limit,
             cursor=cursor,
         )
+
+    @property
+    def dashboard_filter(self) -> dict[str, str] | None:
+        if self.dashboard_from is None or self.dashboard_to is None:
+            return None
+        values = {
+            "from": self.dashboard_from.isoformat(),
+            "to": self.dashboard_to.isoformat(),
+        }
+        for key in ("family", "direction", "nfse_category"):
+            value = getattr(self, key)
+            if value is not None:
+                values[key] = value
+        return values
 
 
 def _uuid_parameter(value: str | None) -> UUID | None:
@@ -212,6 +248,11 @@ def _scoped_documents(params: DocumentListParams) -> QuerySet[Document]:
 def scoped_documents(params: DocumentListParams) -> QuerySet[Document]:
     """Return the canonical P7 document selection for read-only consumers."""
     return _scoped_documents(params)
+
+
+def persisted_document_count(params: DocumentListParams) -> int:
+    """Count the full persisted selection, excluding quarantine rows and cursors."""
+    return _scoped_documents(replace(params, cursor=None)).count()
 
 
 def _scoped_quarantine(params: DocumentListParams) -> QuerySet[ReceivedUnit]:
@@ -371,6 +412,7 @@ def _aggregate_status(statuses: list[dict[str, object]]) -> CollectionStatus:
 
 
 def list_document_status(params: DocumentListParams) -> dict[str, object]:
+    persisted_count = persisted_document_count(params)
     documents = list(_scoped_documents(params)[: params.limit + 1])
     quarantined = list(_scoped_quarantine(params)[: params.limit + 1])
     rows = [_document_payload(row) for row in documents] + [
@@ -380,12 +422,20 @@ def list_document_status(params: DocumentListParams) -> dict[str, object]:
     page_rows = rows[: params.limit]
     statuses = _scope_statuses(params)
     aggregate = _aggregate_status(statuses)
-    return {
+    payload: dict[str, object] = {
         "status": aggregate.code,
         "reason_code": aggregate.reason_code,
         "collection_states": statuses,
         "documents": page_rows,
+        "total": persisted_count,
+        "limit": params.limit,
+        "truncated": len(rows) > params.limit,
         "next_cursor": (
             cursor_for(str(page_rows[-1]["id"])) if len(rows) > params.limit else None
         ),
     }
+    dashboard_filter = params.dashboard_filter
+    if dashboard_filter is not None:
+        payload["filter"] = dashboard_filter
+        payload["boundary"] = "[from,to)"
+    return payload

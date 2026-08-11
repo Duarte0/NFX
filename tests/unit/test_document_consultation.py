@@ -65,6 +65,45 @@ def test_consultation_params_reject_unsupported_or_invalid_input(query: dict[str
         parse_consultation_params(query)
 
 
+def test_dashboard_period_is_translated_to_the_inclusive_archive_contract() -> None:
+    params = parse_consultation_params(
+        {
+            "from": "2026-08-01",
+            "to": "2026-09-01",
+            "family": "nfse",
+            "nfse_category": "tomada",
+        }
+    )
+
+    assert params.dashboard_from == date(2026, 8, 1)
+    assert params.dashboard_to == date(2026, 9, 1)
+    assert params.emitted_from == date(2026, 8, 1)
+    assert params.emitted_to == date(2026, 8, 31)
+    assert params.family == "nfse"
+    assert params.nfse_category == "tomada"
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"from": "2026-08-01"},
+        {"from": "2026-09-01", "to": "2026-08-01"},
+        {"from": "2026-01-01", "to": "2027-02-01"},
+        {"from": ["2026-08-01", "2026-08-02"], "to": "2026-09-01"},
+        {
+            "from": "2026-08-01",
+            "to": "2026-09-01",
+            "emitted_from": "2026-08-01",
+        },
+    ],
+)
+def test_dashboard_period_rejects_ambiguous_or_unbounded_input(
+    query: dict[str, object],
+) -> None:
+    with pytest.raises(InvalidConsultationParams):
+        parse_consultation_params(query)
+
+
 def test_cursor_is_opaque_and_round_trips_without_exposing_the_database_id() -> None:
     value = "11111111-1111-1111-1111-111111111111"
 

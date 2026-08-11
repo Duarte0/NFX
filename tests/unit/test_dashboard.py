@@ -64,7 +64,9 @@ def test_document_source_failure_does_not_erase_unrelated_cards(
     assert cards["companies.active"]["status"] in {"zero", "ready"}
     assert cards["documents.total"]["status"] == "unavailable"
     assert cards["documents.total"]["current"]["freshness"]["status"] == "unknown"
-    assert cards["documents.total"]["drilldown"]["href"] == "#documentos"
+    assert cards["documents.total"]["drilldown"]["href"] == (
+        "?from=2026-08-01&to=2026-09-01#documentos"
+    )
 
 
 def test_collection_source_failure_is_unavailable_without_erasing_other_cards(

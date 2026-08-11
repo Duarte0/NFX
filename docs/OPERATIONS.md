@@ -79,6 +79,13 @@ Brasília, informa o total reconciliado e mostra até 50 execuções com metadad
 seguro; indisponibilidade não é apresentada como zero. A tela distingue carregamento, vazio válido,
 filtro inválido, indisponibilidade e degradação.
 
+Os sete cards de documentos também preservam `from`/`to` e seus filtros P7 canônicos ao abrir
+`#documentos`. O arquivo aceita o intervalo civil `[from,to)` de Brasília, informa em `total` a
+quantidade server-side de documentos persistidos da seleção e mantém quarentena/status como
+linhas distintas. `tomada` e `prestada` são as categorias NFS-e válidas; falha de consulta retorna
+503 seguro e não vira zero. A leitura não cria jobs, transições, artefatos ou auditoria adicional
+além da consulta P7 existente.
+
 Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por

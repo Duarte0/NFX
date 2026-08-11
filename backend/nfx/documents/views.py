@@ -89,7 +89,12 @@ def documents(request: HttpRequest) -> JsonResponse:
         params = DocumentListParams.from_query(request.GET)
     except InvalidDocumentListParams:
         return JsonResponse({"detail": "Parâmetros inválidos."}, status=400)
-    payload = list_document_status(params)
+    try:
+        payload = list_document_status(params)
+    except Exception:
+        return JsonResponse(
+            {"detail": "Não foi possível consultar os documentos."}, status=503
+        )
     if not _audit_read(
         request,
         action="document.consultation",
@@ -101,7 +106,9 @@ def documents(request: HttpRequest) -> JsonResponse:
         },
     ):
         return JsonResponse({"detail": "Consulta temporariamente indisponível."}, status=503)
-    return JsonResponse(payload)
+    response = JsonResponse(payload)
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 @require_GET

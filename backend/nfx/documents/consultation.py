@@ -10,7 +10,7 @@ import re
 import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from uuid import UUID
 
 from django.core import signing
@@ -28,6 +28,8 @@ from nfx.documents.rendering import render_payload
 _ALLOWED_KEYS = frozenset(
     {
         "company_id",
+        "from",
+        "to",
         "competence_from",
         "competence_to",
         "emitted_from",
@@ -48,6 +50,7 @@ _SAFE_REFERENCE = re.compile(r"^[A-Za-z0-9_.:/-]{1,64}$")
 _CURSOR_SALT = "nfx.documents.consultation.cursor"
 _MAX_COMPANIES = 20
 _MAX_LIMIT = 100
+_MAX_DASHBOARD_PERIOD_DAYS = 366
 
 
 class InvalidConsultationParams(ValueError):
@@ -57,6 +60,8 @@ class InvalidConsultationParams(ValueError):
 @dataclass(frozen=True)
 class ConsultationParams:
     company_ids: tuple[UUID, ...] = ()
+    dashboard_from: date | None = None
+    dashboard_to: date | None = None
     competence_from: date | None = None
     competence_to: date | None = None
     emitted_from: date | None = None
@@ -180,6 +185,18 @@ def parse_consultation_params(query: Mapping[str, object]) -> ConsultationParams
         key: _date(_single(query, key))
         for key in ("competence_from", "competence_to", "emitted_from", "emitted_to")
     }
+    dashboard_from = _date(_single(query, "from"))
+    dashboard_to = _date(_single(query, "to"))
+    if (dashboard_from is None) != (dashboard_to is None):
+        raise InvalidConsultationParams("dashboard period is incomplete")
+    if dashboard_from is not None and dashboard_to is not None:
+        if "emitted_from" in query or "emitted_to" in query:
+            raise InvalidConsultationParams("dashboard period is ambiguous")
+        duration = (dashboard_to - dashboard_from).days
+        if duration < 1 or duration > _MAX_DASHBOARD_PERIOD_DAYS:
+            raise InvalidConsultationParams("dashboard period is outside the allowed range")
+        dates["emitted_from"] = dashboard_from
+        dates["emitted_to"] = dashboard_to - timedelta(days=1)
     for start, end in (("competence_from", "competence_to"), ("emitted_from", "emitted_to")):
         start_date = dates[start]
         end_date = dates[end]
@@ -188,6 +205,8 @@ def parse_consultation_params(query: Mapping[str, object]) -> ConsultationParams
 
     return ConsultationParams(
         company_ids=company_ids,
+        dashboard_from=dashboard_from,
+        dashboard_to=dashboard_to,
         competence_from=dates["competence_from"],
         competence_to=dates["competence_to"],
         emitted_from=dates["emitted_from"],

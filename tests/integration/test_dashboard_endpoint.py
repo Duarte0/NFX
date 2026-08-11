@@ -98,8 +98,8 @@ def test_dashboard_returns_period_cards_real_zero_and_explicit_capabilities() ->
     assert cards["documents.nfse"]["current"]["status"] == "zero"
     assert cards["documents.total"]["previous"]["value"] == 0
     assert cards["documents.nfe"]["drilldown"] == {
-        "href": "?family=nfe#documentos",
-        "filters": {"family": "nfe"},
+        "href": "?from=2026-08-01&to=2026-09-01&family=nfe#documentos",
+        "filters": {"from": "2026-08-01", "to": "2026-09-01", "family": "nfe"},
     }
     assert payload["capabilities"]["fiscal_sources"]["status"] == "unavailable"
     assert payload["capabilities"]["rendering"] == {
