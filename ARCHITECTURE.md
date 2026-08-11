@@ -9,12 +9,12 @@
 | Documento | Arquitetura técnica |
 | Relacionamento | Complementa o `PRD.md`; não o substitui |
 | Status | Proposta arquitetural aprovada para detalhamento técnico |
-| Versão | 1.0 |
+| Versão | 1.1 |
 | Idioma | Português brasileiro |
 | Fuso de apresentação | America/Sao_Paulo |
 | Escala | Aproximadamente 200 empresas |
 | Fonte | `PRD.md`, versão 1.0 — MVP |
-| Data | 2026-08-04 |
+| Data | 2026-08-10 |
 
 Este documento define responsabilidades, limites, invariantes, tecnologias, persistência, operação e decisões arquiteturais. Não define o esquema físico final do banco, SQL, migrações, contratos completos de API, diretórios de código, tarefas ou sequência de implementação.
 
@@ -196,6 +196,25 @@ O Docker atual, com PostgreSQL, MinIO e agente de desenvolvimento, é apenas bas
 - **Leases** impedem execução concorrente e expiram após falha de processo.
 - **Política externa** mantém regras versionadas e efetivas por fonte/fluxo.
 - **Redação de erros** remove segredo, stack, XML e detalhes internos indevidos das respostas.
+
+### 10.4 Arquitetura da interface web
+
+O frontend React é organizado por funcionalidades de negócio e preserva os mesmos limites dos
+módulos de domínio. O arquivo `src/main.tsx` é somente o ponto de entrada que valida o elemento
+raiz e inicializa o React; a composição da aplicação e do shell pertence a `App.tsx`.
+
+- Autenticação, usuários, empresas, certificados, coletas, documentos e auditoria possuem
+  módulos de funcionalidade próprios, contendo sua apresentação, estado e contratos TypeScript.
+- A comunicação HTTP compartilhada centraliza credenciais same-origin, CSRF, serialização e
+  conversão de falhas em erros seguros; funcionalidades não duplicam esse mecanismo.
+- Tipos permanecem junto do domínio que os possui. Componentes e utilitários compartilhados
+  contêm apenas comportamento realmente transversal e não acumulam regras de negócio.
+- Estado local e composição React são o padrão. Router ou biblioteca global de estado somente
+  serão introduzidos quando navegação ou compartilhamento de estado demonstrarem essa necessidade.
+- A interface pode ocultar ações conforme o papel para melhorar a experiência, mas toda
+  autorização continua aplicada pelo servidor; visibilidade no cliente nunca é controle de acesso.
+- Refatorações estruturais preservam os contratos HTTP, os identificadores de seção, a
+  navegação e os estados visíveis, salvo mudança de produto ou spec aprovada separadamente.
 
 ## 11. Organização do repositório
 
@@ -609,4 +628,3 @@ Renderer novo não sobrescreve PDFs anteriores. Políticas são versionadas e po
 12. Nenhum legado, feature fora do MVP ou API pública foi introduzido.
 13. A traceabilidade cobre os identificadores relevantes e AC-001 a AC-025.
 14. Diagramas, responsabilidades, decisões e terminologia são consistentes.
-
