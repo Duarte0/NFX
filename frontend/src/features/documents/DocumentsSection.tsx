@@ -202,7 +202,7 @@ export function DocumentsSection({ loadSignal, notify }: DocumentsSectionProps) 
         <button type="submit">Consultar</button>
       </form>
       {loading && <p role="status">Carregando documentos…</p>}
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       {queryError === "invalid" && <p role="status">O filtro de documentos é inválido.</p>}
       {queryError === "unavailable" && <p role="status">Os documentos estão indisponíveis.</p>}
       {queryError === "degraded" && <p role="status">A consulta de documentos está degradada.</p>}

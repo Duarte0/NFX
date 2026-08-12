@@ -153,7 +153,7 @@ export function CompaniesSection({ loadSignal, notify }: CompaniesSectionProps) 
       <CertificateInventoryPanel loadSignal={loadSignal} />
       <button onClick={() => void loadCompanies()}>Atualizar empresas</button>
       {loading && <p role="status">Carregando empresas…</p>}
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       {queryError === "invalid" && <p role="status">O filtro de empresas é inválido.</p>}
       {queryError === "unavailable" && <p role="status">As empresas estão indisponíveis.</p>}
       {queryError === "degraded" && <p role="status">A consulta de empresas está degradada.</p>}

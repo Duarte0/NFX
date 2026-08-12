@@ -19,6 +19,26 @@ continua sem router, biblioteca global de estado, framework de componentes ou ca
 Autorização permanece server-side, e os endpoints, payloads, mensagens, IDs de seção e estados
 visíveis das specs P1–P4 continuam sendo contratos de compatibilidade.
 
+## Fundação visual P10-01
+
+`frontend/src/shared/ui/tokens.css` é a fonte única dos tokens de marca, neutros, estados,
+tipografia, espaçamento, superfícies, bordas, raios, sombra e foco. A direção aprovada usa vinho
+como primária, cinza como estrutura/neutro e branco como superfície; `success`, `warning`,
+`danger` e `info` têm superfícies claras próprias e não substituem texto ou semântica.
+
+`frontend/src/shared/ui/primitives.ts` contém os primitives sem regras de domínio: `Button`
+(primário, secundário, perigo e bloqueado), `Field` (label, ajuda e erro), `Panel`, `DataTable` e
+`Badge`. `Feedback` acrescenta os estados loading, vazio válido, erro, indisponível, degradado,
+bloqueado, sucesso e ação crítica, com HTML/ARIA nativos, live regions, foco visível e fallback
+para mensagem segura. Um botão bloqueado é nativamente `disabled`; ocultação visual nunca é
+autorização.
+
+O dashboard, o drill-down de jobs, o shell autenticado e o login exercitam a fundação sem mudar
+rotas, âncoras, chamadas HTTP, papéis, dados fiscais ou estado local das features. A verificação
+determinística é `npm --prefix frontend run test:ui-contract`; ela valida os oito estados, pares
+de contraste documentados, semântica, foco, labels, bloqueio e ausência de efeitos colaterais sem
+introduzir dependências ou infraestrutura de browser.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes

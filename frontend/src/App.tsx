@@ -8,6 +8,7 @@ import { DashboardSection } from "./features/dashboard/DashboardSection";
 import { UsersSection } from "./features/users/UsersSection";
 import { RetentionSection } from "./features/retention/RetentionSection";
 import { ExportsSection } from "./features/exports/ExportsSection";
+import { Button } from "./shared/ui/primitives";
 
 type Section = "dashboard" | "documents" | "exports" | "companies" | "collections" | "users" | "audit" | "retention";
 
@@ -30,13 +31,13 @@ function AuthenticatedApp({ user, signOut, notify, message }: AuthenticatedConte
   }
 
   return (
-    <main lang="pt-BR">
-      <header>
+    <main lang="pt-BR" className="app-shell">
+      <header className="app-shell__header">
         <h1>NFX INOV</h1>
         <p>{user.name} · {user.role}</p>
-        <button onClick={() => void signOut()}>Sair</button>
+        <Button variant="secondary" onClick={() => void signOut()}>Sair</Button>
       </header>
-      <nav aria-label="Navegação principal">
+      <nav className="app-shell__nav" aria-label="Navegação principal">
         <a href="#dashboard" onClick={() => requestLoad("dashboard")}>Dashboard</a>
         <a href="#documentos" onClick={() => requestLoad("documents")}>Documentos</a>
         <a href="#exportacoes" onClick={() => requestLoad("exports")}>Exportações</a>

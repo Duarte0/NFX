@@ -58,7 +58,7 @@ export function ExportsSection({ loadSignal, notify }: ExportsSectionProps) {
       <button onClick={() => void requestExport()}>Exportar documentos consultados</button>
       <button onClick={() => void loadExports()}>Atualizar exportações</button>
       {loading && <p role="status">Carregando exportações…</p>}
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       {!loading && !error && exports.length === 0 && <p>Nenhuma exportação solicitada.</p>}
       {!loading && !error && exports.length > 0 && (
         <table>

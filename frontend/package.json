@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "lint": "tsc --noEmit && eslint .",
+    "test:ui-contract": "node scripts/run-ui-contract.mjs",
     "dev": "vite --host 0.0.0.0"
   },
   "dependencies": {

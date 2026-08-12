@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "../../shared/http";
+import { Button, DataTable } from "../../shared/ui/primitives";
+import { Feedback } from "../../shared/ui/Feedback";
 import { listJobObservability } from "./api";
 import { JobObservabilityFilter, JobObservabilityResponse } from "./types";
 
@@ -91,12 +93,12 @@ export function JobObservabilityPanel({ loadSignal, notify }: JobObservabilityPa
     <section id="processamento" aria-label="Jobs de processamento">
       <h3>Jobs de processamento</h3>
       <p>Filtro solicitado: {filterLabel(filter.filter)}</p>
-      <button onClick={() => void loadJobs(filter)}>Atualizar jobs</button>
-      {loading && <p role="status">Carregando jobs de processamento…</p>}
-      {error && <p role="alert">{error}</p>}
-      {queryError === "invalid" && <p role="status">O filtro de jobs é inválido.</p>}
-      {queryError === "unavailable" && <p role="status">Os jobs de processamento estão indisponíveis.</p>}
-      {queryError === "degraded" && <p role="status">A consulta de jobs está degradada.</p>}
+      <Button variant="secondary" onClick={() => void loadJobs(filter)}>Atualizar jobs</Button>
+      {loading && <Feedback state="loading" message="Carregando jobs de processamento…" />}
+      <Feedback message={error} state="error" />
+      {queryError === "invalid" && <Feedback state="error" message="O filtro de jobs é inválido." />}
+      {queryError === "unavailable" && <Feedback state="unavailable" message="Os jobs de processamento estão indisponíveis." />}
+      {queryError === "degraded" && <Feedback state="degraded" message="A consulta de jobs está degradada." />}
       {!loading && !error && result && (
         <>
           <p>
@@ -107,9 +109,9 @@ export function JobObservabilityPanel({ loadSignal, notify }: JobObservabilityPa
             {result.truncated ? " (mostrando somente a primeira página limitada)" : ""}
           </p>
           {result.jobs.length === 0 ? (
-            <p>Nenhum job encontrado para este filtro.</p>
+            <Feedback state="empty" message="Nenhum job encontrado para este filtro." />
           ) : (
-            <table>
+            <DataTable caption="Jobs de processamento">
               <thead><tr><th>Tipo</th><th>Estado</th><th>Resultado</th><th>Tentativas</th><th>Criado em</th><th>Erro seguro</th></tr></thead>
               <tbody>
                 {result.jobs.map((job) => (
@@ -123,7 +125,7 @@ export function JobObservabilityPanel({ loadSignal, notify }: JobObservabilityPa
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </DataTable>
           )}
         </>
       )}

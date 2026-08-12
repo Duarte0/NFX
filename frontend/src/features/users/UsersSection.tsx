@@ -45,7 +45,7 @@ export function UsersSection({ loadSignal, notify }: UsersSectionProps) {
     <section id="usuarios">
       <h2>Usuários</h2>
       <button onClick={() => void loadUsers()}>Atualizar usuários</button>
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       <form onSubmit={createManagedUser}>
         <label>
           Nome

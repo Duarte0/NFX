@@ -1,5 +1,6 @@
 import { FormEvent, MouseEvent, useCallback, useEffect, useState } from "react";
 import { Feedback } from "../../shared/ui/Feedback";
+import { Badge, Button, Field, Panel } from "../../shared/ui/primitives";
 import { getDashboard } from "./api";
 import { JobObservabilityPanel } from "./JobObservabilityPanel";
 import { BackupHealth, DashboardCard, DashboardResponse } from "./types";
@@ -75,6 +76,13 @@ function backupAgeLabel(ageSeconds: number | null): string {
   return `${days}d ${hours}h ${minutes}min`;
 }
 
+function cardBadgeVariant(status: DashboardCard["status"]): "success" | "warning" | "danger" | "neutral" {
+  if (status === "ready") return "success";
+  if (["stale", "partial", "degraded"].includes(status)) return "warning";
+  if (["unavailable", "unknown"].includes(status)) return "danger";
+  return "neutral";
+}
+
 export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) {
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [from, setFrom] = useState("");
@@ -117,17 +125,17 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
       <h2>Dashboard</h2>
       <p>Somente leitura. Intervalos usam {"[início, fim)"} em datas civis de Brasília.</p>
       <form onSubmit={submit}>
-        <label>
-          De <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
-        </label>
-        <label>
-          Até <input type="date" value={to} onChange={(event) => setTo(event.target.value)} />
-        </label>
-        <button type="submit">Aplicar período</button>
+        <Field id="dashboard-from" label="De">
+          <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+        </Field>
+        <Field id="dashboard-to" label="Até">
+          <input type="date" value={to} onChange={(event) => setTo(event.target.value)} />
+        </Field>
+        <Button type="submit">Aplicar período</Button>
       </form>
-      <button onClick={() => void loadDashboard()}>Atualizar dashboard</button>
-      {loading && <p role="status">Carregando dashboard…</p>}
-      <Feedback message={error} error />
+      <Button variant="secondary" onClick={() => void loadDashboard()}>Atualizar dashboard</Button>
+      {loading && <Feedback state="loading" message="Carregando dashboard…" />}
+      <Feedback message={error} state="error" />
       {dashboard && (
         <>
           <p role="status">
@@ -135,17 +143,16 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
           </p>
           <div>
             {dashboard.cards.map((card) => (
-              <article key={card.id} aria-label={card.label}>
-                <h3>{card.label}</h3>
+              <Panel as="article" key={card.id} aria-label={card.label} title={card.label}>
                 <p>{valueLabel(card)}</p>
-                <p role="status">{statusLabel(card.status)}</p>
+                <Badge variant={cardBadgeVariant(card.status)}>{statusLabel(card.status)}</Badge>
                 {card.previous && <p>Período anterior: {card.previous.value === null ? "—" : card.previous.value}</p>}
                 {card.drilldown && (
                   <a href={card.drilldown.href} onClick={(event) => openJobDrilldown(event, card)}>
                     Abrir lista correspondente
                   </a>
                 )}
-              </article>
+              </Panel>
             ))}
           </div>
           <JobObservabilityPanel loadSignal={loadSignal} notify={notify} />
@@ -156,13 +163,11 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
             ))}
           </ul>
           {dashboard.operational_health && (
-            <aside aria-label="Saúde operacional">
-              <h3>Saúde operacional</h3>
+            <Panel as="aside" aria-label="Saúde operacional" title="Saúde operacional">
               <p>{dashboard.operational_health.status}</p>
               {dashboard.operational_health.backlog && <p>Backlog: {dashboard.operational_health.backlog.status}</p>}
               {dashboard.operational_health.backup && (
-                <section aria-label="Saúde do backup">
-                  <h4>Backup</h4>
+                <Panel as="section" aria-label="Saúde do backup" title="Backup">
                   <p>Estado da cobertura: {backupCoverageLabel(dashboard.operational_health.backup)}</p>
                   <p>Último conjunto: {backupStateLabel(dashboard.operational_health.backup.latest_backup.state)}</p>
                   {dashboard.operational_health.backup.latest_backup.safe_error && (
@@ -178,9 +183,9 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
                       Falha na última validação: {safeErrorLabel(dashboard.operational_health.backup.latest_restore.safe_error)}
                     </p>
                   )}
-                </section>
+                </Panel>
               )}
-            </aside>
+            </Panel>
           )}
         </>
       )}

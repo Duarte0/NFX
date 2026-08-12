@@ -27,7 +27,7 @@ export function AuditSection({ loadSignal, notify }: AuditSectionProps) {
     <section id="auditoria">
       <h2>Auditoria</h2>
       <button onClick={() => void loadAudit()}>Atualizar auditoria</button>
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       <table>
         <thead>
           <tr><th>Data/hora</th><th>Ação</th><th>Entidade</th><th>Resultado</th><th>Motivo</th></tr>

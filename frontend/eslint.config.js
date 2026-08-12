@@ -7,4 +7,5 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   { plugins: { "react-hooks": reactHooks }, rules: reactHooks.configs.recommended.rules },
+  { files: ["scripts/**/*.mjs"], languageOptions: { globals: { URL: "readonly", console: "readonly", process: "readonly" } } },
 );

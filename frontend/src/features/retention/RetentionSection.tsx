@@ -104,7 +104,7 @@ export function RetentionSection({ loadSignal, notify }: { loadSignal: number; n
       <p>A prévia é somente metadados e não autoriza exclusão.</p>
       <button onClick={() => void loadRetention()}>Atualizar retenção</button>
       {loading && <p role="status">Carregando retenção…</p>}
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       {stale && <p role="alert">A prévia ficou desatualizada; atualize a lista antes de tentar novamente.</p>}
       {!loading && !error && retention && (
         retention.documents.length === 0 ? (

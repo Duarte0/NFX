@@ -124,7 +124,7 @@ export function CollectionsSection({ canManage, loadSignal, notify }: Collection
     <section id="coletas">
       <h2>Coletas</h2>
       <button onClick={() => void loadCollections()}>Atualizar coletas</button>
-      <Feedback message={error} error />
+      <Feedback message={error} state="error" />
       {executionLoading && <p role="status">Carregando execuções filtradas…</p>}
       {executionFilterFromLocation() && executionError === "invalid" && (
         <p role="status">O filtro de execuções é inválido.</p>

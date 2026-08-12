@@ -1,6 +1,7 @@
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { getSession, login, logout, prepareSession } from "./api";
 import { User } from "./types";
+import { Button, Field } from "../../shared/ui/primitives";
 
 export type AuthenticatedContext = {
   user: User;
@@ -56,25 +57,23 @@ export function AuthShell({ children }: AuthShellProps) {
         <h1>NFX INOV</h1>
         <p>{message || "Acesse sua conta."}</p>
         <form onSubmit={submit}>
-          <label>
-            E-mail
+          <Field id="auth-email" label="E-mail">
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
             />
-          </label>
-          <label>
-            Senha
+          </Field>
+          <Field id="auth-password" label="Senha">
             <input
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
             />
-          </label>
-          <button type="submit">Entrar</button>
+          </Field>
+          <Button type="submit">Entrar</Button>
         </form>
       </main>
     );
