@@ -19,6 +19,12 @@ continua sem router, biblioteca global de estado, framework de componentes ou ca
 Autorização permanece server-side, e os endpoints, payloads, mensagens, IDs de seção e estados
 visíveis das specs P1–P4 continuam sendo contratos de compatibilidade.
 
+## Workflow operacional de frontend
+
+Em criação, redesign, modernização ou alteração visual significativa, identificar antes do trabalho as skills/plugins disponíveis e aplicáveis por capacidade, ler suas instruções e executar o workflow selecionado. Se uma skill exigir aprovação de conceito/design antes da implementação, a aprovação é obrigatória e a codificação não começa antes dela. A seleção de skills complementa os contratos de PRD, arquitetura, specs e issues; não autoriza alterar endpoints, contratos HTTP, RBAC, regras de negócio, estados funcionais, URLs/âncoras ou os limites desta seção.
+
+Conceber e implementar pela fundação visual compartilhada, mantendo `App.tsx` como composition root, `App → features → shared` e a separação entre `shared/http.ts`, `shared/ui/` e os owners de domínio. Ao concluir, executar a validação aplicável: `npm --prefix frontend run test:ui-contract`, lint e build; para alterações que afetem interação, layout ou comportamento visual em browser, executar também `make test-browser` (ou o comando equivalente documentado) e inspecionar/refinar as divergências na matriz Chrome, Firefox e Edge em 1024, 1280 e 1440 px. Essa validação visual não substitui os testes funcionais, de contrato ou de RBAC dos owners.
+
 ## Fundação visual P10-01
 
 `frontend/src/shared/ui/tokens.css` é a fonte única dos tokens de marca, neutros, estados,
@@ -98,6 +104,33 @@ cursor, deep links, estados, stale/error/retry, redaction e ações com fixtures
 matriz Docker cobre 135 testes em Chrome, Firefox e Edge nas larguras 1024, 1280 e 1440 px para
 Administrador, Operador, Visualizador e sessões anônima/expirada. Não há endpoint, migration,
 dependência ou dado fiscal novo.
+
+## Empresas, certificados e coletas P10-05
+
+`frontend/src/features/companies/CompaniesSection.tsx` compõe a apresentação de empresas e seus
+detalhes com os owners existentes. Os filtros de ciclo de vida, status, busca, limite e cursor
+usam somente os parâmetros allowlisted da URL; o destino `#certificados` continua único e a
+visibilidade permanece definida pela composição autorizada em `App.tsx`. Estados de empresa,
+enriquecimento público não autoritativo e fluxos NF-e/NFS-e recebem rótulos semânticos, enquanto
+confirmação, motivo, versão, autorização e respostas duráveis continuam nos callbacks da feature.
+
+`CertificateInventoryPanel.tsx` e `CertificatePanel.tsx` distinguem certificado atual, ausente,
+expirado/próximo do vencimento, validade fresca/desatualizada/desconhecida e resultado vazio válido.
+O inventário conserva total, limite, truncamento e cursor opaco para a próxima página sem exibir o
+cursor; nenhum material, senha, chave, fingerprint ou payload é renderizado.
+
+`CollectionsSection.tsx` separa cobertura ADN ausente, nenhuma cobertura, desconhecida e erro de
+indisponibilidade dos estados de coleta e execução (vazia, em execução, parcial, falha, bloqueio,
+cooldown e retry). Filtros de execução preservam `from`, `to` e `state`; a leitura segura fica
+visível durante refresh/erro com stale explícito, as leituras de coleta e execução são independentes
+e guards de sequência/listeners/mutação impedem respostas fora de ordem e cliques repetidos.
+
+O contrato determinístico é `npm --prefix frontend run test:ui-contract`. A fixture sintética
+`frontend/browser-tests/companies.*` cobre os três papéis, sessões anônima/expirada, estados
+negativos, foco, teclado, overflow, cursor, stale/error/retry e redaction. A imagem efêmera do
+target `make test-browser`, reconstruída para incluir o fixture, passou 180 testes em Chrome,
+Firefox e Edge nas larguras 1024, 1280 e 1440 px. Não houve endpoint, migration, dependência ou
+dado fiscal novo.
 
 ## Decisões Proposed adotadas
 

@@ -6,6 +6,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import App, { AuthenticatedApp, navigationItemsForRole, navigationKeyFromHash } from "../src/App";
 import { DashboardPresentation } from "../src/features/dashboard/DashboardSection";
 import { DocumentsPresentation } from "../src/features/documents/DocumentsSection";
+import { CompaniesPresentation, companyStatusLabel, flowStateLabel } from "../src/features/companies/CompaniesSection";
+import { CertificateInventoryPresentation, certificateFreshnessLabel, certificateStatusLabel } from "../src/features/certificates/CertificateInventoryPanel";
+import { CollectionsPresentation, collectionStateLabel, coverageLabel } from "../src/features/collections/CollectionsSection";
 import { Button, DataTable, Field, Panel, Badge } from "../src/shared/ui/primitives";
 import { Feedback, feedbackStates } from "../src/shared/ui/Feedback";
 
@@ -14,6 +17,9 @@ const primitiveSource = readFileSync(resolve(process.cwd(), "src/shared/ui/primi
 const feedbackSource = readFileSync(resolve(process.cwd(), "src/shared/ui/Feedback.ts"), "utf8");
 const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const companiesSource = readFileSync(resolve(process.cwd(), "src/features/companies/CompaniesSection.tsx"), "utf8");
+const certificatesSource = readFileSync(resolve(process.cwd(), "src/features/certificates/CertificateInventoryPanel.tsx"), "utf8");
+const certificatePanelSource = readFileSync(resolve(process.cwd(), "src/features/certificates/CertificatePanel.tsx"), "utf8");
+const collectionsSource = readFileSync(resolve(process.cwd(), "src/features/collections/CollectionsSection.tsx"), "utf8");
 const documentsSource = readFileSync(resolve(process.cwd(), "src/features/documents/DocumentsSection.tsx"), "utf8");
 
 function cssVariables(source) {
@@ -483,5 +489,281 @@ const staleDocumentMarkup = renderToStaticMarkup(
 assert.match(staleDocumentMarkup, /Leitura desatualizada/);
 assert.match(staleDocumentMarkup, /Tentar novamente/);
 assert.match(staleDocumentMarkup, /Empresa sintética/);
+
+const syntheticCompany = {
+  id: "company-synthetic-1",
+  cnpj: "00000000000000",
+  legal_name: "Empresa sintética",
+  status: "ativa",
+  first_collection_at: null,
+  deactivation_reason: null,
+  version: 2,
+  flows: {
+    nfe: { id: "flow-nfe", state: "habilitado" },
+    nfse: { id: "flow-nfse", state: "pausado" },
+  },
+  enrichment: {
+    status: "sucesso",
+    public_non_authoritative: true,
+    payload: { should_not_render: true },
+    error_code: "",
+  },
+};
+const companyResponse = {
+  companies: [syntheticCompany],
+  filter: { lifecycle: "active" },
+  total: 2,
+  limit: 1,
+  truncated: true,
+  next_cursor: "opaque.company.cursor",
+};
+const companyMarkup = renderToStaticMarkup(
+  React.createElement(CompaniesPresentation, {
+    companies: companyResponse.companies,
+    companyResult: companyResponse,
+    selectedCompany: syntheticCompany,
+    loading: false,
+    stale: false,
+    error: "",
+    queryError: "",
+    actionBusy: "",
+    newCompany: { cnpj: "", legal_name: "" },
+    editCompany: { cnpj: syntheticCompany.cnpj, legal_name: syntheticCompany.legal_name },
+    onReload: () => {},
+    onRetry: () => {},
+    onCreate: () => {},
+    onEdit: () => {},
+    onSelect: () => {},
+    onCompanyAction: () => {},
+    onToggleFlow: () => {},
+    onEnrich: () => {},
+    onNewCompanyChange: () => {},
+    onEditCompanyChange: () => {},
+    children: null,
+  }),
+);
+assert.match(companyMarkup, /Empresas ativas/);
+assert.match(companyMarkup, /Empresa ativa/);
+assert.match(companyMarkup, /NF-e: Fluxo habilitado/);
+assert.match(companyMarkup, /NFS-e: Fluxo pausado/);
+assert.match(companyMarkup, /Enriquecimento público não autoritativo/);
+assert.match(companyMarkup, /Consulta pública concluída/);
+assert.doesNotMatch(companyMarkup, /opaque\.company\.cursor/);
+assert.doesNotMatch(companyMarkup, /should_not_render/);
+assert.doesNotMatch(companyMarkup, />(?:ativa|habilitado|pausado)</);
+for (const [status, label] of [["cadastrada", "Empresa cadastrada"], ["ativa", "Empresa ativa"], ["desativada", "Empresa desativada"]]) {
+  assert.equal(companyStatusLabel(status), label);
+}
+for (const [state, label] of [["habilitado", "Fluxo habilitado"], ["pausado", "Fluxo pausado"]]) {
+  assert.equal(flowStateLabel(state), label);
+}
+const staleCompanyMarkup = renderToStaticMarkup(
+  React.createElement(CompaniesPresentation, {
+    companies: companyResponse.companies,
+    companyResult: companyResponse,
+    selectedCompany: syntheticCompany,
+    loading: true,
+    stale: true,
+    error: "Não foi possível carregar empresas.",
+    queryError: "unavailable",
+    actionBusy: "",
+    newCompany: { cnpj: "", legal_name: "" },
+    editCompany: { cnpj: syntheticCompany.cnpj, legal_name: syntheticCompany.legal_name },
+    onReload: () => {},
+    onRetry: () => {},
+    onCreate: () => {},
+    onEdit: () => {},
+    onSelect: () => {},
+    onCompanyAction: () => {},
+    onToggleFlow: () => {},
+    onEnrich: () => {},
+    onNewCompanyChange: () => {},
+    onEditCompanyChange: () => {},
+    children: null,
+  }),
+);
+assert.match(staleCompanyMarkup, /Leitura desatualizada/);
+assert.match(staleCompanyMarkup, /Tentar novamente/);
+assert.match(staleCompanyMarkup, /Empresa sintética/);
+assert.match(companiesSource, /companyRequestSequence/);
+assert.match(companiesSource, /actionBusy/);
+assert.match(companiesSource, /popstate/);
+assert.match(companiesSource, /next_cursor/);
+
+const inventoryResponse = {
+  certificates: [
+    {
+      id: "certificate-synthetic-1",
+      company: { id: "company-synthetic-1", cnpj: "00000000000000", legal_name: "Empresa sintética" },
+      state: "current",
+      status: "proximo_vencimento",
+      not_before: "2026-01-01T00:00:00+00:00",
+      not_after: "2026-08-20T00:00:00+00:00",
+      days_until_expiry: 8,
+    },
+  ],
+  filter: { filter: "expiring" },
+  evaluated_at: "2026-08-12T12:00:00+00:00",
+  freshness: { status: "stale", evaluated_at: "2026-08-12T11:00:00+00:00", age_seconds: 3600 },
+  total: 3,
+  limit: 1,
+  truncated: true,
+  next_cursor: "opaque.certificate.cursor",
+};
+const inventoryMarkup = renderToStaticMarkup(
+  React.createElement(CertificateInventoryPresentation, {
+    filter: "expiring",
+    cursor: "opaque.certificate.cursor",
+    result: inventoryResponse,
+    loading: false,
+    stale: true,
+    error: "",
+    queryError: "",
+    onFilterChange: () => {},
+    onReload: () => {},
+    onRetry: () => {},
+    onNextPage: () => {},
+  }),
+);
+assert.match(inventoryMarkup, /Certificados próximos do vencimento/);
+assert.match(inventoryMarkup, /Certificado próximo do vencimento/);
+assert.match(inventoryMarkup, /Leitura desatualizada/);
+assert.match(inventoryMarkup, /Próxima página/);
+assert.doesNotMatch(inventoryMarkup, /opaque\.certificate\.cursor/);
+assert.doesNotMatch(inventoryMarkup, /fingerprint_sha256|certificate_cnpj|password|payload/);
+for (const [status, label] of [
+  ["valido", "Certificado válido"],
+  ["proximo_vencimento", "Certificado próximo do vencimento"],
+  ["expirado", "Certificado vencido"],
+  ["invalido", "Certificado inválido"],
+  ["falha_armazenamento", "Certificado indisponível para armazenamento"],
+]) {
+  assert.equal(certificateStatusLabel(status), label);
+}
+for (const [freshness, label] of [["fresh", "Leitura atual"], ["stale", "Leitura desatualizada"], ["unknown", "Atualidade não determinada"]]) {
+  assert.equal(certificateFreshnessLabel(freshness), label);
+}
+assert.match(certificatesSource, /next_cursor/);
+assert.match(certificatesSource, /certificateRequestSequence/);
+assert.match(certificatesSource, /popstate/);
+assert.match(certificatePanelSource, /uploadBusy/);
+
+const collectionFlow = (family, collection_state, coverage) => ({
+  family,
+  flow_state: "habilitado",
+  collection_state,
+  last_attempt_at: "2026-08-12T10:00:00+00:00",
+  last_success_at: null,
+  next_scheduled_at: null,
+  cooldown_until: null,
+  blocked_reason: "policy_block",
+  safe_error: "temporary_failure",
+  progress: { current: 2, total: 4 },
+  coverage,
+  active_execution: null,
+  latest_execution: { id: `execution-${family}`, state: collection_state, safe_error: "temporary_failure", origin: "manual" },
+});
+const collectionResponse = {
+  collections: [{
+    company_id: "company-synthetic-1",
+    legal_name: "Empresa sintética",
+    status: "ativa",
+    flows: [
+      collectionFlow("nfe", "running", null),
+      collectionFlow("nfse", "blocked", { status: "none", source: "synthetic", verified_at: "2026-08-12T10:00:00+00:00", policy_version: "synthetic-policy" }),
+      collectionFlow("nfse", "partial", { status: "unknown", source: "synthetic", verified_at: "2026-08-12T10:00:00+00:00", policy_version: "synthetic-policy" }),
+      collectionFlow("nfse", "failed", { status: "error", source: "synthetic", verified_at: "2026-08-12T10:00:00+00:00", policy_version: "synthetic-policy" }),
+    ],
+  }],
+};
+const executionResponse = {
+  read_only: true,
+  filter: { from: "2026-08-01", to: "2026-09-01", state: "partial" },
+  boundary: "[from,to)",
+  total: 4,
+  limit: 100,
+  truncated: false,
+  executions: [
+    { id: "execution-synthetic", company_id: "company-synthetic-1", company_name: "Empresa sintética", family: "nfe", requested_scope: "nfe", state: "partial", outcome: "partial", recovery: "retry", safe_error: "partial_result", created_at: "2026-08-12T10:00:00+00:00", started_at: null, finished_at: null },
+    { id: "execution-blocked", company_id: "company-synthetic-1", company_name: "Empresa sintética", family: "nfse", requested_scope: "nfse", state: "blocked", outcome: "permanent_failure", recovery: "blocked", safe_error: "permanent_failure", created_at: "2026-08-12T10:00:00+00:00", started_at: null, finished_at: null },
+  ],
+};
+const collectionMarkup = renderToStaticMarkup(
+  React.createElement(CollectionsPresentation, {
+    companies: collectionResponse.collections,
+    executionResult: executionResponse,
+    executionFilter: executionResponse.filter,
+    executionLoading: false,
+    executionStale: true,
+    collectionStale: false,
+    error: "",
+    executionError: "",
+    canManage: true,
+    actionBusy: "",
+    onReload: () => {},
+    onRetry: () => {},
+    onFilterChange: () => {},
+    onRequest: () => {},
+    onRetryCollection: () => {},
+  }),
+);
+assert.match(collectionMarkup, /Cobertura ADN ausente/);
+assert.match(collectionMarkup, /Cobertura ADN desconhecida/);
+assert.match(collectionMarkup, /Cobertura ADN indisponível/);
+assert.match(collectionMarkup, /Coleta em execução/);
+assert.match(collectionMarkup, /Coleta parcial/);
+assert.match(collectionMarkup, /Coleta bloqueada/);
+assert.match(collectionMarkup, /Falha na coleta/);
+assert.match(collectionMarkup, /Execução parcial/);
+assert.match(collectionMarkup, /Execução bloqueada/);
+assert.match(collectionMarkup, /Leitura desatualizada/);
+assert.doesNotMatch(collectionMarkup, /temporary_failure|permanent_failure|policy_block/);
+for (const [state, label] of [
+  ["idle", "Coleta não iniciada"],
+  ["queued", "Coleta na fila"],
+  ["running", "Coleta em execução"],
+  ["concluded", "Coleta concluída"],
+  ["empty", "Consulta válida sem documentos"],
+  ["partial", "Coleta parcial"],
+  ["retrying", "Nova tentativa de coleta agendada"],
+  ["cooldown", "Coleta em cooldown"],
+  ["blocked", "Coleta bloqueada"],
+  ["failed", "Falha na coleta"],
+]) {
+  assert.equal(collectionStateLabel(state), label);
+}
+for (const [coverage, label] of [
+  [null, "Cobertura ADN não consultada"],
+  ["available", "Cobertura ADN disponível"],
+  ["none", "Cobertura ADN ausente"],
+  ["unknown", "Cobertura ADN desconhecida"],
+  ["error", "Cobertura ADN indisponível"],
+  ["degraded", "Cobertura ADN degradada"],
+]) {
+  assert.equal(coverageLabel(coverage), label);
+}
+const viewerCollectionMarkup = renderToStaticMarkup(
+  React.createElement(CollectionsPresentation, {
+    companies: collectionResponse.collections,
+    executionResult: null,
+    executionFilter: null,
+    executionLoading: false,
+    executionStale: false,
+    collectionStale: false,
+    error: "",
+    executionError: "",
+    canManage: false,
+    actionBusy: "",
+    onReload: () => {},
+    onRetry: () => {},
+    onFilterChange: () => {},
+    onRequest: () => {},
+    onRetryCollection: () => {},
+  }),
+);
+assert.doesNotMatch(viewerCollectionMarkup, /Solicitar coleta|Retry/);
+assert.match(collectionsSource, /collectionRequestSequence/);
+assert.match(collectionsSource, /Promise\.allSettled/);
+assert.match(collectionsSource, /popstate/);
 
 console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, shell landmarks, dashboard groups/states/RBAC, role navigation, anchors, active state, focus and blocked action behavior.`);
