@@ -10,6 +10,9 @@ import { CompaniesPresentation, companyStatusLabel, flowStateLabel } from "../sr
 import { CertificateInventoryPresentation, certificateFreshnessLabel, certificateStatusLabel } from "../src/features/certificates/CertificateInventoryPanel";
 import { CollectionsPresentation, collectionStateLabel, coverageLabel } from "../src/features/collections/CollectionsSection";
 import { ExportsPresentation, exportStateLabel } from "../src/features/exports/ExportsSection";
+import { UsersPresentation, roleLabel, userActiveLabel } from "../src/features/users/UsersSection";
+import { AuditPresentation, auditActionLabel, auditEntityLabel, auditResultLabel } from "../src/features/audit/AuditSection";
+import { RetentionPresentation, deletionStateLabel, retentionStateLabel } from "../src/features/retention/RetentionSection";
 import { Button, DataTable, Field, Panel, Badge } from "../src/shared/ui/primitives";
 import { Feedback, feedbackStates } from "../src/shared/ui/Feedback";
 
@@ -23,6 +26,9 @@ const certificatePanelSource = readFileSync(resolve(process.cwd(), "src/features
 const collectionsSource = readFileSync(resolve(process.cwd(), "src/features/collections/CollectionsSection.tsx"), "utf8");
 const documentsSource = readFileSync(resolve(process.cwd(), "src/features/documents/DocumentsSection.tsx"), "utf8");
 const exportsSource = readFileSync(resolve(process.cwd(), "src/features/exports/ExportsSection.tsx"), "utf8");
+const usersSource = readFileSync(resolve(process.cwd(), "src/features/users/UsersSection.tsx"), "utf8");
+const auditSource = readFileSync(resolve(process.cwd(), "src/features/audit/AuditSection.tsx"), "utf8");
+const retentionSource = readFileSync(resolve(process.cwd(), "src/features/retention/RetentionSection.tsx"), "utf8");
 
 function cssVariables(source) {
   return Object.fromEntries(
@@ -202,6 +208,74 @@ assert.match(appSource, /onClick=\{\(\) => selectNavigation\(item\)\}/);
 assert.match(companiesSource, /<section id="certificados"/);
 assert.equal((companiesSource.match(/id="certificados"/g) ?? []).length, 1);
 assert.doesNotMatch(appSource, /fetch\(|localStorage|sessionStorage|document\.cookie/);
+
+const adminUserRows = [
+  { id: "admin-row", name: "Admin sintético", email: "admin@example.test", role: "administrador", active: true, version: 4 },
+  { id: "viewer-row", name: "Viewer sintético", email: "viewer@example.test", role: "visualizador", active: false, version: 2 },
+];
+const usersMarkup = renderToStaticMarkup(React.createElement(UsersPresentation, {
+  result: { users: adminUserRows, next_cursor: "opaque.user.cursor" }, loading: true, stale: true, error: "", actionError: "", createError: "E-mail já cadastrado.", ownPasswordError: "", actionBusy: "",
+  filters: { active: "", role: "", cursor: "" }, newUser: { name: "", email: "", role: "visualizador", password: "" }, editUser: { name: "Admin sintético", email: "admin@example.test", role: "administrador", password: "" }, editingUser: adminUserRows[0], ownPassword: { current_password: "", password: "" },
+  pendingAction: { kind: "deactivate", user: adminUserRows[0], role: "administrador", active: false, reason: "", password: "" },
+  onReload: () => {}, onRetry: () => {}, onFilterChange: () => {}, onNextPage: () => {}, onCreate: () => {}, onEdit: () => {}, onNewUserChange: () => {}, onEditUserChange: () => {}, onOwnPasswordChange: () => {}, onOwnPasswordSubmit: () => {}, onSelectEdit: () => {}, onRequestAction: () => {}, onPendingActionChange: () => {}, onCancelAction: () => {}, onConfirmAction: () => {},
+}));
+assert.match(usersMarkup, /Usuários/);
+assert.match(usersMarkup, /Administrador/);
+assert.match(usersMarkup, /Visualizador/);
+assert.match(usersMarkup, /Leitura desatualizada/);
+assert.match(usersMarkup, /Confirmar ação/);
+assert.match(usersMarkup, /Cancelar/);
+assert.doesNotMatch(usersMarkup, /opaque\.user\.cursor|password_hash|synthetic-password/);
+assert.equal(roleLabel("administrador"), "Administrador");
+assert.equal(userActiveLabel(false), "Desativado");
+assert.match(usersSource, /requestSequence/);
+assert.match(usersSource, /updateUser\(/);
+assert.match(usersSource, /changeUserRole\(/);
+assert.match(usersSource, /setUserActive\(/);
+assert.match(usersSource, /await loadUsers\(filters\)/);
+
+const auditMarkup = renderToStaticMarkup(React.createElement(AuditPresentation, {
+  result: { events: [{ id: "event-synthetic", sequence: 3, occurred_at: "2026-08-12T12:00:00+00:00", action: "user.deactivate", entity_type: "user", entity_id: "sensitive-entity-id", result: "denied", reason: "Motivo administrativo sintético", actor_id: "sensitive-actor-id", actor_role: "administrador", context: { count: 1, scope: "bounded", operation_id: "not-rendered", hash: "not-rendered" } }], next_cursor: 4, integrity: false },
+  filters: { actor_id: "", action: "", entity_type: "", result: "", cursor: "" }, loading: true, stale: true, error: "Não foi possível consultar a auditoria.", onReload: () => {}, onRetry: () => {}, onFilterChange: () => {}, onNextPage: () => {},
+}));
+assert.match(auditMarkup, /Filtros da auditoria/);
+assert.match(auditMarkup, /Falha de integridade/);
+assert.match(auditMarkup, /Usuário desativado/);
+assert.match(auditMarkup, /Negado/);
+assert.match(auditMarkup, /Próxima página/);
+assert.doesNotMatch(auditMarkup, /sensitive-entity-id|sensitive-actor-id|operation_id|not-rendered|hash/);
+assert.equal(auditActionLabel("user.deactivate"), "Usuário desativado");
+assert.equal(auditEntityLabel("user"), "Usuário");
+assert.equal(auditResultLabel("denied"), "Negado");
+assert.match(auditSource, /sequence/);
+assert.match(auditSource, /next_cursor/);
+assert.match(auditSource, /safeContext/);
+
+const retentionHash = "redacted-scope-hash";
+const retentionMarkup = renderToStaticMarkup(React.createElement(RetentionPresentation, {
+  retention: { documents: [
+    { id: "retained-document", company_id: "company-synthetic", family: "nfe", category: "document", flow: "distribution", state: "retained", reason_code: "within_retention_period", rule_version: "retention-v1", basis_date: "2026-08-12", eligibility_date: "2037-08-12", calculated_on: "2026-08-12", scope_hash: retentionHash, detail_url: "", preview_url: "" },
+    { id: "eligible-document", company_id: "company-synthetic", family: "nfse", category: "document", flow: "distribution", state: "eligible", reason_code: "retention_complete", rule_version: "retention-v1", basis_date: "2026-01-01", eligibility_date: "2032-01-01", calculated_on: "2026-08-12", scope_hash: retentionHash, detail_url: "", preview_url: "" },
+    { id: "blocked-document", company_id: "company-synthetic", family: "nfse", category: "document", flow: "distribution", state: "non_executable", reason_code: "artifact_missing", rule_version: "retention-v1", basis_date: null, eligibility_date: null, calculated_on: "2026-08-12", scope_hash: retentionHash, detail_url: "", preview_url: "" },
+  ], next_cursor: "opaque.retention.cursor", as_of: "2026-08-12", rule_version: "retention-v1" },
+  preview: { document: { id: "eligible-document", company_id: "company-synthetic", family: "nfse", category: "document", flow: "distribution", emitted_at: "2026-01-01T00:00:00+00:00", authorized_at: null }, decision: { state: "eligible", reason_code: "retention_complete", rule_version: "retention-v1", basis_date: "2026-01-01", eligibility_date: "2032-01-01", calculated_on: "2026-08-12" }, scope: { hash: retentionHash, version: "scope-v1" }, evidence: [{ id: "evidence", artifact_id: "artifact", digest_prefix: "not-rendered", size_bytes: 12, content_type: "application/xml", availability: "available" }], events: [], renders: [], deletion: { authorized: false, message: "A prévia não autoriza exclusão." } },
+  operation: { id: "operation-synthetic", target_document_id: "eligible-document", state: "recovery_required", scope: { hash: retentionHash, version: "scope-v1" }, reason: "Motivo sintético", current_step: "recovery", safe_error: "artifact_divergent", result_code: "recovery_required", requested_at: "2026-08-12T12:00:00+00:00", started_at: null, completed_at: null, checkpoint: {}, items: [] },
+  loading: true, previewLoading: false, operationLoading: false, stale: true, previewStale: false, error: "", previewError: "", operationError: "", reason: "Motivo sintético", deleteDialogOpen: true,
+  onReload: () => {}, onRetry: () => {}, onRetryPreview: () => {}, onPreview: () => {}, onNextPage: () => {}, onReasonChange: () => {}, onOpenDeleteDialog: () => {}, onCancelDelete: () => {}, onConfirmDelete: () => {}, onRefreshOperation: () => {}, onResumeOperation: () => {},
+}));
+assert.match(retentionMarkup, /Retido durante o prazo/);
+assert.match(retentionMarkup, /Elegível para exclusão manual/);
+assert.match(retentionMarkup, /Não executável/);
+assert.match(retentionMarkup, /Recuperação necessária/);
+assert.match(retentionMarkup, /Confirmar solicitação/);
+assert.match(retentionMarkup, /Solicitar recuperação/);
+assert.match(retentionMarkup, /A última decisão segura permanece visível/);
+assert.doesNotMatch(retentionMarkup, /opaque\.retention\.cursor|digest-prefix|not-rendered|aaaaaaaa/);
+for (const [state, label] of [["retained", "Retido durante o prazo"], ["eligible", "Elegível para exclusão manual"], ["non_executable", "Não executável"]]) assert.equal(retentionStateLabel(state), label);
+for (const [state, label] of [["pending", "Pendente"], ["executing", "Em execução"], ["recovery_required", "Recuperação necessária"], ["failed", "Falha controlada"], ["completed", "Concluída pelo servidor"]]) assert.equal(deletionStateLabel(state), label);
+assert.match(retentionSource, /previewSequence/);
+assert.match(retentionSource, /operationSequence/);
+assert.match(retentionSource, /confirmationFor\(preview\)/);
 
 const anonymousMarkup = renderToStaticMarkup(React.createElement(App));
 assert.match(anonymousMarkup, /Acesse sua conta\./);

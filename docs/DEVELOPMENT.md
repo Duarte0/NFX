@@ -132,6 +132,26 @@ target `make test-browser`, reconstruída para incluir o fixture, passou 180 tes
 Firefox e Edge nas larguras 1024, 1280 e 1440 px. Não houve endpoint, migration, dependência ou
 dado fiscal novo.
 
+## Administração, auditoria e retenção P10-07
+
+`UsersSection`, `AuditSection` e `RetentionSection` compõem a superfície administrativa P10-07
+usando somente os contratos existentes de usuários, auditoria, retenção e exclusão controlada.
+Os anchors e a navegação direta continuam sob o shell existente; a autorização continua sendo
+decidida pelo servidor e a UI esconde toda a seção para sessões anônimas, expiradas ou não Admin.
+
+Filtros têm listas permitidas, paginação mantém cursor opaco fora da apresentação, e respostas
+antigas ficam marcadas como desatualizadas. Contexto de auditoria e prévias de retenção são
+redigidos por allowlist. Ações críticas exigem alvo, consequência, motivo quando aplicável,
+confirmação explícita e cancelamento; nenhuma operação de exclusão é concluída localmente, e o
+estado autoritativo é recarregado após mutações. Estados `pending`, `executing`,
+`recovery_required`, `failed` e `completed` permanecem visíveis conforme o servidor os devolve.
+
+O contrato determinístico continua sendo `npm --prefix frontend run test:ui-contract`; a fixture
+`frontend/browser-tests/admin.*` cobre RBAC, estados de sessão, confirmação/cancelamento, foco,
+prévia desatualizada, recuperação e redaction. O target `make test-browser` passou 306 testes na
+matriz Chrome, Firefox e Edge em 1024, 1280 e 1440 px. Não houve endpoint, migration, dependência
+ou dado fiscal novo.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes
