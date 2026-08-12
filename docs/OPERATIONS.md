@@ -112,6 +112,19 @@ retornam somente empresa, estado/status e validade seguros. Repetições, filtro
 parâmetros inválidos e fonte indisponível falham com `400`/`503` seguro; nenhuma leitura cria
 auditoria, job, mutação ou estado de certificado.
 
+Os cards `jobs.pending`, `jobs.failed` e `jobs.blocked` abrem `GET /api/jobs/observability` com o
+período exibido e `filter=pending|failed|blocked`. `pending` seleciona jobs `queued` ou
+`running`; `failed` seleciona outcomes `temporary`, `permanent` ou `partial`; `blocked` seleciona
+o estado persistido `blocked`. A consulta exige `from`, `to` e um único filtro allowlisted, usa
+Brasília `[from,to)`, informa o total reconciliado e mostra até 50 linhas ordenadas por
+`created_at`/UUID.
+
+O endpoint é autenticado e somente leitura. Cada linha contém apenas ID, tipo, estado/outcome,
+timestamps, tentativas e código de erro seguro; payload, alvo lógico, resultado, lease, política,
+segredos, conteúdo fiscal e exceções brutas são redigidos. Repetições, filtros inválidos, sessão
+expirada e falhas da fonte retornam erro seguro, sem transformar indisponibilidade em zero e sem
+criar jobs, leases, auditoria ou transições.
+
 Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por

@@ -11,6 +11,7 @@ from nfx.exports import views as export_views
 from nfx.identity import views as identity_views
 from nfx.infrastructure.dependencies import dependencies_from_environment
 from nfx.infrastructure.health import operational
+from nfx.jobs import views as job_views
 from nfx.operations.views import dashboard
 from nfx.retention import views as retention_views
 
@@ -35,6 +36,7 @@ urlpatterns = [
     path("health/ready", ready),
     path("health/operational", operational),
     path("api/dashboard", dashboard),
+    path("api/jobs/observability", job_views.observability),
     path("api/backups/status", backup_views.status),
     path("api/backups", backup_views.backups),
     path("api/auth/csrf", identity_views.csrf),

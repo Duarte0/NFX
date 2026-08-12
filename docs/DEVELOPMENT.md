@@ -183,6 +183,21 @@ total reconciliado, avaliação, vazio válido, carregamento, indisponibilidade,
 de filtro sem autorizar ou recalcular no browser. Leituras repetidas não criam auditoria, job,
 mutação ou transição de certificado/empresa.
 
+## Drill-down de jobs do dashboard (P8-02)
+
+Os cards `jobs.pending`, `jobs.failed` e `jobs.blocked` do `GET /api/dashboard` carregam o
+período civil exibido e `filter=pending|failed|blocked` para `GET /api/jobs/observability`. O
+owner `nfx.jobs` compartilha com a agregação os predicados `queued|running`, outcomes
+`temporary|permanent|partial` e estado `blocked`, além das fronteiras Brasília `[from,to)`.
+
+O endpoint exige exatamente `from`, `to` e um filtro allowlisted, rejeita repetições, parâmetros
+desconhecidos e períodos inválidos, informa total server-side e retorna no máximo 50 linhas
+ordenadas por timestamp/UUID. Os resumos são limitados a ID, tipo, estado/outcome, timestamps,
+tentativas e códigos de erro seguros; payload, alvo, resultado, lease, política, segredos,
+conteúdo fiscal e exceções brutas ficam fora. A UI `#dashboard` distingue carregamento, sucesso,
+vazio, filtro inválido, indisponibilidade e degradação. A leitura é autorizada server-side e não
+cria jobs, leases, auditoria, cache ou transições.
+
 ## Consulta e download individual (P7-01/P7-02)
 
 `GET /api/documents/<id>` fornece detalhe seguro, incluindo eventos/substituições e disponibilidade

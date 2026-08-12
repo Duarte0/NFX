@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from django.db import IntegrityError, transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
 from django.utils import timezone
 
 from nfx.infrastructure.dependencies import DependencyCheck
@@ -16,6 +16,164 @@ from nfx.jobs.models import Job, JobOutcomeKind, JobState, ProcessHeartbeat
 COMPONENTS = ("worker", "scheduler")
 _SAFE_OUTCOMES = tuple(JobOutcomeKind.values)
 _SAFE_STATES = tuple(JobState.values)
+JOB_DASHBOARD_FILTERS = {
+    "pending": Q(state__in=(JobState.QUEUED, JobState.RUNNING)),
+    "failed": Q(
+        last_outcome__in=(
+            JobOutcomeKind.TEMPORARY,
+            JobOutcomeKind.PERMANENT,
+            JobOutcomeKind.PARTIAL,
+        )
+    ),
+    "blocked": Q(state=JobState.BLOCKED),
+}
+JOB_OBSERVABILITY_QUERY_KEYS = frozenset(("from", "to", "filter"))
+MAX_JOB_OBSERVABILITY_QUERY_DAYS = 366
+MAX_JOB_OBSERVABILITY_QUERY_ROWS = 50
+_SAFE_JOB_ERRORS = frozenset(
+    {
+        "artifact_unavailable",
+        "authorization_blocked",
+        "authorization_revoked",
+        "certificate_invalid",
+        "deletion_failed",
+        "handler_failed",
+        "handler_not_registered",
+        "invalid_export_reference",
+        "invalid_operation",
+        "lease_expired",
+        "operation_missing",
+        "official_cooldown",
+        "partial_result",
+        "permanent_failure",
+        "policy_required",
+        "recovery_required",
+        "render_audit_unavailable",
+        "render_reference_invalid",
+        "render_reference_missing",
+        "renderer_failed",
+        "retry_exhausted",
+        "temporary_failure",
+    }
+)
+
+
+class InvalidJobObservabilityQuery(ValueError):
+    """A filtered job read is outside its bounded contract."""
+
+
+@dataclass(frozen=True)
+class JobObservabilityFilter:
+    start: date
+    end: date
+    filter_name: str
+
+    @property
+    def boundary(self) -> str:
+        return "[from,to)"
+
+
+def _query_value(query: Mapping[str, object], key: str) -> object | None:
+    getlist = getattr(query, "getlist", None)
+    values: list[object] = list(getlist(key)) if callable(getlist) else []
+    if len(values) > 1:
+        raise InvalidJobObservabilityQuery("query parameter is repeated")
+    if values:
+        return values[0]
+    return query.get(key)
+
+
+def _query_date(query: Mapping[str, object], key: str) -> date:
+    value = _query_value(query, key)
+    if not isinstance(value, str) or not value:
+        raise InvalidJobObservabilityQuery("query date is required")
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise InvalidJobObservabilityQuery("query date is invalid") from exc
+
+
+def normalize_job_observability_query(
+    query: Mapping[str, object],
+) -> JobObservabilityFilter:
+    """Parse the dashboard's required civil-date and job-card filter."""
+    if set(query.keys()) - JOB_OBSERVABILITY_QUERY_KEYS:
+        raise InvalidJobObservabilityQuery("unsupported query parameter")
+    start = _query_date(query, "from")
+    end = _query_date(query, "to")
+    filter_name = _query_value(query, "filter")
+    if not isinstance(filter_name, str) or filter_name not in JOB_DASHBOARD_FILTERS:
+        raise InvalidJobObservabilityQuery("job filter is invalid")
+    duration = (end - start).days
+    if duration < 1 or duration > MAX_JOB_OBSERVABILITY_QUERY_DAYS:
+        raise InvalidJobObservabilityQuery("query period is outside the allowed range")
+    return JobObservabilityFilter(start=start, end=end, filter_name=filter_name)
+
+
+def job_created_at_bounds(start: date, end: date) -> tuple[datetime, datetime]:
+    """Return the dashboard's Brasília/civil-date half-open bounds."""
+    zone = timezone.get_current_timezone()
+    return (
+        timezone.make_aware(datetime.combine(start, datetime.min.time()), timezone=zone),
+        timezone.make_aware(datetime.combine(end, datetime.min.time()), timezone=zone),
+    )
+
+
+def job_observability_queryset(
+    start: date, end: date, *, filter_name: str | None = None
+) -> QuerySet[Job]:
+    """Return the canonical job selection shared by cards and drill-downs."""
+    if filter_name is not None and filter_name not in JOB_DASHBOARD_FILTERS:
+        raise InvalidJobObservabilityQuery("job filter is invalid")
+    start_at, end_at = job_created_at_bounds(start, end)
+    queryset = Job.objects.filter(created_at__gte=start_at, created_at__lt=end_at)
+    if filter_name is not None:
+        queryset = queryset.filter(JOB_DASHBOARD_FILTERS[filter_name])
+    return queryset
+
+
+def _safe_job_error(value: object) -> str:
+    return value if isinstance(value, str) and value in _SAFE_JOB_ERRORS else ""
+
+
+def job_observability_summary(job: Job) -> dict[str, object]:
+    """Serialize only bounded job metadata; never expose payload or lease details."""
+    return {
+        "id": str(job.id),
+        "job_type": job.job_type,
+        "state": job.state if job.state in _SAFE_STATES else "",
+        "outcome": job.last_outcome if job.last_outcome in _SAFE_OUTCOMES else None,
+        "created_at": job.created_at.isoformat(),
+        "scheduled_at": job.scheduled_at.isoformat(),
+        "last_attempt_at": job.last_attempt_at.isoformat() if job.last_attempt_at else None,
+        "completed_at": job.completed_at.isoformat() if job.completed_at else None,
+        "attempt_count": job.attempt_count,
+        "safe_error": _safe_job_error(job.safe_error),
+    }
+
+
+def list_job_observability_summaries(
+    selected: JobObservabilityFilter,
+) -> dict[str, object]:
+    queryset = job_observability_queryset(
+        selected.start,
+        selected.end,
+        filter_name=selected.filter_name,
+    )
+    rows = list(queryset.order_by("-created_at", "-id")[: MAX_JOB_OBSERVABILITY_QUERY_ROWS + 1])
+    return {
+        "read_only": True,
+        "filter": {
+            "from": selected.start.isoformat(),
+            "to": selected.end.isoformat(),
+            "filter": selected.filter_name,
+        },
+        "boundary": selected.boundary,
+        "total": queryset.count(),
+        "limit": MAX_JOB_OBSERVABILITY_QUERY_ROWS,
+        "truncated": len(rows) > MAX_JOB_OBSERVABILITY_QUERY_ROWS,
+        "jobs": [job_observability_summary(row) for row in rows[:MAX_JOB_OBSERVABILITY_QUERY_ROWS]],
+    }
 
 
 @dataclass(frozen=True)

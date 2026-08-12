@@ -1,6 +1,7 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, MouseEvent, useCallback, useEffect, useState } from "react";
 import { Feedback } from "../../shared/ui/Feedback";
 import { getDashboard } from "./api";
+import { JobObservabilityPanel } from "./JobObservabilityPanel";
 import { BackupHealth, DashboardCard, DashboardResponse } from "./types";
 
 type DashboardSectionProps = { loadSignal: number; notify: (message: string) => void };
@@ -104,6 +105,13 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
     void loadDashboard();
   }
 
+  function openJobDrilldown(event: MouseEvent<HTMLAnchorElement>, card: DashboardCard) {
+    if (!card.id.startsWith("jobs.") || !card.drilldown) return;
+    event.preventDefault();
+    window.history.pushState(null, "", card.drilldown.href);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
   return (
     <section id="dashboard">
       <h2>Dashboard</h2>
@@ -132,10 +140,15 @@ export function DashboardSection({ loadSignal, notify }: DashboardSectionProps) 
                 <p>{valueLabel(card)}</p>
                 <p role="status">{statusLabel(card.status)}</p>
                 {card.previous && <p>Período anterior: {card.previous.value === null ? "—" : card.previous.value}</p>}
-                {card.drilldown && <a href={card.drilldown.href}>Abrir lista correspondente</a>}
+                {card.drilldown && (
+                  <a href={card.drilldown.href} onClick={(event) => openJobDrilldown(event, card)}>
+                    Abrir lista correspondente
+                  </a>
+                )}
               </article>
             ))}
           </div>
+          <JobObservabilityPanel loadSignal={loadSignal} notify={notify} />
           <h3>Capacidades</h3>
           <ul>
             {Object.entries(dashboard.capabilities).map(([name, capability]) => (

@@ -27,13 +27,15 @@ from nfx.documents.status import DOCUMENT_DASHBOARD_FILTERS, document_model_filt
 from nfx.identity.models import Role
 from nfx.infrastructure.configuration import load_settings
 from nfx.infrastructure.dependencies import dependencies_from_environment
-from nfx.jobs.models import Job, JobOutcomeKind, JobState
+from nfx.jobs.models import JobState
 from nfx.jobs.observability import (
+    JOB_DASHBOARD_FILTERS,
     ComponentHealth,
     HeartbeatService,
     JobMetricsSnapshot,
     JobObservability,
     OperationalHealth,
+    job_observability_queryset,
 )
 
 MAX_PERIOD_DAYS = 366
@@ -342,20 +344,13 @@ def _collection_counts(period: DatePeriod) -> dict[str, int]:
 
 
 def _job_counts(period: DatePeriod) -> dict[str, int]:
-    start, end = _local_bounds(period)
-    jobs = Job.objects.filter(created_at__gte=start, created_at__lt=end)
+    jobs = job_observability_queryset(period.start, period.end)
     return {
         "recent": jobs.count(),
-        "pending": jobs.filter(state__in=(JobState.QUEUED, JobState.RUNNING)).count(),
+        "pending": jobs.filter(JOB_DASHBOARD_FILTERS["pending"]).count(),
         "completed": jobs.filter(state=JobState.COMPLETED).count(),
-        "blocked": jobs.filter(state=JobState.BLOCKED).count(),
-        "failed": jobs.filter(
-            last_outcome__in=(
-                JobOutcomeKind.TEMPORARY,
-                JobOutcomeKind.PERMANENT,
-                JobOutcomeKind.PARTIAL,
-            )
-        ).count(),
+        "blocked": jobs.filter(JOB_DASHBOARD_FILTERS["blocked"]).count(),
+        "failed": jobs.filter(JOB_DASHBOARD_FILTERS["failed"]).count(),
     }
 
 
@@ -541,6 +536,7 @@ def build_dashboard(
         ("failed", "Processamento com falha", "degraded"),
         ("blocked", "Processamento bloqueado", "degraded"),
     ):
+        filters = {**period_filters, "filter": key}
         cards.append(
             _period_card(
                 card_id=f"jobs.{key}",
@@ -548,7 +544,8 @@ def build_dashboard(
                 current=job_current.get(key) if job_current else None,
                 previous=job_previous.get(key) if job_previous else None,
                 evaluated_at=evaluated_at,
-                href="#coletas",
+                href=f"?{urlencode(filters)}#dashboard",
+                filters=filters,
                 nonzero_status=status,
             )
         )

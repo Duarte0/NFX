@@ -19,6 +19,35 @@ export type DashboardCard = {
   drilldown: { href: string; filters: Record<string, string> } | null;
 };
 
+export type JobObservabilityFilter = {
+  from: string;
+  to: string;
+  filter: string;
+};
+
+export type JobObservabilitySummary = {
+  id: string;
+  job_type: string;
+  state: string;
+  outcome: string | null;
+  created_at: string;
+  scheduled_at: string;
+  last_attempt_at: string | null;
+  completed_at: string | null;
+  attempt_count: number;
+  safe_error: string;
+};
+
+export type JobObservabilityResponse = {
+  read_only: true;
+  filter: JobObservabilityFilter;
+  boundary: "[from,to)";
+  total: number;
+  limit: number;
+  truncated: boolean;
+  jobs: JobObservabilitySummary[];
+};
+
 export type BackupHealth = {
   status: "success" | "failure" | "unavailable";
   latest_backup: { state: string | null; safe_error: string };

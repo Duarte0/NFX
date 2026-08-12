@@ -6,12 +6,12 @@
 - **Backlog:** P8-02. **Dependências:** P3-04 e capacidades P2–P7 disponíveis.
 - **PRD:** FR-DASH-001, FR-DASH-002, FR-DASH-003; FR-OPS-001, BR-OPS-001, BR-DASH-001; NFR-001, NFR-002, NFR-008. **Aceite:** AC-013, AC-023, AC-024.
 - **Arquitetura:** seções 14, 26, 32, 35, 36, 39 e 40; ADR-012 quanto à limitação de backup.
-- **Implementação:** slice inicial P8-02 concluído no issue 0018; fontes P5–P7, rendering e
-  disco continuam explicitamente indisponíveis para incrementos posteriores; o status seguro de
+- **Implementação:** slice inicial P8-02 concluído no issue 0018; o status seguro de
   backup P9-02 foi integrado no issue 0025; o drill-down de execuções de coleta foi concluído no
   issue 0026; o drill-down de documentos foi concluído no issue 0027; o drill-down de empresas foi
-  concluído no issue 0028; o drill-down de certificados foi concluído no issue 0029. O drill-down
-  de jobs continua em slice próprio.
+  concluído no issue 0028; o drill-down de certificados foi concluído no issue 0029; o drill-down
+  de jobs foi concluído no issue 0030. Fontes P5–P7, rendering e disco continuam explicitamente
+  indisponíveis para incrementos posteriores.
 
 ## Propósito e resultado
 
@@ -23,13 +23,13 @@ Métricas iniciais vêm P3; dados de empresas/certificados/documentos surgem P2�
 
 ## Contratos e dados Proposed
 
-Operação é dona de health; domínios são donos dos dados agregados. Contrato de dashboard recebe intervalo com limites claros e retorna valor atual, anterior, status/frescura e filtro de drill-down. Período anterior tem mesma duração, termina exatamente no início do atual e não sobrepõe. O owner `nfx.collection` expõe `GET /api/collections/executions` para o slice de coleta, com `from`, `to` e o filtro allowlisted dos cinco cards, total server-side e página limitada. **Proposed:** consultas diretas/indexadas ou snapshots locais; se materialização for necessária, registrar origem/frescura e reconciliação. Não duplicar autoridade do domínio.
+Operação é dona de health; domínios são donos dos dados agregados. Contrato de dashboard recebe intervalo com limites claros e retorna valor atual, anterior, status/frescura e filtro de drill-down. Período anterior tem mesma duração, termina exatamente no início do atual e não sobrepõe. O owner `nfx.collection` expõe `GET /api/collections/executions` para o slice de coleta, com `from`, `to` e o filtro allowlisted dos cinco cards, total server-side e página limitada. O owner `nfx.jobs` expõe `GET /api/jobs/observability` com `from`, `to` e `filter=pending|failed|blocked`, total server-side e página limitada; ambos compartilham a seleção canônica com a agregação. **Proposed:** consultas diretas/indexadas ou snapshots locais; se materialização for necessária, registrar origem/frescura e reconciliação. Não duplicar autoridade do domínio.
 
 Indicadores: empresas ativas/inativas; documentos/quantidades/valores; NF-e/NFS-e e categorias; certificados expirados/próximos; coletas recentes/em execução; pendências/falhas/bloqueios/atrasos. Saúde Admin: espaço, DB, MinIO, fontes, processamento e backup. Cada indicador clicável usa filtros suportados por P7 e deve reconciliar contagem com a lista.
 
 ## UI, autorização e observabilidade
 
-Todos veem dashboard fiscal permitido; apenas Admin vê detalhes técnicos/backup/configuração. Interface pt-BR, Brasília/BRL, com loading, parcial, stale, degradado e indisponível. O drill-down de coleta mantém o período e o estado na URL, consulta o servidor e mostra total, vazio válido, indisponível, inválido ou degradado sem filtrar no browser. Health distingue liveness/readiness/dependência. Métricas próprias: latência, freshness, erro e divergência de drill-down; logs sem dados fiscais agregados desnecessários.
+Todos veem dashboard fiscal permitido; apenas Admin vê detalhes técnicos/backup/configuração. Interface pt-BR, Brasília/BRL, com loading, parcial, stale, degradado e indisponível. Os drill-downs de coleta e jobs mantêm o período e o filtro na URL, consultam o servidor e mostram total, vazio válido, indisponível, inválido ou degradado sem filtrar no browser. O job view retorna somente estado/outcome allowlisted, tipo, timestamps, tentativas e códigos de erro seguros, sem payload, lease ou política. Health distingue liveness/readiness/dependência. Métricas próprias: latência, freshness, erro e divergência de drill-down; logs sem dados fiscais agregados desnecessários.
 
 ## Falhas e testes
 
@@ -38,7 +38,7 @@ Falha de uma fonte não derruba demais cards. Cache/snapshot antigo mostra idade
 ## Aceite e DoD
 
 - [ ] Atual/anterior têm duração igual, são consecutivos e não sobrepostos.
-- [ ] Todo card clicável abre lista com filtro equivalente e contagem reconciliada.
+- [x] Todo card clicável abre lista com filtro equivalente e contagem reconciliada.
 - [ ] Ausência/frescura é explícita, não zero silencioso.
 - [x] Saúde/backup técnico é Admin-only server-side.
 - [ ] Não há notificação ou relatório fora do MVP.
@@ -67,8 +67,8 @@ canônico de estados; `recent` é o filtro já existente de todas as execuções
 persistido. A resposta limita a página a 50 linhas, ordena por timestamp/UUID, retorna total e
 somente metadados redigidos. Falha da fonte retorna indisponibilidade/degradação sem zero inventado.
 O slice é coberto por testes unitários de parsing e integração PostgreSQL/MinIO de reconciliação,
-limites, RBAC, redaction, erro e no-write, além do contrato TypeScript/ESLint/Vite. Os demais
-cards clicáveis permanecem pendentes no issue 0030.
+limites, RBAC, redaction, erro e no-write, além do contrato TypeScript/ESLint/Vite. Os cards de
+jobs são cobertos pelo issue 0030.
 
 ### Evidência do slice de documentos — issue 0027
 
@@ -128,3 +128,24 @@ O incremento não cria migration, cache, snapshot, job, auditoria, mutação ou 
 certificado/empresa. Testes unitários e integração PostgreSQL/MinIO cobrem os três filtros,
 fronteiras de expiração/janela de 30 dias, histórico excluído, zero, paginação, RBAC, sessão
 expirada, redaction, falha isolada e no-write; TypeScript/ESLint/Vite verificam o contrato React.
+
+### Evidência do slice de jobs — issue 0030
+
+Os cards `jobs.pending`, `jobs.failed` e `jobs.blocked` compartilham com
+`GET /api/jobs/observability` o owner `nfx.jobs`, o período civil de Brasília em `[from,to)` e
+os predicados canônicos do dashboard: `pending` é `queued|running`, `failed` é o conjunto de
+outcomes `temporary|permanent|partial`, e `blocked` é o estado durável `blocked`. O endpoint
+exige `from`, `to` e um único filtro allowlisted, rejeita parâmetros repetidos/desconhecidos ou
+períodos inválidos, calcula o total na mesma queryset e retorna até 50 linhas ordenadas por
+`created_at`/UUID.
+
+As linhas contêm somente ID, tipo, estado/outcome, timestamps, tentativas e códigos de erro
+seguros; payload, alvo lógico, idempotência, resultado, lease, política, segredo, conteúdo fiscal
+e exceção bruta ficam fora. A UI `#dashboard` preserva período/filtro, carrega a lista por leitura
+autenticada e distingue sucesso, vazio, carregamento, filtro inválido, indisponibilidade e
+degradação. Falhas do job owner degradam somente os cards/lista de processamento; leituras
+repetidas não criam job, lease, auditoria, migração, cache ou transição.
+
+Testes unitários e integração PostgreSQL/MinIO cobrem os três predicados, fronteiras, zero,
+página limitada e ordenação determinística, RBAC/sessão expirada, redaction, falha isolada,
+reconciliação e no-write; TypeScript/ESLint/Vite verificam o contrato React.
