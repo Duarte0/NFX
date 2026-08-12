@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status/versão:** P10-02 — implementação pronta; validação de browser pendente — v1.1.
+- **Fase/status/versão:** P10-02 — implementação concluída e verificada — v1.2.
 - **Dependências:** P10-01. **Seguida por:** P10-03..08.
 - **Fontes:** PRD NFR-010..012, AC-023 e AC-026; Arquitetura §10.4; Plano P10-02.
 
@@ -24,10 +24,10 @@ Header deve apresentar apenas identidade/papel da sessão, logout e contexto Bra
 
 - [x] Todas as áreas e links publicados permanecem endereçáveis e semanticamente equivalentes; `#certificados` passa a ter destino único e autorizado.
 - [x] A visibilidade por papel e logout preservam a baseline; acesso direto continua protegido no servidor.
-- [ ] Shell responde a desktop/notebook com foco e teclado utilizáveis.
+- [x] Shell responde a desktop/notebook com foco e teclado utilizáveis.
 - [x] Não há router, estado global, dependência UI relevante ou alteração HTTP sem nova spec.
 
-## Evidência de implementação (validação pendente)
+## Evidência de implementação e validação
 
 `frontend/src/App.tsx` mantém a composição `App → features → shared` e acrescenta o shell
 autenticado com header institucional, identidade/papel, logout, contexto de Brasília/R$, skip
@@ -45,7 +45,12 @@ desktop/notebook a partir de 1024 px.
 O contrato `npm --prefix frontend run test:ui-contract` renderiza contextos sintéticos de
 Administrador, Operador, Visualizador e anônimo, verificando landmarks, skip link, foco, estado
 ativo, hashes, destino único, matriz positiva/negativa e ausência de requests/persistência na
-composição. `npm --prefix frontend run lint` e `npm --prefix frontend run build` passaram. Não há
-runner de browser ou Chrome, Firefox e Edge instalados neste checkout; a matriz manual desses
-navegadores é necessária para fechar o aceite visual e de teclado, sem dependência nova ou
-infraestrutura fora do escopo desta fatia.
+composição. `npm --prefix frontend run lint` e `npm --prefix frontend run build` passaram.
+
+A matriz reproduzível `docker compose -f docker-compose.test.yml run --rm --no-deps browser-tests`
+passou 63 testes sintéticos em Chrome, Firefox e Edge, nas larguras 1024, 1280 e 1440 px. Ela
+verifica identidade do browser, visibilidade e nome dos itens por papel, ausência de rolagem
+horizontal, skip link e foco de teclado, atualização do item ativo por hash, preservação de
+query/deep link e destino único de `#certificados`. O target instala os browsers isoladamente
+no container e a fixture rejeita rede, mantendo contas e dados sintéticos; não há chamada fiscal,
+credencial ou migração.

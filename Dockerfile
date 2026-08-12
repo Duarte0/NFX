@@ -26,6 +26,27 @@ COPY requirements-dev.txt ./
 RUN python -m pip install --no-cache-dir -r requirements-dev.txt
 COPY tests/ ./tests/
 
+# Isolated, synthetic browser-validation image. Chrome and Edge are installed as
+# their branded Linux packages; Firefox is Playwright's Firefox build.
+FROM node:22-bookworm-slim AS browser-test
+ENV DEBIAN_FRONTEND=noninteractive PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+RUN npx playwright install --with-deps firefox > /tmp/playwright-install.log 2>&1 \
+    || { cat /tmp/playwright-install.log; exit 1; }
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
+    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends google-chrome-stable microsoft-edge-stable \
+    && rm -rf /var/lib/apt/lists/*
+COPY frontend/ ./
+CMD ["npm", "run", "test:browser"]
+
 # The development tool image remains available, but follows runtime/test stages so legacy Docker
 # builders do not build it when targeting an application image.
 FROM python:${PYTHON_VERSION}-slim-bookworm AS dev

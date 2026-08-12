@@ -52,6 +52,12 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+  browser-tests:
+    build:
+      context: .
+      target: browser-test
+    environment:
+      CI: "true"
   web:
     build:
       context: .

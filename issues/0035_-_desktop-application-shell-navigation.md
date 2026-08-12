@@ -2,12 +2,12 @@
 id: 0035
 title: "Deliver the desktop application shell and role-aware navigation"
 type: feature
-status: open
+status: closed
 priority: high
 phase: P10
 created_at: 2026-08-12
 updated_at: 2026-08-12
-closed_at: ~
+closed_at: 2026-08-12
 related_issues: [0011, 0034]
 blocked_by: []
 affects:
@@ -73,7 +73,7 @@ permission rule, persistence, fiscal computation, or new UI dependency.
 ## Dependencies and Notes
 
 - **Plan item:** `IMPLEMENTATION_PLAN.md`, P10-02 “Application Shell — pending”.
-- **Canonical spec:** `specs/p10-application-shell.md`, P10-02 v1.0.
+- **Canonical spec:** `specs/p10-application-shell.md`, P10-02 v1.2.
 - **Prerequisite:** P10-01 is implemented and verified by `issues/0034_-_shared-visual-tokens-and-accessible-primitives.md`.
 - **Related baseline:** `issues/0011_-_frontend-architecture-refactor.md` and
   `specs/p1-authentication-sessions-and-rbac.md` define the `App → features → shared` ownership,
@@ -160,7 +160,7 @@ permission rule, persistence, fiscal computation, or new UI dependency.
   load behavior.
 - [x] The certificate destination is within the existing authorized companies/certificates surface
   and does not add a route, duplicate feature, or unauthorized access path.
-- [ ] At 1024 px, 1280 px, and 1440 px in Chrome, Firefox, and Edge desktop, shell controls and
+- [x] At 1024 px, 1280 px, and 1440 px in Chrome, Firefox, and Edge desktop, shell controls and
   labels do not overlap, disappear, or require horizontal scrolling; keyboard focus remains
   visible and usable.
 - [x] Anonymous and expired sessions continue to expose only the existing authentication flow, and
@@ -177,13 +177,13 @@ permission rule, persistence, fiscal computation, or new UI dependency.
   requirements.
 - [x] The P10-02 spec evidence, `specs/README.md`, `IMPLEMENTATION_PLAN.md`, relevant UI/development
   documentation, and Graphify metadata are synchronized before closure.
-- [ ] The Resolution records implementation and validation evidence, the implementation-plan sync,
+- [x] The Resolution records implementation and validation evidence, the implementation-plan sync,
   and closure in one focused commit.
 
 ## References
 
 - Plan: `IMPLEMENTATION_PLAN.md` — “P10 Frontend UX & Visual System”, P10-02.
-- Canonical spec: `specs/p10-application-shell.md` — v1.0.
+- Canonical spec: `specs/p10-application-shell.md` — v1.2.
 - Prerequisite spec: `specs/p10-design-system-foundation.md` — v1.1, implemented in issue 0034.
 - Product requirements: `PRD.md` — NFR-010..012, AC-023, and AC-026.
 - Architecture: `ARCHITECTURE.md` — §10.4 and §11.
@@ -196,11 +196,32 @@ permission rule, persistence, fiscal computation, or new UI dependency.
 
 <!-- Filled by the agent on close. DO NOT edit manually. -->
 
-## Build status
+Implemented the P10-02 authenticated desktop/notebook shell in `frontend/src/App.tsx` using the
+P10-01 tokens and primitives. The shell now has semantic header, named sidebar/navigation, main
+landmark, keyboard skip link, session identity/role, logout, Brasília/BRL context, typed role-aware
+navigation, active hash state, and the single authorized `#certificados` destination inside
+`CompaniesSection`. Existing feature callbacks, query/deep-link URLs, section IDs, safe messages,
+session behavior, and server-side authorization remain unchanged; no router, global store,
+endpoint, migration, fiscal calculation, or runtime dependency was introduced.
 
-The implementation and repository validation are complete except for the mandatory manual
-desktop-browser matrix. This checkout has no Chrome, Firefox, or Edge binary and no configured
-browser/e2e runner, so keyboard-only focus movement, runtime `hashchange` updates, deep links at
-1024/1280/1440 px, and cross-browser overflow behavior remain unverified. Keep this issue open;
-run the documented synthetic UI contract plus the manual Chrome/Firefox/Edge matrix in an
-equipped validation environment, then complete the remaining browser criterion and Resolution.
+Added a synthetic Playwright browser-validation target with pinned dev tooling, a Docker image for
+Chrome, Firefox, and Edge, and browser fixtures that reject network access. The matrix covers all
+three roles, anonymous composition through the existing UI contract, landmarks, focus and keyboard
+skip behavior, active hash navigation, query preservation, all anchors, certificate uniqueness,
+visible labels, and no horizontal overflow at 1024, 1280, and 1440 px.
+
+Validation performed:
+
+- `npm --prefix frontend run test:ui-contract` — passed.
+- `npm --prefix frontend run lint` — passed.
+- `npm --prefix frontend run build` — passed.
+- `docker compose -f docker-compose.test.yml build browser-tests` — passed.
+- `docker compose -f docker-compose.test.yml run --rm --no-deps browser-tests` — 63 passed across Chrome, Firefox, and Edge at all three widths.
+- `make lint` — passed (Ruff, mypy, frontend lint).
+- `make test-unit` — 307 passed; one pre-existing botocore `datetime.utcnow` deprecation warning.
+- `make build` — passed.
+- `make smoke` — passed with isolated PostgreSQL, MinIO, web, worker, and scheduler.
+
+Synchronized `specs/p10-application-shell.md`, `specs/README.md`, `IMPLEMENTATION_PLAN.md`, and
+`docs/DEVELOPMENT.md`. Graphify was updated with `graphify update .`. No production credentials,
+customer/fiscal data, migration, or external fiscal service was used.

@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 PYTHON ?= python
 
-.PHONY: help install build lint test-unit test-integration smoke check-services nfx-migrate schema-status web worker scheduler validate
+.PHONY: help install build lint test-unit test-integration test-browser smoke check-services nfx-migrate schema-status web worker scheduler validate
 help:
-	@printf '%s\n' 'install build lint test-unit test-integration smoke validate web worker scheduler check-services nfx-migrate schema-status'
+	@printf '%s\n' 'install build lint test-unit test-integration test-browser smoke validate web worker scheduler check-services nfx-migrate schema-status'
 install:
 	$(PYTHON) --version | grep -E 'Python 3\.12\.'
 	node --version | grep -E '^v(20|22)\.'
@@ -20,6 +20,8 @@ test-unit:
 	NFX_PROFILE=test NFX_SECRET_KEY=synthetic-test-django-secret NFX_CERTIFICATE_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= DATABASE_URL=postgresql://nfx_test:nfx_test_only@postgres:5432/nfx_test MINIO_ROOT_PASSWORD=nfx-test-only-password $(PYTHON) -m pytest tests/unit
 test-integration:
 	./scripts/test-integration.sh
+test-browser:
+	docker compose -f docker-compose.test.yml run --rm --no-deps browser-tests
 smoke:
 	./scripts/smoke.sh
 check-services:

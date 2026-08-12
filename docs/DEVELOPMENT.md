@@ -58,9 +58,11 @@ de duas colunas para larguras desktop/notebook a partir de 1024 px.
 
 O contrato UI renderiza contextos sintéticos dos três papéis e verifica landmarks, skip link,
 foco, estado ativo, hashes, destino único de certificado, visibilidade negativa e ausência de
-efeitos de rede/persistência. Não existe runner de browser ou navegador instalado neste checkout;
-Chrome, Firefox e Edge continuam sendo a matriz manual de validação para a homologação visual
-posterior, sem introduzir infraestrutura de teste nesta fatia.
+efeitos de rede/persistência. A matriz reproduzível de interação usa
+`docker compose -f docker-compose.test.yml run --rm --no-deps browser-tests` (ou `make test-browser`)
+para executar a fixture sintética em Chrome, Firefox e Edge nas larguras 1024, 1280 e 1440 px.
+O target instala os browsers em uma imagem efêmera; a fixture rejeita chamadas de rede e usa
+somente identidades sintéticas.
 
 ## Decisões Proposed adotadas
 
