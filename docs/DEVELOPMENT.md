@@ -152,6 +152,34 @@ prévia desatualizada, recuperação e redaction. O target `make test-browser` p
 matriz Chrome, Firefox e Edge em 1024, 1280 e 1440 px. Não houve endpoint, migration, dependência
 ou dado fiscal novo.
 
+## Validação transversal P10-08
+
+O gate transversal usa `frontend/browser-tests/accessibility.spec.ts` para percorrer as fixtures de
+dashboard, documentos, empresas/certificados/coletas, exportações, administração e o shell
+composto. Ele verifica, com dados sintéticos, landmarks e headings nomeados, associações
+label/control e `aria-describedby`, live regions, redaction, papéis Administrador/Operador/Visualizador,
+sessões anônima/expirada, skip link, clipping, scroll horizontal da página e overflow somente em
+`.ui-table-wrap`, preservando caption e cabeçalhos.
+
+Os diálogos de usuário e exclusão controlada têm `aria-labelledby`, recebem foco ao abrir, cancelam
+por Escape somente quando o cancelamento é seguro e devolvem foco ao disparador. O cancelamento de
+exclusão é desabilitado enquanto há solicitação em andamento. A mudança permanece na fronteira de
+apresentação: não altera endpoints, payloads, RBAC server-side, âncoras, dados owner-provided,
+migrations, backend ou suporte mobile.
+
+| Evidência | Resultado |
+|---|---|
+| `npm --prefix frontend run test:ui-contract` | Passou: estados, tokens/contraste, labels, dialogs, redaction e overflow de tabela. |
+| `npm --prefix frontend run lint` / `npm --prefix frontend run build` | Ambos passaram. |
+| `make test-browser` | 342 testes passaram em Chrome, Firefox e Edge nas larguras 1024, 1280 e 1440 px. |
+
+As descrições visuais são reproduzíveis pelas rotas das fixtures e pelas métricas de bounding box e
+`scrollWidth` das asserções; não há capturas com dados para versionar. O contrato P10-01 fornece os
+dez pares de contraste e o foco tokenizado, enquanto a matriz confirma a visibilidade e o alcance
+por teclado. A skill instalada `graphify` foi avaliada e usada para navegar as relações entre spec,
+issue, código e testes; não havia skill/plugin frontend ou browser adicional instalado no catálogo
+ativo e nenhum gate de aprovação de conceito/design foi exigido.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes

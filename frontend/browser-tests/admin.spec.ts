@@ -56,3 +56,27 @@ test("opens explicit retention confirmation and supports keyboard focus", async 
   await page.getByRole("button", { name: "Cancelar" }).last().click();
   await expect(page.getByRole("button", { name: "Confirmar solicitação" })).toHaveCount(0);
 });
+
+test("names critical dialogs, focuses them, and returns focus after Escape", async ({ page }) => {
+  await page.goto("/browser-tests/admin.html?role=administrador#usuarios");
+  const deactivate = page.getByRole("button", { name: "Desativar" });
+  await deactivate.focus();
+  await deactivate.click();
+  const userDialog = page.getByRole("dialog", { name: "Desativar usuário" });
+  await expect(userDialog).toBeVisible();
+  await expect(userDialog).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(userDialog).toHaveCount(0);
+  await expect(deactivate).toBeFocused();
+
+  await page.goto("/browser-tests/admin.html?role=administrador#retencao");
+  const prepareDeletion = page.getByRole("button", { name: "Preparar solicitação de exclusão" });
+  await prepareDeletion.focus();
+  await prepareDeletion.click();
+  const deletionDialog = page.getByRole("dialog", { name: "Confirmar exclusão controlada" });
+  await expect(deletionDialog).toBeVisible();
+  await expect(deletionDialog).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(deletionDialog).toHaveCount(0);
+  await expect(prepareDeletion).toBeFocused();
+});

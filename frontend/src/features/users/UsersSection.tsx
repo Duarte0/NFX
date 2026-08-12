@@ -135,6 +135,13 @@ function UserActionDialog({
   const canConfirm = !busy && (!reasonRequired || action.reason.trim().length > 0)
     && (action.kind !== "password-reset" || action.password.length > 0);
 
+  useEffect(() => {
+    queueMicrotask(() => {
+      const dialog = document.getElementById("usuario-acao-dialog");
+      if (dialog instanceof HTMLElement) dialog.focus();
+    });
+  }, []);
+
   return (
     <Panel
       as="aside"
@@ -143,6 +150,13 @@ function UserActionDialog({
       role="dialog"
       aria-modal="true"
       aria-describedby="usuario-acao-consequence"
+      tabIndex={-1}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && !busy) {
+          event.preventDefault();
+          onCancel();
+        }
+      }}
       className="admin-dialog"
     >
       <p><strong>Alvo seguro:</strong> conta administrativa selecionada pelo servidor.</p>
@@ -211,12 +225,26 @@ export function UsersPresentation({
   onCancelAction,
   onConfirmAction,
 }: UsersPresentationProps) {
+  const dialogTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const previousPendingAction = useRef<UserCriticalAction | null>(pendingAction);
   const hasRows = Boolean(result && result.users.length > 0);
   const requestFeedback = error === "forbidden"
     ? requestState(403)
     : error === "unavailable"
       ? requestState(503)
       : requestState(400);
+
+  useEffect(() => {
+    if (previousPendingAction.current && !pendingAction) {
+      const trigger = dialogTriggerRef.current;
+      dialogTriggerRef.current = null;
+      queueMicrotask(() => {
+        if (trigger?.isConnected) trigger.focus();
+      });
+    }
+    previousPendingAction.current = pendingAction;
+  }, [pendingAction]);
+
   return (
     <section id="usuarios" className="feature-section">
       <div className="feature-heading">
@@ -263,9 +291,9 @@ export function UsersPresentation({
                 <td>{user.version}</td>
                 <td><div className="feature-actions">
                   <Button variant="secondary" onClick={() => onSelectEdit(user)} aria-label={`Editar ${user.name}`}>Editar</Button>
-                  <Button variant="secondary" onClick={() => onRequestAction(user, "role")} disabled={Boolean(actionBusy)}>Alterar papel</Button>
-                  <Button variant="secondary" onClick={() => onRequestAction(user, "password-reset")} disabled={Boolean(actionBusy)}>Redefinir senha</Button>
-                  <Button variant={user.active ? "danger" : "secondary"} onClick={() => onRequestAction(user, user.active ? "deactivate" : "activate")} disabled={Boolean(actionBusy)}>{user.active ? "Desativar" : "Ativar"}</Button>
+                  <Button variant="secondary" onClick={(event) => { dialogTriggerRef.current = event.currentTarget; onRequestAction(user, "role"); }} disabled={Boolean(actionBusy)}>Alterar papel</Button>
+                  <Button variant="secondary" onClick={(event) => { dialogTriggerRef.current = event.currentTarget; onRequestAction(user, "password-reset"); }} disabled={Boolean(actionBusy)}>Redefinir senha</Button>
+                  <Button variant={user.active ? "danger" : "secondary"} onClick={(event) => { dialogTriggerRef.current = event.currentTarget; onRequestAction(user, user.active ? "deactivate" : "activate"); }} disabled={Boolean(actionBusy)}>{user.active ? "Desativar" : "Ativar"}</Button>
                 </div></td>
               </tr>
             ))}</tbody>

@@ -150,8 +150,27 @@ export function RetentionPresentation({
   onRefreshOperation,
   onResumeOperation,
 }: RetentionPresentationProps) {
+  const deleteTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const previousDeleteDialogOpen = useRef(deleteDialogOpen);
   const eligibleCurrentPreview = Boolean(preview && preview.decision.state === "eligible" && !previewStale);
   const confirmationReady = Boolean(eligibleCurrentPreview && reason.trim());
+
+  useEffect(() => {
+    if (deleteDialogOpen) {
+      queueMicrotask(() => {
+        const dialog = document.getElementById("retencao-confirmacao-dialog");
+        if (dialog instanceof HTMLElement) dialog.focus();
+      });
+    } else if (previousDeleteDialogOpen.current) {
+      const trigger = deleteTriggerRef.current;
+      deleteTriggerRef.current = null;
+      queueMicrotask(() => {
+        if (trigger?.isConnected) trigger.focus();
+      });
+    }
+    previousDeleteDialogOpen.current = deleteDialogOpen;
+  }, [deleteDialogOpen]);
+
   return (
     <section id="retencao" className="feature-section">
       <div className="feature-heading"><div><p className="feature-eyebrow">Administração</p><h2>Retenção e exclusão controlada</h2><p className="feature-intro">Decisões fiscais e operações duráveis permanecem sob autoridade do servidor.</p></div><Button variant="secondary" onClick={onReload} disabled={loading}>{loading ? "Atualizando…" : "Atualizar retenção"}</Button></div>
@@ -181,16 +200,21 @@ export function RetentionPresentation({
         <p><strong>Escopo:</strong> versão {preview.scope.version} · hash de escopo preservado para revalidação.</p>
         <p><strong>Evidências limitadas:</strong> {preview.evidence.length} original/XML · {preview.events.length} evento(s) · {preview.renders.length} derivado(s). Conteúdo fiscal não é copiado para a interface.</p>
         <p>{preview.deletion.message}</p>
-        {eligibleCurrentPreview && <Button variant="danger" onClick={onOpenDeleteDialog}>Preparar solicitação de exclusão</Button>}
+        {eligibleCurrentPreview && <Button variant="danger" onClick={(event) => { deleteTriggerRef.current = event.currentTarget; onOpenDeleteDialog(); }}>Preparar solicitação de exclusão</Button>}
         {!eligibleCurrentPreview && preview.decision.state !== "eligible" && <Feedback state="blocked" message="Esta decisão não pode iniciar exclusão controlada." />}
         <Button variant="secondary" onClick={onReload}>Atualizar decisão</Button>
       </Panel>}
-      {deleteDialogOpen && preview && <Panel as="aside" title="Confirmar exclusão controlada" role="dialog" aria-modal="true" aria-describedby="retencao-confirmacao-consequencia" className="admin-dialog">
+      {deleteDialogOpen && preview && <Panel as="aside" id="retencao-confirmacao-dialog" title="Confirmar exclusão controlada" role="dialog" aria-modal="true" aria-describedby="retencao-confirmacao-consequencia" tabIndex={-1} onKeyDown={(event) => {
+        if (event.key === "Escape" && !operationLoading) {
+          event.preventDefault();
+          onCancelDelete();
+        }
+      }} className="admin-dialog">
         <p><strong>Alvo seguro:</strong> o documento e os artefatos enumerados na prévia atual.</p>
         <p id="retencao-confirmacao-consequencia">A operação é manual, auditada e pode exigir recuperação. Nenhum estado local será tratado como exclusão concluída.</p>
         <Field id="retencao-motivo" label="Motivo bounded" hint="Obrigatório e enviado ao servidor." required><textarea value={reason} maxLength={1000} onChange={(event) => onReasonChange(event.target.value)} required /></Field>
         <p className="feature-context">A confirmação explícita será vinculada automaticamente à versão e ao escopo atuais; o servidor fará a revalidação final.</p>
-        <div className="feature-actions"><Button variant="danger" onClick={onConfirmDelete} disabled={!confirmationReady}>Confirmar solicitação</Button><Button variant="secondary" onClick={onCancelDelete}>Cancelar</Button></div>
+        <div className="feature-actions"><Button variant="danger" onClick={onConfirmDelete} disabled={!confirmationReady || operationLoading}>Confirmar solicitação</Button><Button variant="secondary" onClick={onCancelDelete} disabled={operationLoading}>Cancelar</Button></div>
       </Panel>}
       {operationLoading && <Feedback state="loading" message="Consultando estado da operação…" />}
       {operationError && <Feedback state="error" message={operationError} />}
