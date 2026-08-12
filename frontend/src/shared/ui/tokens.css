@@ -890,6 +890,60 @@ button[aria-disabled="true"] {
   color: var(--color-muted);
 }
 
+.export-section {
+  min-width: 0;
+}
+
+.export-request-error,
+.export-detail,
+.export-state,
+.export-detail__context {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.export-state {
+  min-width: 180px;
+}
+
+.export-state p,
+.export-detail__context span,
+.export-safe-note {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+}
+
+.export-summary {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 180px;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+}
+
+.export-summary strong {
+  color: var(--color-ink);
+}
+
+.export-actions {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
+
+.export-detail {
+  align-items: start;
+}
+
+.export-detail > .ui-panel__title {
+  margin-bottom: 0;
+}
+
+.export-table .is-selected {
+  background: var(--color-brand-050);
+}
+
 .company-table .is-selected {
   background: var(--color-brand-050);
 }

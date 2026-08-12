@@ -198,6 +198,13 @@ rechecks session, requester/Admin authorization, `available` state and the 24-ho
 each request. Missing or divergent inputs produce explicit item outcomes and a partial/failed
 export, never a falsely complete archive.
 
+The P10-06 browser slice in `frontend/src/features/exports/ExportsSection.tsx` consumes this
+owner-provided metadata without changing the `/api/exports` contract. Its synthetic UI contract
+and browser fixture cover every durable state, returned-only progress/counts/bytes, stale refresh
+retention, request/detail/download guards, safe redaction, role/session negatives, keyboard focus,
+and the Chrome/Firefox/Edge desktop matrix at 1024/1280/1440 px. Browser validation uses only
+synthetic responses and never downloads or embeds ZIP/XML/PDF bytes.
+
 `make check-services` returns zero only when PostgreSQL and MinIO are ready. On failure it returns
 non-zero and says only which dependency is unavailable; it never prints connection strings or
 credentials. `/health/live` is independent of services and `/health/ready` returns 503 until both

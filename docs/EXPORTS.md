@@ -17,3 +17,18 @@ O worker lê cada artefato fiscal pelo owner de storage e confirma estado finali
 tamanho antes de incluí-lo. Caminhos têm segmentos ASCII sanitizados e um sufixo determinístico
 do documento para evitar traversal e colisões. O cleanup remove apenas o artifact lógico
 `export_zip_temp`; a origem fiscal, evidências, cursores e estado de coleta permanecem intactos.
+
+## Apresentação no navegador — P10-06
+
+`ExportsSection` apresenta cada estado durável com rótulo e explicação em pt-BR. `pending` e
+`processing` permanecem em acompanhamento, `complete` não libera download por si só, `available`
+exige a URL vigente retornada pelo owner, e `partial`, `failed`, `expired` e `excluded` não são
+tratados como ZIP completo. Expiração remove somente a ação de download e informa que o acervo de
+origem permanece intacto.
+
+Contagens, bytes e timestamps só são renderizados quando presentes na resposta; a UI não estima
+percentual nem simula progresso local. Códigos `safe_error`, IDs, caminhos, conteúdo de documentos
+e exceções internas são traduzidos para mensagens seguras ou omitidos. Uma falha de refresh mantém
+a última leitura segura com estado stale explícito e retry. Solicitação, detalhe, retry e download
+têm guards de interação; a listagem/detalhe posterior reconsulta o servidor e sequenciamento impede
+resposta antiga de substituir uma seleção nova.

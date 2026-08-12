@@ -9,6 +9,7 @@ import { DocumentsPresentation } from "../src/features/documents/DocumentsSectio
 import { CompaniesPresentation, companyStatusLabel, flowStateLabel } from "../src/features/companies/CompaniesSection";
 import { CertificateInventoryPresentation, certificateFreshnessLabel, certificateStatusLabel } from "../src/features/certificates/CertificateInventoryPanel";
 import { CollectionsPresentation, collectionStateLabel, coverageLabel } from "../src/features/collections/CollectionsSection";
+import { ExportsPresentation, exportStateLabel } from "../src/features/exports/ExportsSection";
 import { Button, DataTable, Field, Panel, Badge } from "../src/shared/ui/primitives";
 import { Feedback, feedbackStates } from "../src/shared/ui/Feedback";
 
@@ -21,6 +22,7 @@ const certificatesSource = readFileSync(resolve(process.cwd(), "src/features/cer
 const certificatePanelSource = readFileSync(resolve(process.cwd(), "src/features/certificates/CertificatePanel.tsx"), "utf8");
 const collectionsSource = readFileSync(resolve(process.cwd(), "src/features/collections/CollectionsSection.tsx"), "utf8");
 const documentsSource = readFileSync(resolve(process.cwd(), "src/features/documents/DocumentsSection.tsx"), "utf8");
+const exportsSource = readFileSync(resolve(process.cwd(), "src/features/exports/ExportsSection.tsx"), "utf8");
 
 function cssVariables(source) {
   return Object.fromEntries(
@@ -765,5 +767,123 @@ assert.doesNotMatch(viewerCollectionMarkup, /Solicitar coleta|Retry/);
 assert.match(collectionsSource, /collectionRequestSequence/);
 assert.match(collectionsSource, /Promise\.allSettled/);
 assert.match(collectionsSource, /popstate/);
+
+const exportStates = [
+  ["pending", "Pendente", "Exportação aguardando processamento."],
+  ["processing", "Processando", "Exportação em processamento."],
+  ["complete", "Concluída", "Exportação concluída, aguardando disponibilização."],
+  ["available", "Disponível para download", "Exportação disponível dentro do prazo informado."],
+  ["partial", "Parcial", "Exportação parcial: parte do escopo autorizado não foi produzida."],
+  ["failed", "Falhou", "A exportação não foi concluída."],
+  ["expired", "Expirada", "A exportação expirou; os documentos de origem permanecem no acervo."],
+  ["excluded", "Excluída", "Esta exportação não está disponível."],
+];
+for (const [state, label] of exportStates) assert.equal(exportStateLabel(state), label);
+
+const exportMarkup = renderToStaticMarkup(
+  React.createElement(ExportsPresentation, {
+    exports: exportStates.map(([state], index) => ({
+      id: `export-synthetic-${index}`,
+      state,
+      expected_count: index === 0 ? 4 : 4,
+      produced_count: index === 4 ? 3 : index === 5 ? 0 : 4,
+      expected_bytes: 4096,
+      produced_bytes: index === 4 ? 3072 : index === 5 ? 0 : 4096,
+      created_at: "2026-08-12T10:00:00+00:00",
+      expires_at: "2026-08-13T10:00:00+00:00",
+      safe_error: index === 4 ? "partial_result" : index === 5 ? "all_items_failed" : null,
+      download_url: state === "available" || state === "partial" ? "/api/exports/synthetic/download" : null,
+    })),
+    listReady: true,
+    detail: {
+      id: "export-synthetic-4",
+      state: "partial",
+      expected_count: 4,
+      produced_count: 3,
+      expected_bytes: 4096,
+      produced_bytes: 3072,
+      created_at: "2026-08-12T10:00:00+00:00",
+      expires_at: "2026-08-13T10:00:00+00:00",
+      safe_error: "partial_result",
+      download_url: "/api/exports/synthetic/download",
+      requester_id: "requester-synthetic",
+      filter_snapshot: { family: "nfe", company_ids: ["not-rendered"] },
+      selection_snapshot: { document_ids: ["not-rendered"] },
+      items: [{ document_id: "not-rendered", state: "missing", archive_path: "/not-rendered", safe_error: "source_missing", size_bytes: 1024 }],
+    },
+    loading: true,
+    stale: true,
+    error: "",
+    detailLoading: false,
+    detailStale: true,
+    detailError: "Não foi possível consultar a exportação.",
+    requestBusy: true,
+    actionBusy: "export-synthetic-4",
+    selectedExportId: "export-synthetic-4",
+    onRequest: () => {},
+    onReload: () => {},
+    onRetry: () => {},
+    onSelectExport: () => {},
+    onRetryDetail: () => {},
+    onDownload: () => {},
+    onCloseDetail: () => {},
+  }),
+);
+assert.match(exportMarkup, /Pendente/);
+assert.match(exportMarkup, /Processando/);
+assert.match(exportMarkup, /Concluída/);
+assert.match(exportMarkup, /Disponível para download/);
+assert.match(exportMarkup, /Parcial/);
+assert.match(exportMarkup, /Falhou/);
+assert.match(exportMarkup, /Expirada/);
+assert.match(exportMarkup, /Excluída/);
+assert.match(exportMarkup, /Leitura desatualizada/);
+assert.match(exportMarkup, /A última leitura segura permanece visível/);
+assert.match(exportMarkup, /Itens produzidos pelo servidor:<\/strong> 3/);
+assert.match(exportMarkup, /Itens esperados pelo servidor:<\/strong> 4/);
+assert.match(exportMarkup, /A exportação não foi concluída\./);
+assert.doesNotMatch(exportMarkup, /partial_result|all_items_failed|source_missing|not-rendered|not-rendered|internal|archive_path/);
+assert.doesNotMatch(exportMarkup, /Baixar ZIP[^<]*export-synthetic-4/);
+const sparseExportMarkup = renderToStaticMarkup(
+  React.createElement(ExportsPresentation, {
+    exports: [{
+      id: "export-sparse",
+      state: "processing",
+      expected_count: undefined,
+      produced_count: 2,
+      expected_bytes: undefined,
+      produced_bytes: undefined,
+      created_at: undefined,
+      expires_at: undefined,
+      safe_error: null,
+      download_url: null,
+    }],
+    listReady: true,
+    detail: null,
+    loading: false,
+    stale: false,
+    error: "",
+    detailLoading: false,
+    detailStale: false,
+    detailError: "",
+    requestBusy: false,
+    actionBusy: null,
+    selectedExportId: null,
+    onRequest: () => {},
+    onReload: () => {},
+    onRetry: () => {},
+    onSelectExport: () => {},
+    onRetryDetail: () => {},
+    onDownload: () => {},
+    onCloseDetail: () => {},
+  }),
+);
+assert.match(sparseExportMarkup, /Itens produzidos pelo servidor:<\/strong> 2/);
+assert.doesNotMatch(sparseExportMarkup, /Itens esperados pelo servidor|Bytes produzidos pelo servidor|Bytes esperados pelo servidor|dateTime/);
+assert.match(exportsSource, /listRequestSequence/);
+assert.match(exportsSource, /detailRequestSequence/);
+assert.match(exportsSource, /downloadBusyRef/);
+assert.match(exportsSource, /createExport\(\{\}, idempotencyKey\)/);
+assert.match(exportsSource, /await loadExports\(true\)/);
 
 console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, shell landmarks, dashboard groups/states/RBAC, role navigation, anchors, active state, focus and blocked action behavior.`);
