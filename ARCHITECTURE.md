@@ -209,12 +209,64 @@ raiz e inicializa o React; a composição da aplicação e do shell pertence a `
   conversão de falhas em erros seguros; funcionalidades não duplicam esse mecanismo.
 - Tipos permanecem junto do domínio que os possui. Componentes e utilitários compartilhados
   contêm apenas comportamento realmente transversal e não acumulam regras de negócio.
-- Estado local e composição React são o padrão. Router ou biblioteca global de estado somente
-  serão introduzidos quando navegação ou compartilhamento de estado demonstrarem essa necessidade.
+- Estado local e composição React são o padrão. A navegação autenticada usa React Router como
+  solução SPA estabelecida; não se manterá um roteador próprio baseado em `hash`, `pushState` ou
+  rolagem entre seções. Biblioteca global de estado continua fora do escopo salvo necessidade
+  aprovada separadamente.
 - A interface pode ocultar ações conforme o papel para melhorar a experiência, mas toda
   autorização continua aplicada pelo servidor; visibilidade no cliente nunca é controle de acesso.
-- Refatorações estruturais preservam os contratos HTTP, os identificadores de seção, a
-  navegação e os estados visíveis, salvo mudança de produto ou spec aprovada separadamente.
+- Refatorações estruturais preservam contratos HTTP, regras de negócio, estados visíveis e
+  fronteiras de funcionalidade; mudança de rota, endpoint ou contrato exige spec aprovada.
+
+#### Shell autenticado e contrato de navegação SPA
+
+`App.tsx` permanece a raiz de composição. Depois da autenticação, ele compõe um `AppShell`
+persistente com sidebar, header e uma saída de rota; a saída renderiza exatamente uma página de
+negócio primária por vez. A direção de dependência permanece `App → features → shared`, inclusive
+`shared/http` e `shared/ui`; cada página importa somente a feature dona de sua apresentação e
+contratos, sem criar uma camada transversal de regra de domínio.
+
+As entradas da sidebar são destinos, e não âncoras do mesmo documento. Os destinos primários
+aprovados são `/dashboard`, `/documentos`, `/exportacoes`, `/empresas`, `/certificados`,
+`/coletas`, `/usuarios`, `/auditoria` e `/retencao`. A localização padrão autenticada é
+`/dashboard`. Os nomes de query string, seus valores permitidos e a serialização de cada feature
+continuam pertencendo aos contratos existentes ou à spec futura: a arquitetura não inventa filtros.
+
+A rota e a query string devem restaurar a mesma intenção após refresh, deep link e Back/Forward.
+Filtros, paginação/detalhe quando já forem URL-endereçáveis e drill-downs do dashboard permanecem
+representáveis no URL. Um indicador do dashboard navega à página dedicada indicada pelo URL
+canônico e pelos filtros já produzidos pelo owner server-side; o cliente não deriva contagens,
+elegibilidade, filtros de negócio ou reconciliação. A navegação direta para uma rota deve produzir
+o mesmo resultado funcional e de autorização que a entrada equivalente da sidebar.
+
+O servidor de entrega do build deverá, em spec e implementação posteriores, devolver o documento
+SPA apenas para rotas de interface conhecidas que não sejam `/api`, health, sessão ou assets; APIs,
+assets e caminhos inválidos preservam seus comportamentos seguros atuais. Esse fallback limitado é
+necessário para refresh e deep links e não altera endpoints, payloads, CSRF ou sessão.
+
+Visibilidade de rota no cliente é somente UX. A rota direta, o carregamento de dados e toda ação
+continuam sujeitos a RBAC e validação no servidor. A página deve conservar loading, vazio,
+indisponível, degradado, stale, parcial, bloqueado e erro de sua feature; desmontar páginas não
+autorizadas ou inativas não pode transformar esses estados em sucesso, zero ou autorização local.
+O shell persistente preserva landmarks, skip link, foco e teclado, e a responsividade não pode
+depender de montar simultaneamente todas as features.
+
+#### Workflow obrigatório para futuras mudanças visuais de frontend
+
+Uma futura implementação ou modernização visual significativa da navegação deve primeiro avaliar
+as skills instaladas e usá-las como complemento, nunca como substituição, de PRD, arquitetura,
+specs, issues e contratos de backend. A sequência aplicável é: exploração visual com
+`superdesign:superdesign`; definição de conceito/design system e aprovação explícita quando a
+skill a exigir; implementação com `build-web-apps:frontend-app-builder`; revisão de arquitetura e
+performance React com `build-web-apps:react-best-practices`; e validação/refinamento renderizado
+com `build-web-apps:frontend-testing-debugging`. `build-web-apps:shadcn` só pode ser selecionada
+se o design system aprovado decidir usar seus componentes; geração de imagens só é usada quando
+forem necessários assets visuais reais.
+
+Quando uma skill selecionada exigir aprovação de conceito ou design, a implementação não pode
+começar antes dela. A modernização não autoriza alterar endpoints, HTTP, RBAC, regras fiscais,
+retenção, auditoria, posse de dados, comportamento de backend ou URLs além deste contrato
+aprovado.
 
 ## 11. Organização do repositório
 
@@ -264,6 +316,8 @@ Os nomes físicos de pacotes serão definidos no desenho de implementação. Mó
 | Cursor em memória | Rejeitado | Reinício poderia perder progresso |
 | Rede interna sem HTTPS | Rejeitada | Rede interna não é fronteira de confiança |
 | Backup local como proteção de desastre | Rejeitado como alegação | Não sobrevive à perda do host |
+| Navegação por âncoras/hash e todas as features montadas | Rejeitada | Não preserva página primária, refresh/deep link, Back/Forward ou responsividade por rota |
+| Roteador próprio crescente com `pushState`/hash | Rejeitado | React Router atende o contrato SPA com semântica e manutenção estabelecidas |
 
 ## 14. Responsabilidade e propriedade de estado
 
@@ -489,11 +543,11 @@ O MVP usa certificado autoassinado gerado localmente no reverse proxy. O tráfeg
 
 ## 35. Backup e restauração
 
-O backup diário inclui PostgreSQL, objetos fiscais/PDFs, certificados cifrados, configuração necessária e material protegido para recuperação da chave. A política operacional prevê 7 diárias, 4 semanais e 12 mensais, com teste de restauração no máximo a cada três meses.
+O backup diário inclui PostgreSQL, objetos fiscais/PDFs, certificados cifrados, configuração necessária e material protegido para recuperação da chave. A política operacional prevê 7 diárias, 4 semanais e 12 mensais, além de procedimento manual de recuperação documentado.
 
 O deployment MVP aprovado salva backups em `/var/backups/nfx` na mesma máquina Docker. Isso protege contra erro lógico e algumas corrupções, mas não contra falha física, perda total do disco, roubo, ransomware ou indisponibilidade do host. Portanto, é exceção conhecida às expectativas de separação e recuperação de `OPS-BKP-002` e `OPS-BKP-006`, não uma alegação de conformidade plena.
 
-Administradores veem última execução, idade, tamanho, falha, atraso, retenção e último restore. O restore isolado valida contagens, hashes, vínculos, auditoria, cursores e descriptografia de certificados. NAS, servidor separado, mídia removível ou serviço externo são evolução futura.
+Administradores veem última execução, idade, tamanho, falha, atraso, retenção e a última validação do conjunto. O comando de validação isolada confere manifesto, contagens, hashes, vínculos, auditoria, cursores e descriptografia de certificados, sem alegar reconstrução operacional completa. A recuperação após desastre é manual: operador autorizado prepara host isolado com PostgreSQL e MinIO, importa o dump, restaura objetos, fornece a chave mestre por mecanismo externo, sobe a aplicação e valida o estado. O MVP não automatiza essa criação de ambiente, `pg_restore` ou a repopulação do MinIO. NAS, servidor separado, mídia removível ou serviço externo são evolução futura.
 
 ## 36. Observabilidade e saúde
 
@@ -510,7 +564,7 @@ Health checks distinguem liveness, readiness de banco/MinIO, conectividade das f
 - **Contratos fiscais:** fixtures anonimizadas/sintéticas de NF-e, manifestação, eventos, distribuição, NFS-e/ADN, NSU, vazio, erro, cooldown e leiautes desconhecidos.
 - **Assíncrono:** morte antes/depois do upload, depois do registro, antes do cursor, lease expirado, retry duplicado, PDF interrompido e ZIP parcial.
 - **Segurança:** autorização direta, revogação, brute force, CSRF, cookies, traversal, XML inseguro, vazamento e download indevido.
-- **Operação:** espaço cheio, banco/MinIO reiniciado, fonte indisponível, scheduler morto e restore trimestral.
+- **Operação:** espaço cheio, banco/MinIO reiniciado, fonte indisponível, scheduler morto, integridade do backup e procedimento manual de recuperação.
 
 ## 38. Simulação oficial e rede de testes
 
@@ -547,7 +601,7 @@ Paralelismo é limitado por fonte, empresa e capacidade local. Não há promessa
 
 Versões da aplicação, políticas externas e renderers são identificáveis. Upgrade preserva compatibilidade de leitura e valida health antes de aceitar tráfego. Rollback é possível enquanto não houver mudança irreversível; jobs em andamento são pausados ou retomados por versão compatível.
 
-Renderer novo não sobrescreve PDFs anteriores. Políticas são versionadas e podem ser desativadas sem reescrever histórico. Backup e teste de restore precedem mudanças que afetem persistência. O runbook exato é posterior.
+Renderer novo não sobrescreve PDFs anteriores. Políticas são versionadas e podem ser desativadas sem reescrever histórico. Backup verificável e o procedimento manual de recuperação precedem mudanças que afetem persistência. O runbook operacional documenta a recuperação manual; ela não é automatizada pelo produto.
 
 ## 42. Resumo de decisões arquiteturais
 
@@ -566,6 +620,7 @@ Renderer novo não sobrescreve PDFs anteriores. Políticas são versionadas e po
 | ADR-011 | PDF/ZIP assíncronos e derivados | Não bloquear coleta |
 | ADR-012 | Backup local como exceção do MVP | Restrição operacional atual |
 | ADR-013 | HTTPS autoassinado no MVP | Cifragem com risco de confiança explícito |
+| ADR-014 | `AppShell` persistente com React Router e uma página primária por rota | Navegação SPA URL-endereçável, refresh/deep link e Back/Forward sem montar todas as features |
 
 ## 43. Traceabilidade PRD → arquitetura
 
@@ -587,8 +642,9 @@ Renderer novo não sobrescreve PDFs anteriores. Políticas são versionadas e po
 | OPS-BKP-001…006; BR-BKP-001; SEC-009 | Backup, retenção, restore e exceção local documentada |
 | OPS-001…007; NFR-004…008 | Processos independentes, estado persistido, health e operação |
 | NFR-001…003 | React desktop, localização e escala de 200 empresas |
+| NFR-009…013 | Identidade visual, estados acessíveis e shell SPA com rotas URL-endereçáveis |
 | Seção 18 e J1…J7 | Máquinas de estados e fluxos operacionais |
-| AC-001…AC-025 | Matriz de testes, segurança, restore, concorrência e papéis |
+| AC-001…AC-027 | Matriz de testes, segurança, restore, concorrência, papéis e navegação SPA |
 
 ## 44. Riscos, limitações e evolução
 
@@ -622,9 +678,12 @@ Renderer novo não sobrescreve PDFs anteriores. Políticas são versionadas e po
 6. Certificados, senhas, chaves, tokens e conteúdo sensível não vazam por logs, auditoria, erros, UI ou backup em claro.
 7. Autorização é aplicada no servidor e os três papéis do PRD são suportados.
 8. Retenção bloqueia exclusão prematura; exclusão elegível é manual, motivada, confirmada, coerente e auditada.
-9. Restauração cobre PostgreSQL, objetos, certificados cifrados e chave necessária.
-10. Coletas funcionam sem usuário conectado e estados de falha, parcial, bloqueio, vazio e degradação são distinguíveis.
-11. A solução é razoável para 200 empresas sem microserviços ou broker obrigatório.
-12. Nenhum legado, feature fora do MVP ou API pública foi introduzido.
-13. A traceabilidade cobre os identificadores relevantes e AC-001 a AC-025.
-14. Diagramas, responsabilidades, decisões e terminologia são consistentes.
+9. O conjunto de backup permite recuperação manual de PostgreSQL, objetos e certificados cifrados, com a chave mestre disponibilizada externamente; o produto não a automatiza.
+10. A navegação autenticada mantém shell persistente e uma página primária por rota; refresh,
+   deep links, Back/Forward, query strings e drill-downs canônicos preservam a intenção sem
+   transferir autorização ou regras de domínio ao navegador.
+11. Coletas funcionam sem usuário conectado e estados de falha, parcial, bloqueio, vazio e degradação são distinguíveis.
+12. A solução é razoável para 200 empresas sem microserviços ou broker obrigatório.
+13. Nenhum legado, feature fora do MVP ou API pública foi introduzido.
+14. A traceabilidade cobre os identificadores relevantes e AC-001 a AC-027.
+15. Diagramas, responsabilidades, decisões e terminologia são consistentes.

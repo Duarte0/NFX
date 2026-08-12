@@ -2,13 +2,18 @@
 
 ## Metadados
 
-- **Fase/status/versão:** P10-02 — implementação concluída e verificada — v1.2.
-- **Dependências:** P10-01. **Seguida por:** P10-03..08.
-- **Fontes:** PRD NFR-010..012, AC-023 e AC-026; Arquitetura §10.4; Plano P10-02.
+- **Fase/status/versão:** P10-02 — implementação concluída e verificada para o contrato histórico de hash; supersedida somente na navegação por P10-09 — v1.3.
+- **Dependências:** P10-01. **Seguida por:** P10-03..09.
+- **Fontes:** PRD NFR-010..013, AC-023, AC-026 e AC-027; Arquitetura §10.4; Plano P10-02/P10-09.
 
 ## Objetivo, escopo e não escopo
 
 Entregar composição visual consistente com sidebar, header, identidade da sessão e navegação para desktop/notebook. Não cria roteamento de cliente, estado global, novos endpoints, nem muda composição/visibilidade funcional por papel.
+
+Este é o registro verificável do contrato entregue no issue 0035. A proibição de router e o
+contrato de hashes abaixo não são requisitos da baseline atual: foram supersedidos, apenas nesse
+aspecto, por [P10-09](p10-spa-url-navigation.md), em razão de PRD NFR-013/AC-027 e Arquitetura
+§10.4. Shell, semântica, papéis, foco e evidência desta spec continuam históricos e reutilizáveis.
 
 ## Estado atual e contrato de navegação
 

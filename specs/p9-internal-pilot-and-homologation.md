@@ -2,7 +2,8 @@
 
 ## Metadados
 
-- **Fase/status:** P9 — pronta após hardening e capacidades finais.
+- **Fase/status:** P9 — P9-05 bloqueado: exige decisões oficiais para NF-e/ADN e cópia de
+  backup fisicamente separada antes da evidência de produção.
 - **Backlog:** P9-05. **Dependências:** P5, P6, P8 e P9-01 a P9-04.
 - **PRD:** NFR-003, NFR-005, NFR-007, NFR-008; OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006. **Aceite:** AC-024, AC-025 e evidências finais AC-001 a AC-023.
 - **Arquitetura:** seções 23, 24, 34–41 e 44; ADR-006, ADR-012, ADR-013.
@@ -13,7 +14,7 @@ Confirmar detalhes fiscais voláteis em homologação segregada e executar pilot
 
 ## Baseline, escopo e não escopo
 
-Parte de produto endurecido, restore comprovado e runtime HTTPS. Inclui plano de entrada/saída, allowlist/credenciais segregadas, execução, incidentes e decisão operacional. Não cria produção aberta, acesso externo, SLA, HA, novas fontes ou reduz critérios do PRD.
+Parte de produto endurecido, backup verificável com recuperação manual documentada e runtime HTTPS. Inclui plano de entrada/saída, allowlist/credenciais segregadas, execução, incidentes e decisão operacional. Não cria produção aberta, acesso externo, SLA, HA, novas fontes ou reduz critérios do PRD.
 
 ## Plano e decisões
 
@@ -23,7 +24,7 @@ Plano **Proposed** deve listar responsável, janela, empresas/dados autorizados,
 
 ## Falhas, observabilidade e recovery
 
-Incidente pausa fonte/fluxo afetado por política; não zera cursor, apaga acervo nem tenta repetidamente contra bloqueio. Registrar versão, correlação, efeito, dados redigidos, recovery e risco residual. Backup local e TLS autoassinado permanecem limitações Accepted visíveis.
+Incidente pausa fonte/fluxo afetado por política; não zera cursor, apaga acervo nem tenta repetidamente contra bloqueio. Registrar versão, correlação, efeito, dados redigidos, recovery e risco residual. TLS autoassinado permanece limitação arquitetural visível. Backup local também deve permanecer explícito e impede declarar OPS-BKP-002/006 e AC-016 como evidência de produção até existir cópia fisicamente separada e recovery correspondente.
 
 ## Testes/evidências e aceite
 

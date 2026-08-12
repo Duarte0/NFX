@@ -1,0 +1,1 @@
+/workspace/frontend/browser-tests/shell.html

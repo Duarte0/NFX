@@ -2,7 +2,8 @@
 
 ## Metadados
 
-- **Fase/status:** P9 — P9-01 concluído e validado; P9-02 permanece pendente.
+- **Fase/status:** P9 — P9-01 concluído e validado; P9-02 foi concluído no issue 0017,
+  com a lacuna de cópia fisicamente separada mantida em `p9-backup-and-restore.md`.
 - **Backlog:** P9-01. **Dependências:** P1-01, P1-03, P3-04.
 - **PRD:** SEC-006, SEC-008, OPS-002, OPS-007, NFR-007. **Aceite:** AC-024.
 - **Arquitetura:** ADR-001, ADR-002, ADR-013; seções 7–9, 12, 33, 34, 36, 39–41.
@@ -46,4 +47,4 @@ certificado autoassinado.
 - [x] Health distingue liveness/readiness/degradação.
 - [x] Limitação autoassinada está documentada.
 
-DoD P9-01: imagens/config, runbook, limites definidos, testes/evidências verdes. **Deferred:** CA confiável e HA não bloqueiam o MVP. P9-02 permanece responsável por backup/restore.
+DoD P9-01: imagens/config, runbook, limites definidos, testes/evidências verdes. **Deferred:** CA confiável e HA não bloqueiam o MVP. P9-02 permanece responsável por backup verificável, validação do conjunto e recuperação manual documentada.

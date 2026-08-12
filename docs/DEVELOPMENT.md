@@ -231,6 +231,23 @@ malformados, traversal ou symlinks que escapem do build retornam `404`. Não há
 servidor de arquivos genérico. O `make smoke` compara o HTML e cada asset referenciado com os
 artefatos dentro do container e exercita os caminhos inválidos.
 
+### Rebuild do frontend no Compose de desenvolvimento
+
+Quando o código em `frontend/src/` muda, a aplicação web precisa ser reconstruída para que a
+imagem copie o novo `frontend/dist` para `/app/frontend/dist`. O arquivo
+`docker-compose.app.yml` é um override e não declara sozinho a rede `nfx_network`; por isso ele
+deve ser usado junto com o Compose base:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.app.yml build --no-cache web
+docker compose -f docker-compose.yml -f docker-compose.app.yml up -d web
+docker compose -f docker-compose.yml -f docker-compose.app.yml ps
+```
+
+Depois do reinício, faça hard refresh no navegador (`Ctrl+Shift+R`) ou abra uma janela anônima.
+Não execute `docker compose -f docker-compose.app.yml ...` sozinho, pois o override referencia
+`nfx_network` e dependências declaradas no arquivo base.
+
 ## Exportação ZIP P8-01
 
 `nfx.exports` owns the request, frozen P7 filter snapshot, document/artifact items, composition

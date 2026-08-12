@@ -31,17 +31,15 @@ Matriz-base: Administrador administra tudo; Operador empresas/certificados/colet
 
 Redigir senha/token/cookie. Eventos: login sucesso/falha, logout, sessão expirada/revogada, com ator quando conhecido, IP, resultado e correlação; resposta de falha é indistinguível. Métricas de sucesso/falha/rate-limit/sessão expirada, sem e-mail como label.
 
-## Testes, sequência e aceite
+## Testes e sequência originalmente planejados
 
 Testar bootstrap/rerun, Argon2id, enumeração, brute force, CSRF, cookie, relógio em 29:59/30:00, revogação, concorrência de atividade, matriz por ação e URL direta; browser em Chrome/Firefox/Edge suportados. Fixtures usam contas sintéticas.
 
 1. Modelo/bootstrap. 2. Sessões/rate limit. 3. política RBAC. 4. contratos HTTP. 5. shell/localização. 6. segurança/browser.
 
-- [ ] Somente usuário ativo válido autentica; resposta inválida é uniforme.
-- [ ] Sessão expira exatamente após 30 minutos de inatividade e pode ser revogada.
-- [ ] Todo HTTP/job/download protegido consulta política server-side.
-- [ ] Primeiro Admin vem de segredo e senha nunca aparece em saída.
-- [ ] Shell pt-BR não é tratado como controle de segurança.
+Os critérios desta seção foram o contrato de planejamento de P1-02/P1-03/P1-07. Eles foram
+atendidos; a evidência verificável e a lista de aceite canônica estão na seção **Aceite e DoD**
+abaixo. Esta seção é preservada para registrar o escopo original, não para indicar trabalho aberto.
 
 DoD: migrações, bootstrap, contratos, UI, matriz e testes de segurança verdes. **Assunções Proposed:** formato do token, estratégia exata de rate limit e URLs.
 
@@ -54,6 +52,12 @@ DoD: migrações, bootstrap, contratos, UI, matriz e testes de segurança verdes
 - **Bootstrap:** `python backend/manage.py bootstrap_admin` cria idempotentemente apenas `guilherme.duarte@inovssc.com.br` enquanto a base estiver vazia, a partir de `NFX_BOOTSTRAP_ADMIN_PASSWORD` externo. Reexecução não troca a senha e a saída nunca a contém.
 - **Implementação:** `backend/nfx/identity/{models,services,policy,views}.py`, migration `backend/nfx/migrations/0003_identity.py`, comando `bootstrap_admin`, endpoints em `nfx.urls` e shell em `frontend/src/main.tsx`.
 - **Validação (2026-08-04):** `makemigrations --check --dry-run`, Ruff, build Vite e 37 testes unitários verdes em container isolado; `./scripts/test-integration.sh` passou 14 testes em PostgreSQL/MinIO descartáveis; `./scripts/smoke.sh` passou com web/worker/scheduler. Os testes sintéticos cobrem bootstrap/rerun, Argon2id, enumeração, backoff, CSRF, cookie, 29:59/30:00, revogação, atualização condicional que não ressuscita sessão expirada e matriz RBAC. A shell é `pt-BR`, usa rótulos de Brasília/BRL e compila para os navegadores desktop modernos definidos pelo MVP.
+- **Delta resolvido (2026-08-12):** o follow-up canônico
+  [`p0-bootstrap-admin-provisioning.md`](p0-bootstrap-admin-provisioning.md) concluiu no issue
+  0033 a permissão explícita de `load_settings()` para o processo `bootstrap_admin`. A allowlist
+  global continua fail-closed, a senha não integra `Settings` e os testes em processo novo cobrem
+  comando, reexecução, redaction e a rejeição do segredo pelos processos regulares. Não há
+  divergência aberta de provisionamento nesta spec.
 
 ## Aceite e DoD
 
@@ -63,4 +67,6 @@ DoD: migrações, bootstrap, contratos, UI, matriz e testes de segurança verdes
 - [x] Primeiro Admin vem de segredo e senha nunca aparece em saída.
 - [x] Shell pt-BR não é tratado como controle de segurança.
 
-DoD atendido: migration, bootstrap externo, contratos protegidos por CSRF, shell localizado, matriz central e testes de segurança têm evidência verde. Sem blocker local.
+DoD histórico atendido para migration, serviço de bootstrap, contratos protegidos por CSRF, shell
+localizado, matriz central e testes de segurança. O follow-up de provisionamento foi concluído na
+spec P0 própria e não reabre os demais contratos desta spec.

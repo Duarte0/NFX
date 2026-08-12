@@ -2,7 +2,7 @@
 
 ## Metadados
 
-- **Fase/status:** P3 — P3-01, P3-02 e P3-04 implementados e validados; P3-05 permanece pendente.
+- **Fase/status:** P3 — P3-01, P3-02 e P3-04 implementados e validados; P3-05 foi concluído pela spec canônica `p3-manual-collection-control.md`.
 - **Backlog:** P3-01, P3-02, P3-04.
 - **Dependências:** P1-01 e P1-05.
 - **PRD:** FR-COLL-002; BR-COLL-002, BR-COLL-007, BR-COLL-010; OPS-001, OPS-002, OPS-003, OPS-004, OPS-005, OPS-006; NFR-004, NFR-005, NFR-008. **Aceite:** AC-006, AC-007, AC-017, AC-024.

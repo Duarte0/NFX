@@ -53,7 +53,7 @@ FROM python:${PYTHON_VERSION}-slim-bookworm AS dev
 ARG NODE_MAJOR=22
 ARG GRAPHIFYY_VERSION=0.9.32
 ENV DEBIAN_FRONTEND=noninteractive PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1 PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH=/root/.local/bin:${PATH}
-RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates curl git gnupg less make openssh-client postgresql-client procps ripgrep \
+RUN apt-get update && apt-get install -y --no-install-recommends bash ca-certificates curl git gnupg less make openssh-client postgresql-client procps ripgrep jq \
     && install -m 0755 -d /etc/apt/keyrings \
     && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
     && chmod a+r /etc/apt/keyrings/docker.asc \

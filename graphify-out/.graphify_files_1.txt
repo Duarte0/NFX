@@ -1,0 +1,14 @@
+/workspace/ARCHITECTURE.md
+/workspace/IMPLEMENTATION_PLAN.md
+/workspace/OPERATING_PRINCIPLES.md
+/workspace/PRD.md
+/workspace/PROMPT_build.md
+/workspace/PROMPT_issues.md
+/workspace/PROMPT_plan.md
+/workspace/PROMPT_specs.md
+/workspace/docker-compose.app.yml
+/workspace/docker-compose.runtime.yml
+/workspace/docker-compose.test.yml
+/workspace/docker-compose.yml
+/workspace/requirements-dev.txt
+/workspace/requirements.txt

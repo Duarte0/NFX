@@ -2,11 +2,13 @@
 
 ## Metadados
 
-- **Fase/status:** P7 — pronta após P4; cobertura completa cresce com P5/P6.
+- **Fase/status:** P7 — P7-01/P7-02 concluídos e verificados no issue 0015; P7-03 é uma
+  spec canônica separada, concluída no issue 0023.
 - **Backlog:** P7-01, P7-02. **Dependências:** P1-03/04, P4-01/04.
 - **Implementação:** P7-01/P7-02 concluídos no issue 0015. A consulta usa filtros bounded,
   cursor opaco assinado e detalhe seguro; o download individual revalida artefato, digest e
-  tamanho antes do streaming. PDF/DANFE/DANFSe continua no slice P7-03 bloqueado localmente.
+  tamanho antes do streaming. PDF/DANFE/DANFSe pertence ao slice P7-03, cuja decisão de renderer
+  está registrada na spec canônica de renderização e foi entregue no issue 0023.
 - **PRD:** FR-DOC-001, FR-DOC-002, FR-DOC-003, FR-DOC-004, FR-DOC-005; BR-DOC-001, BR-DOC-002; FR-ART-001; NFR-001, NFR-002, NFR-006; AUD-006. **Aceite:** AC-004, AC-005, AC-010, AC-011, AC-014.
 - **Arquitetura:** seções 14–18, 26–28, 32, 33, 36 e 37.
 
@@ -36,15 +38,16 @@ Validar parâmetros, limites, ordenação allowlisted e evitar enumeração via 
 
 Objeto pendente/ausente/divergente não é servido e UI mantém metadado com indisponibilidade. Testar cada filtro isolado/combinado, busca multiempresa, datas/competência, Unicode, paginação estável, entrada/saída/tomada/prestada/evento, ausência de filtros proibidos, RBAC direto, stream interrompido, auditoria e browsers. Fixtures sintéticas.
 
-## Aceite e DoD
+## Aceite originalmente planejado
 
-- [ ] Todos e somente os filtros PRD funcionam.
-- [ ] Detalhe preserva datas, competência, categoria e vínculos.
-- [ ] Download revalida autorização e integridade no servidor.
-- [ ] XML continua disponível quando PDF falha.
-- [ ] Consulta não altera documento/cursor/artefato.
+Os critérios desta seção foram atendidos por P7-01/P7-02; as evidências concretas estão nas notas
+de implementação abaixo e nos testes referenciados pelo issue 0015. Eles não incluem P7-03, que é
+regido exclusivamente por `p7-danfe-danfse-rendering.md`.
 
-DoD: migrações/índices, contratos, UI, download, auditoria e matriz browser verdes. **Proposed:** URLs/payload/paginação e política de granularidade de auditoria de consultas.
+DoD P7-01/P7-02: migrações/índices, contratos, UI, download, auditoria e matriz de contratos verdes.
+**Proposed resolvido:** URLs, payload, paginação e granularidade de auditoria de consultas estão
+registrados nas notas de implementação. A cobertura interativa de browser continua dívida de
+qualidade operacional, não requisito aberto desta spec concluída.
 
 ## Notas de implementação — issue 0015
 

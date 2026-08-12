@@ -15,7 +15,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET:-nfx-documentos}
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8001:8000"
     depends_on: &app_dependencies
       postgres:
         condition: service_healthy
@@ -23,6 +23,9 @@ services:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
+    networks:
+      - nfx_network
+
   worker:
     build:
       context: .
@@ -32,6 +35,9 @@ services:
       <<: *app_environment
       NFX_PROCESS: worker
     depends_on: *app_dependencies
+    networks:
+      - nfx_network
+
   scheduler:
     build:
       context: .
@@ -41,3 +47,5 @@ services:
       <<: *app_environment
       NFX_PROCESS: scheduler
     depends_on: *app_dependencies
+    networks:
+      - nfx_network

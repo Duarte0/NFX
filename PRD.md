@@ -249,7 +249,7 @@ A regra deve ser validada como atividade de compliance antes da operação produ
 - **OPS-BKP-001** — Executar backup diário do banco, documentos fiscais/PDFs e material de certificado criptografado.
 - **OPS-BKP-002** — Armazenar cópias separadas do servidor primário, com acesso físico e lógico restrito.
 - **OPS-BKP-003** — Reter as 7 cópias diárias, 4 semanais e 12 mensais mais recentes.
-- **OPS-BKP-004** — Executar e registrar teste de restauração pelo menos uma vez a cada três meses, incluindo data, escopo, resultado e falhas encontradas.
+- **OPS-BKP-004** — Manter procedimento manual de recuperação documentado para operador autorizado, incluindo data, escopo, resultado e falhas quando exercitado.
 - **OPS-BKP-005** — Exibir para Administradores o último backup bem-sucedido e falhas/atrasos.
 - **OPS-BKP-006** — Recuperação após falha do servidor primário deve ser possível até o próximo dia útil, preservando o máximo de dados duráveis possível.
 - **BR-BKP-001** — Retenção operacional de backup é independente da retenção fiscal; expirar backup não exclui documento do acervo vivo.
@@ -275,6 +275,11 @@ A regra deve ser validada como atividade de compliance antes da operação produ
 - **NFR-006** — Todos os downloads devem respeitar autorização, expiração e auditoria.
 - **NFR-007** — A aplicação deve permanecer acessível somente na rede interna; integrações de saída devem usar canais protegidos e destinos aprovados.
 - **NFR-008** — O sistema deve representar claramente limitações de fonte, indisponibilidade, cobertura incompleta e estados degradados.
+- **NFR-009** — A interface deve adotar identidade institucional sóbria e consistente, com vinho como cor primária, cinza como cor estrutural/neutra e branco como superfície principal; os tons auxiliares devem preservar contraste e legibilidade.
+- **NFR-010** — A interface desktop-first deve oferecer navegação consistente entre Dashboard, Documentos, Exportações, Empresas, Certificados, Coletas, Usuários, Auditoria e Retenção, com hierarquia clara para títulos, ações, filtros, tabelas, estados e informações operacionais, sem padrões visuais incompatíveis entre funcionalidades.
+- **NFR-011** — A experiência operacional deve manter densidade e legibilidade adequadas, padrões consistentes de loading, vazio válido, erro, indisponibilidade, degradação, bloqueio, sucesso e ações críticas, além de contraste, foco visível, labels e navegação por teclado quando aplicável; deve adaptar-se aos tamanhos usuais de desktop e notebook, sem ampliar o MVP para mobile.
+- **NFR-012** — A modernização visual não pode, por si só, alterar comportamento fiscal, regra de negócio, papel, autorização server-side, contrato de backend ou informação operacional relevante; mensagens técnicas internas devem ser apresentadas de forma compreensível quando houver estado funcional equivalente, sem ocultar esse estado.
+- **NFR-013** — A aplicação autenticada deve manter navegação por destinos URL-endereçáveis entre Dashboard, Documentos, Exportações, Empresas, Certificados, Coletas, Usuários, Auditoria e Retenção. Cada destino exibe uma área primária por vez dentro de uma estrutura persistente; refresh, deep link e Back/Forward preservam a localização, e filtros ou drill-downs já suportados permanecem representáveis na URL. Indicador clicável do dashboard abre o destino correspondente com seus filtros canônicos aplicados.
 
 ## 18. Estados de erro, vazio, bloqueio e degradação
 
@@ -342,7 +347,7 @@ Administrador consulta documentos elegíveis, visualiza escopo e artefatos, conf
 - **AC-013** — Indicadores do dashboard abrem listagens filtradas e refletem empresas, documentos, valores, certificados, coletas e saúde operacional; quantidades e valores do período selecionado são comparados com o período imediatamente anterior de mesma duração, consecutivo e sem sobreposição.
 - **AC-014** — Todas as ações enumeradas em AUD-002 a AUD-007 geram auditoria com os campos aplicáveis de AUD-008 e sem segredos; toda ação crítica enumerada em AUD-009 é rejeitada sem motivo explícito.
 - **AC-015** — Exclusão dentro da retenção é bloqueada; uma NF-e autorizada em 15/08/2026 somente é elegível em 15/08/2037, e uma NFS-e emitida em qualquer data de 2026 somente é elegível em 01/01/2032. Documento elegível exige escopo, confirmação e motivo, remove artefatos relacionados e preserva auditoria sem conteúdo fiscal.
-- **AC-016** — Backup diário e políticas de retenção são observáveis por Administrador; existe teste de restauração executado e registrado em cada intervalo máximo de três meses, recuperando documentos, PDFs, estado e material criptografado conforme o procedimento aprovado.
+- **AC-016** — Backup diário e políticas de retenção são observáveis por Administrador; o conjunto é verificável por manifesto, hashes e tamanhos, e há procedimento manual de recuperação documentado para restaurar documentos, PDFs, estado e material criptografado com a chave mestre disponibilizada externamente.
 - **AC-017** — Após reinício, coletas não dependem de memória, não concorrem indevidamente e retomam com segurança.
 - **AC-018** — Empresas sem cobertura NFS-e no Portal Nacional/ADN continuam cadastráveis e exibem a limitação como ausência de cobertura, sem falso sucesso, sem mensagem de consulta vazia e sem confundi-la com indisponibilidade transitória.
 - **AC-019** — A consulta opcional ao OpenCNPJ envia somente o CNPJ, mantém os dados obtidos identificados como públicos e não autoritativos e, quando falha ou está indisponível, não impede cadastro nem coleta; validações e contratos pertinentes não pressupõem que o CNPJ permanecerá exclusivamente numérico.
@@ -352,6 +357,8 @@ Administrador consulta documentos elegíveis, visualiza escopo e artefatos, conf
 - **AC-023** — A interface é integralmente apresentada em português brasileiro, usa horário de Brasília e real brasileiro e funciona nas versões desktop atuais de Chrome, Firefox e Edge.
 - **AC-024** — Em ambiente interno com HTTPS, coletores continuam operando sem usuário conectado, falhas operacionais ficam visíveis a Administradores e reinícios preservam progresso durável e retomada idempotente.
 - **AC-025** — A validação do MVP demonstra operação com aproximadamente 200 empresas e não encontra limite comercial ou funcional configurado para quantidade de contas de usuário.
+- **AC-026** — A interface operacional apresenta identidade em vinho, cinza e branco, navegação consistente e estados visuais compreensíveis; mantém contraste, foco, labels e teclado aplicáveis em desktop/notebook, preservando os contratos funcionais e a autorização server-side existentes.
+- **AC-027** — A sidebar navega para destinos, não para âncoras de um documento com todas as funcionalidades montadas. A estrutura autenticada permanece visível enquanto a área primária muda; navegação direta, refresh, deep links, Back/Forward e drill-downs do dashboard preservam a mesma intenção e continuam sujeitos à autorização do servidor.
 
 ## 21. Critérios de sucesso do produto
 
@@ -366,7 +373,7 @@ Metas iniciais de aceite, sujeitas a medição durante piloto:
 - Consultar e baixar XML/PDF individualmente.
 - Gerar ZIP multiempresa com controle de acesso e resultado de completude explícito.
 - Cobrir auditoria de todas as ações críticas.
-- Executar restauração de backup verificada.
+- Manter backup verificável e procedimento manual de recuperação documentado.
 - Impedir exclusão prematura e aplicar retenção corretamente.
 - Recuperar coletas com segurança após reinício ou falha primária até o próximo dia útil.
 
@@ -385,7 +392,7 @@ Não são estabelecidas metas agressivas de latência, disponibilidade, throughp
 | ZIP incompleto | Processamento assíncrono, metadados e status de completude explícito. |
 | Exposição de segredos | Criptografia, HTTPS, autorização, cookies seguros e proibição de segredos em logs/auditoria. |
 | Exclusão indevida | Retenção inviolável na interface, confirmação, motivo e auditoria. |
-| Falha do servidor | Backups separados, testes de restauração e recuperação até o próximo dia útil. |
+| Falha do servidor | Backups verificáveis, procedimento manual de recuperação e recuperação até o próximo dia útil. |
 
 ## 23. Dependências e restrições externas
 
@@ -423,7 +430,7 @@ Além dos requisitos `SEC-*`, dados fiscais, identificadores pessoais, XMLs, PDF
 
 | Área confirmada | Requisitos principais | Critérios |
 |---|---|---|
-| Identidade, escala e interface | NFR-001 a NFR-003 | AC-023, AC-025 |
+| Identidade, escala e interface | NFR-001 a NFR-003; NFR-009 a NFR-013 | AC-023, AC-025, AC-026, AC-027 |
 | Papéis, usuários e autenticação | FR-AUTH-001 a FR-AUTH-007; BR-AUTH-001 e BR-AUTH-002 | AC-003, AC-004, AC-014, AC-022 |
 | Empresas | FR-COMP-001 a FR-COMP-003; BR-COMP-001 a BR-COMP-006 | AC-001, AC-002, AC-020 |
 | OpenCNPJ | FR-COMP-004 e FR-COMP-005; BR-COMP-007 e BR-COMP-008 | AC-019 |

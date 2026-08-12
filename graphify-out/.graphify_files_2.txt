@@ -1,0 +1,5 @@
+/workspace/docs/DEVELOPMENT.md
+/workspace/docs/EXPORTS.md
+/workspace/docs/OPERATIONS.md
+/workspace/docs/P9_HARDENING.md
+/workspace/docs/RUNTIME.md

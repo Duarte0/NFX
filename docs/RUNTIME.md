@@ -36,7 +36,9 @@ docker compose -f docker-compose.runtime.yml up -d
 docker compose -f docker-compose.runtime.yml ps
 ```
 
-`NFX_BOOTSTRAP_ADMIN_PASSWORD` não é uma variável de runtime do Compose: injete-a somente na execução efêmera do comando, sem registrá-la nos serviços, logs ou no repositório.
+`NFX_BOOTSTRAP_ADMIN_PASSWORD` não é uma variável de runtime do Compose: não a inclua nos
+serviços web, worker ou scheduler. O valor deve ser injetado somente na execução efêmera do
+comando, sem aparecer na linha de comando, nos logs ou no repositório.
 
 Use `https://nfx.internal:8443` (ou o hostname local configurado). A porta HTTP 8080 do proxy
 responde somente com redirect 308 para HTTPS; PostgreSQL, MinIO, console, worker e scheduler
@@ -70,8 +72,9 @@ backup local no mesmo host é uma limitação aceita do MVP.
 
 `NFX_BACKUP_DIR` é montado somente como a área protegida `/var/backups/nfx` dos processos da
 aplicação. O diretório deve existir fora do repositório, ter permissões restritas e ser incluído
-no procedimento administrativo de cópia/proteção. Não monte volumes de runtime como destino de
-restore: use um destino isolado separado e os guards do comando `restore_backup`.
+no procedimento administrativo de cópia/proteção. Não monte volumes de runtime como destino da
+validação `restore_backup`: use um destino isolado separado e seus guards. A recuperação manual
+completa usa host, PostgreSQL, MinIO e volumes novos, isolados do runtime.
 
 Os limites escolhidos são verificados com `docker compose ps`/health e `docker stats
 --no-stream` durante o smoke operacional; uma carga sintética de health e uma reinicialização de

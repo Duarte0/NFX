@@ -2,7 +2,8 @@
 
 ## Metadados
 
-- **Fase/status:** P9 — implementada e verificada no issue 0024; P9-04/P9-05 permanecem pendentes.
+- **Fase/status:** P9 — implementada e verificada no issue 0024; P9-04 foi concluído no
+  issue 0031 e P9-05 permanece bloqueado pelas decisões externas e pelo backup físico.
 - **Backlog:** P9-03. **Dependências:** P8-03 e P9-02.
 - **PRD:** RET-005, RET-006, RET-008, AUD-006, AUD-008, AUD-009. **Aceite:** AC-014, AC-015.
 - **Arquitetura:** seções 14, 17, 27, 28, 31, 33, 37, 40 e 41.

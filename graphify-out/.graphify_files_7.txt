@@ -1,0 +1,11 @@
+/workspace/specs/p6-nfse-adn-distribution-and-coverage.md
+/workspace/specs/p7-danfe-danfse-rendering.md
+/workspace/specs/p7-document-consultation-and-individual-download.md
+/workspace/specs/p8-dashboard-and-operational-health.md
+/workspace/specs/p8-retention-eligibility.md
+/workspace/specs/p8-zip-export.md
+/workspace/specs/p9-backup-and-restore.md
+/workspace/specs/p9-controlled-deletion.md
+/workspace/specs/p9-hardening.md
+/workspace/specs/p9-internal-pilot-and-homologation.md
+/workspace/specs/p9-runtime-and-https.md

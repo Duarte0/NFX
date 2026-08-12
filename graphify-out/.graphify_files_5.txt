@@ -1,0 +1,14 @@
+/workspace/issues/0022_-_nfe-manifestation.md
+/workspace/issues/0023_-_danfe-danfse-rendering.md
+/workspace/issues/0024_-_controlled-deletion.md
+/workspace/issues/0025_-_dashboard-backup-health.md
+/workspace/issues/0026_-_dashboard-collection-drilldown-reconciliation.md
+/workspace/issues/0027_-_dashboard-document-drilldown-reconciliation.md
+/workspace/issues/0028_-_dashboard-company-drilldown-reconciliation.md
+/workspace/issues/0029_-_dashboard-certificate-drilldown-reconciliation.md
+/workspace/issues/0030_-_dashboard-job-drilldown-reconciliation.md
+/workspace/issues/0031_-_integrated-p9-hardening-threat-review-and-failure-evidence.md
+/workspace/issues/0032_-_serve-built-react-application-at-root.md
+/workspace/issues/0033_-_allow-secure-bootstrap-admin-provisioning.md
+/workspace/issues/0034_-_shared-visual-tokens-and-accessible-primitives.md
+/workspace/issues/0035_-_desktop-application-shell-navigation.md
