@@ -64,6 +64,25 @@ para executar a fixture sintética em Chrome, Firefox e Edge nas larguras 1024, 
 O target instala os browsers em uma imagem efêmera; a fixture rejeita chamadas de rede e usa
 somente identidades sintéticas.
 
+## Dashboard P10-03
+
+`frontend/src/features/dashboard/DashboardSection.tsx` mantém o payload de `GET /api/dashboard`
+como única fonte de períodos, valores, estados, frescura, capacidades e URLs de drill-down. A
+apresentação agrupa empresas/documentos, coletas/processamento e certificados/capacidades; a
+saúde operacional e o backup só aparecem quando já foram fornecidos pelo payload autorizado de
+Administrador. O navegador não recalcula métricas, filtros, períodos ou autorização.
+
+Durante uma consulta, a última leitura segura fica visível com indicação de desatualização. Uma
+falha mantém esse contexto e oferece nova tentativa sem apagar os cards não relacionados. Guards
+de sequência impedem respostas antigas de substituir seleções novas; o drill-down de jobs aplica
+a mesma proteção e traduz erros allowlisted para mensagens de interface. O HTML usa os primitives
+P10-01, labels pt-BR, foco nativo e URLs produzidas pelo servidor.
+
+O contrato determinístico é `npm --prefix frontend run test:ui-contract`. A matriz sintética de
+browser usa `docker compose -f docker-compose.test.yml run --rm --no-deps browser-tests` e cobre
+90 testes em Chrome, Firefox e Edge nas larguras 1024, 1280 e 1440 px, incluindo grupos, estados,
+período comparativo, deep links, teclado, overflow e redaction Admin-only.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes

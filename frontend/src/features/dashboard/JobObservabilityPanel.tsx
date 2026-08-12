@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "../../shared/http";
-import { Button, DataTable } from "../../shared/ui/primitives";
+import { Badge, Button, DataTable } from "../../shared/ui/primitives";
 import { Feedback } from "../../shared/ui/Feedback";
 import { listJobObservability } from "./api";
 import { JobObservabilityFilter, JobObservabilityResponse } from "./types";
@@ -21,7 +21,7 @@ function filterLabel(filter: string): string {
     pending: "Processamento pendente",
     failed: "Processamento com falha",
     blocked: "Processamento bloqueado",
-  }[filter] ?? filter;
+  }[filter] ?? "Filtro não reconhecido";
 }
 
 function stateLabel(state: string): string {
@@ -30,7 +30,7 @@ function stateLabel(state: string): string {
     running: "Em execução",
     completed: "Concluído",
     blocked: "Bloqueado",
-  }[state] ?? "Estado desconhecido";
+  }[state] ?? "Estado não reconhecido";
 }
 
 function outcomeLabel(outcome: string | null): string {
@@ -40,7 +40,34 @@ function outcomeLabel(outcome: string | null): string {
     cooldown: "Cooldown",
     permanent: "Permanente",
     partial: "Parcial",
-  }[outcome ?? ""] ?? "—";
+  }[outcome ?? ""] ?? "Resultado não reconhecido";
+}
+
+function safeJobErrorLabel(code: string): string {
+  return {
+    artifact_unavailable: "Artefato indisponível.",
+    authorization_blocked: "Autorização bloqueada.",
+    authorization_revoked: "Autorização revogada.",
+    certificate_invalid: "Certificado inválido.",
+    deletion_failed: "Falha na exclusão controlada.",
+    handler_failed: "Falha no processamento.",
+    handler_not_registered: "Processamento não disponível.",
+    invalid_export_reference: "Referência de exportação inválida.",
+    invalid_operation: "Operação inválida.",
+    lease_expired: "Execução recuperada após expiração.",
+    operation_missing: "Operação não encontrada.",
+    official_cooldown: "Aguardando janela da fonte oficial.",
+    partial_result: "Resultado parcial.",
+    permanent_failure: "Falha permanente.",
+    policy_required: "Política de processamento necessária.",
+    recovery_required: "Recuperação manual necessária.",
+    render_audit_unavailable: "Auditoria de renderização indisponível.",
+    render_reference_invalid: "Referência de renderização inválida.",
+    render_reference_missing: "Referência de renderização ausente.",
+    renderer_failed: "Falha na renderização.",
+    retry_exhausted: "Tentativas esgotadas.",
+    temporary_failure: "Falha temporária.",
+  }[code] ?? "Falha de processamento sem detalhes.";
 }
 
 function queryErrorFor(status: number): "unavailable" | "invalid" | "degraded" {
@@ -55,21 +82,26 @@ export function JobObservabilityPanel({ loadSignal, notify }: JobObservabilityPa
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [queryError, setQueryError] = useState<"unavailable" | "invalid" | "degraded" | "">("");
+  const requestSequence = useRef(0);
 
   const loadJobs = useCallback(async (selected: JobObservabilityFilter) => {
+    const sequence = requestSequence.current + 1;
+    requestSequence.current = sequence;
     setLoading(true);
     setError("");
     setQueryError("");
     try {
-      setResult(await listJobObservability(selected));
+      const nextResult = await listJobObservability(selected);
+      if (sequence !== requestSequence.current) return;
+      setResult(nextResult);
     } catch (caught: unknown) {
+      if (sequence !== requestSequence.current) return;
       const status = caught instanceof ApiError ? caught.status : 0;
       setQueryError(queryErrorFor(status));
-      setResult(null);
       setError("Não foi possível consultar os jobs de processamento.");
       notify("Não foi possível consultar os jobs de processamento.");
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
   }, [notify]);
 
@@ -99,7 +131,13 @@ export function JobObservabilityPanel({ loadSignal, notify }: JobObservabilityPa
       {queryError === "invalid" && <Feedback state="error" message="O filtro de jobs é inválido." />}
       {queryError === "unavailable" && <Feedback state="unavailable" message="Os jobs de processamento estão indisponíveis." />}
       {queryError === "degraded" && <Feedback state="degraded" message="A consulta de jobs está degradada." />}
-      {!loading && !error && result && (
+      {result && (loading || error) && (
+        <div className="dashboard-state dashboard-state--stale" role="status" aria-live="polite">
+          <Badge variant="warning">Desatualizado</Badge>
+          <p>A última leitura segura dos jobs permanece visível enquanto a consulta é atualizada ou revalidada.</p>
+        </div>
+      )}
+      {result && (
         <>
           <p>
             Filtro aplicado: {filterLabel(result.filter.filter)} · {result.filter.from} até {result.filter.to} · limite {result.limit} · {result.boundary}
@@ -121,7 +159,7 @@ export function JobObservabilityPanel({ loadSignal, notify }: JobObservabilityPa
                     <td>{outcomeLabel(job.outcome)}</td>
                     <td>{job.attempt_count}</td>
                     <td>{job.created_at}</td>
-                    <td>{job.safe_error || "—"}</td>
+                    <td>{job.safe_error ? safeJobErrorLabel(job.safe_error) : "—"}</td>
                   </tr>
                 ))}
               </tbody>

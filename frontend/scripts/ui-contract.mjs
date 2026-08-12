@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import App, { AuthenticatedApp, navigationItemsForRole, navigationKeyFromHash } from "../src/App";
+import { DashboardPresentation } from "../src/features/dashboard/DashboardSection";
 import { Button, DataTable, Field, Panel, Badge } from "../src/shared/ui/primitives";
 import { Feedback, feedbackStates } from "../src/shared/ui/Feedback";
 
@@ -196,4 +197,139 @@ const anonymousMarkup = renderToStaticMarkup(React.createElement(App));
 assert.match(anonymousMarkup, /Acesse sua conta\./);
 assert.doesNotMatch(anonymousMarkup, /app-shell__sidebar/);
 
-console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, shell landmarks, role navigation, anchors, active state, focus and blocked action behavior.`);
+const syntheticDashboard = {
+  read_only: true,
+  evaluated_at: "2026-08-12T12:00:00+00:00",
+  period: {
+    current: { from: "2026-08-01", to: "2026-09-01" },
+    previous: { from: "2026-07-01", to: "2026-08-01" },
+    boundary: "[from,to)",
+  },
+  cards: [
+    {
+      id: "companies.active",
+      label: "Empresas ativas",
+      kind: "snapshot",
+      current: { value: 2, status: "ready", freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 } },
+      previous: null,
+      status: "ready",
+      freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 },
+      drilldown: { href: "?lifecycle=active#empresas", filters: { lifecycle: "active" } },
+    },
+    {
+      id: "documents.total",
+      label: "Documentos no período",
+      kind: "period",
+      current: { value: 5, status: "ready", freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 } },
+      previous: { value: 0, status: "zero", freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 } },
+      status: "ready",
+      freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 },
+      drilldown: { href: "?from=2026-08-01&to=2026-09-01#documentos", filters: { from: "2026-08-01", to: "2026-09-01" } },
+    },
+    {
+      id: "documents.nfse",
+      label: "NFS-e",
+      kind: "period",
+      current: { value: null, status: "unavailable", freshness: { status: "unknown", evaluated_at: null, age_seconds: null } },
+      previous: { value: null, status: "unavailable", freshness: { status: "unknown", evaluated_at: null, age_seconds: null } },
+      status: "unavailable",
+      freshness: { status: "unknown", evaluated_at: null, age_seconds: null },
+      drilldown: null,
+    },
+    {
+      id: "collections.partial",
+      label: "Coletas parciais",
+      kind: "period",
+      current: { value: 1, status: "partial", freshness: { status: "stale", evaluated_at: "2026-08-12T11:00:00+00:00", age_seconds: 3600 } },
+      previous: { value: null, status: "unavailable", freshness: { status: "unknown", evaluated_at: null, age_seconds: null } },
+      status: "degraded",
+      freshness: { status: "stale", evaluated_at: "2026-08-12T11:00:00+00:00", age_seconds: 3600 },
+      drilldown: { href: "?from=2026-08-01&to=2026-09-01&state=partial#coletas", filters: { from: "2026-08-01", to: "2026-09-01", state: "partial" } },
+    },
+    {
+      id: "jobs.pending",
+      label: "Processamento pendente",
+      kind: "period",
+      current: { value: 1, status: "ready", freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 } },
+      previous: { value: 0, status: "zero", freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 } },
+      status: "ready",
+      freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 },
+      drilldown: { href: "?from=2026-08-01&to=2026-09-01&filter=pending#dashboard", filters: { from: "2026-08-01", to: "2026-09-01", filter: "pending" } },
+    },
+    {
+      id: "certificates.expired",
+      label: "Certificados vencidos",
+      kind: "snapshot",
+      current: { value: 0, status: "zero", freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 } },
+      previous: null,
+      status: "zero",
+      freshness: { status: "fresh", evaluated_at: "2026-08-12T12:00:00+00:00", age_seconds: 0 },
+      drilldown: { href: "?filter=expired#empresas", filters: { filter: "expired" } },
+    },
+  ],
+  capabilities: {
+    fiscal_sources: { status: "unavailable", reason: "not_implemented" },
+    documents: { status: "available", reason: "persisted_document_contract" },
+    rendering: { status: "available", reason: "brazilfiscalreport:1.0.1" },
+    backup: { status: "available", reason: "p9_backup_status" },
+  },
+  operational_health: {
+    status: "degraded",
+    dependencies: { postgres: "ready", schema: "ready", minio: "unavailable" },
+    processes: { worker: { status: "stale", age_seconds: 60 }, scheduler: { status: "ready", age_seconds: 0 } },
+    jobs: { status: "ready", queue_counts: { queued: 2, running: 1 } },
+    backlog: { status: "delayed", oldest_due_age_seconds: 600 },
+    backup: {
+      status: "success",
+      latest_backup: { state: "complete", safe_error: "" },
+      latest_success_age_seconds: 60,
+      retention: { daily: 2, weekly: 1, monthly: 1 },
+      latest_restore: { state: "success", safe_error: "" },
+    },
+  },
+};
+
+const dashboardMarkup = renderToStaticMarkup(
+  React.createElement(DashboardPresentation, {
+    dashboard: syntheticDashboard,
+    loading: true,
+    error: "Não foi possível carregar o dashboard.",
+    onRetry: () => {},
+    onOpenJobDrilldown: () => {},
+  }),
+);
+assert.match(dashboardMarkup, /dashboard-group-fiscal/);
+assert.match(dashboardMarkup, /dashboard-group-processing/);
+assert.match(dashboardMarkup, /dashboard-group-certificates/);
+assert.match(dashboardMarkup, /Indicadores fiscais e operacionais/);
+assert.match(dashboardMarkup, /Coletas e processamento/);
+assert.match(dashboardMarkup, /Certificados e capacidades/);
+assert.match(dashboardMarkup, /Período atual/);
+assert.match(dashboardMarkup, /Comparativo anterior/);
+assert.match(dashboardMarkup, /Fronteira: \[from,to\)/);
+assert.match(dashboardMarkup, /Zero real no período/);
+assert.match(dashboardMarkup, /Não disponível/);
+assert.match(dashboardMarkup, /Desatualizada/);
+assert.match(dashboardMarkup, /Indisponível/);
+assert.match(dashboardMarkup, /A última leitura segura permanece visível/);
+assert.match(dashboardMarkup, /Tentar novamente/);
+assert.match(dashboardMarkup, /href="\?from=2026-08-01&amp;to=2026-09-01&amp;filter=pending#dashboard"/);
+assert.match(dashboardMarkup, /Fontes fiscais/);
+assert.match(dashboardMarkup, /Banco de dados/);
+assert.match(dashboardMarkup, /Backup/);
+assert.doesNotMatch(dashboardMarkup, /fiscal_sources|not_implemented|persisted_document_contract|brazilfiscalreport/);
+
+const viewerDashboard = { ...syntheticDashboard, operational_health: undefined, capabilities: { backup: { status: "admin_only", reason: "restricted" } } };
+const viewerDashboardMarkup = renderToStaticMarkup(
+  React.createElement(DashboardPresentation, {
+    dashboard: viewerDashboard,
+    loading: false,
+    error: "",
+    onRetry: () => {},
+    onOpenJobDrilldown: () => {},
+  }),
+);
+assert.doesNotMatch(viewerDashboardMarkup, /dashboard-operational-health|Dependências|Processos|Backlog/);
+assert.match(viewerDashboardMarkup, /Somente Administrador/);
+
+console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, shell landmarks, dashboard groups/states/RBAC, role navigation, anchors, active state, focus and blocked action behavior.`);
