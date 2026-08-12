@@ -3,12 +3,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import App, { AuthenticatedApp, navigationItemsForRole, navigationKeyFromHash } from "../src/App";
 import { Button, DataTable, Field, Panel, Badge } from "../src/shared/ui/primitives";
 import { Feedback, feedbackStates } from "../src/shared/ui/Feedback";
 
 const css = readFileSync(resolve(process.cwd(), "src/shared/ui/tokens.css"), "utf8");
 const primitiveSource = readFileSync(resolve(process.cwd(), "src/shared/ui/primitives.ts"), "utf8");
 const feedbackSource = readFileSync(resolve(process.cwd(), "src/shared/ui/Feedback.ts"), "utf8");
+const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
+const companiesSource = readFileSync(resolve(process.cwd(), "src/features/companies/CompaniesSection.tsx"), "utf8");
 
 function cssVariables(source) {
   return Object.fromEntries(
@@ -137,4 +140,60 @@ const unsafe = renderToStaticMarkup(
 assert.doesNotMatch(unsafe, /password=synthetic|<xml>|internal\/file\.xml/);
 assert.match(unsafe, /Não foi possível concluir a operação\./);
 
-console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, semantic primitives, focus and blocked action behavior.`);
+const syntheticWindow = {
+  location: { hash: "#empresas", search: "" },
+  addEventListener() {},
+  removeEventListener() {},
+};
+globalThis.window = syntheticWindow;
+
+const adminUser = { id: "admin", name: "Admin sintético", email: "admin@example.test", role: "administrador" };
+const operatorUser = { id: "operator", name: "Operador sintético", email: "operator@example.test", role: "operador" };
+const viewerUser = { id: "viewer", name: "Visualizador sintético", email: "viewer@example.test", role: "visualizador" };
+const noop = async () => {};
+const notify = () => {};
+
+const adminMarkup = renderToStaticMarkup(
+  React.createElement(AuthenticatedApp, { user: adminUser, signOut: noop, notify, message: "" }),
+);
+const operatorMarkup = renderToStaticMarkup(
+  React.createElement(AuthenticatedApp, { user: operatorUser, signOut: noop, notify, message: "" }),
+);
+const viewerMarkup = renderToStaticMarkup(
+  React.createElement(AuthenticatedApp, { user: viewerUser, signOut: noop, notify, message: "" }),
+);
+
+assert.match(adminMarkup, /<header class="app-shell__header">/);
+assert.match(adminMarkup, /<aside class="app-shell__sidebar" aria-label="Barra lateral">/);
+assert.match(adminMarkup, /<nav class="app-shell__nav" aria-label="Navegação principal">/);
+assert.match(adminMarkup, /<a class="app-shell__skip" href="#main-content">Pular para o conteúdo principal<\/a>/);
+assert.match(adminMarkup, /<main id="main-content" class="app-shell__main" tabindex="-1">/);
+assert.match(adminMarkup, /href="#empresas"[^>]*aria-current="page"/);
+assert.equal((adminMarkup.match(/id="certificados"/g) ?? []).length, 1);
+
+for (const anchor of ["dashboard", "documentos", "exportacoes", "empresas", "certificados", "coletas", "usuarios", "auditoria", "retencao"]) {
+  assert.match(adminMarkup, new RegExp(`href="#${anchor}"`), `administrator navigation must publish #${anchor}`);
+}
+
+for (const item of navigationItemsForRole("administrador")) assert.match(adminMarkup, new RegExp(`href="${item.href}"`));
+for (const item of navigationItemsForRole("operador")) assert.match(operatorMarkup, new RegExp(`href="${item.href}"`));
+for (const item of navigationItemsForRole("visualizador")) assert.match(viewerMarkup, new RegExp(`href="${item.href}"`));
+assert.doesNotMatch(operatorMarkup, /href="#usuarios"|href="#auditoria"|href="#retencao"/);
+assert.doesNotMatch(viewerMarkup, /href="#empresas"|href="#certificados"|href="#usuarios"|href="#auditoria"|href="#retencao"/);
+assert.doesNotMatch(viewerMarkup, /id="certificados"/);
+
+assert.equal(navigationKeyFromHash("#dashboard"), "dashboard");
+assert.equal(navigationKeyFromHash("#certificados"), "certificates");
+assert.equal(navigationKeyFromHash("#empresas"), "companies");
+assert.equal(navigationKeyFromHash("#unknown"), null);
+assert.match(appSource, /addEventListener\("hashchange"/);
+assert.match(appSource, /onClick=\{\(\) => selectNavigation\(item\)\}/);
+assert.match(companiesSource, /<section id="certificados"/);
+assert.equal((companiesSource.match(/id="certificados"/g) ?? []).length, 1);
+assert.doesNotMatch(appSource, /fetch\(|localStorage|sessionStorage|document\.cookie/);
+
+const anonymousMarkup = renderToStaticMarkup(React.createElement(App));
+assert.match(anonymousMarkup, /Acesse sua conta\./);
+assert.doesNotMatch(anonymousMarkup, /app-shell__sidebar/);
+
+console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, shell landmarks, role navigation, anchors, active state, focus and blocked action behavior.`);

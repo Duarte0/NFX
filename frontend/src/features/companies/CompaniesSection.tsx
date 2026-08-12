@@ -150,7 +150,10 @@ export function CompaniesSection({ loadSignal, notify }: CompaniesSectionProps) 
   return (
     <section id="empresas">
       <h2>Empresas</h2>
-      <CertificateInventoryPanel loadSignal={loadSignal} />
+      <section id="certificados" aria-labelledby="certificados-heading">
+        <h3 id="certificados-heading">Certificados</h3>
+        <CertificateInventoryPanel loadSignal={loadSignal} />
+      </section>
       <button onClick={() => void loadCompanies()}>Atualizar empresas</button>
       {loading && <p role="status">Carregando empresas…</p>}
       <Feedback message={error} state="error" />

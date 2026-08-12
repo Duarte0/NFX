@@ -39,6 +39,29 @@ determinística é `npm --prefix frontend run test:ui-contract`; ela valida os o
 de contraste documentados, semântica, foco, labels, bloqueio e ausência de efeitos colaterais sem
 introduzir dependências ou infraestrutura de browser.
 
+## Shell de aplicação P10-02
+
+`frontend/src/App.tsx` continua sendo o composition root e agora publica o shell autenticado em
+um grid desktop/notebook com header institucional, sidebar nomeada e landmark `main`. O modelo
+tipado `navigationModel` é a única fonte da navegação: filtra Administrador, Operador e
+Visualizador conforme a matriz existente, conserva os hashes e dispara somente os `loadSignal`
+que já pertenciam aos links. O item correspondente ao hash inicial e a eventos `hashchange`
+recebe `aria-current="page"` e a classe visual ativa; parâmetros de consulta e URLs de
+drill-down não são reescritos.
+
+O skip link aponta para `#main-content`, que recebe foco por ser programaticamente focalizável.
+`#certificados` é um único destino dentro de `CompaniesSection`, sob a mesma barreira
+`canManage`; não há rota, endpoint ou feature paralela. O header mantém somente marca,
+identidade/papel, logout e contexto de Brasília/R$, enquanto notificações seguras permanecem no
+landmark principal. A composição usa os tokens P10-01, mantém labels visíveis e reserva a grade
+de duas colunas para larguras desktop/notebook a partir de 1024 px.
+
+O contrato UI renderiza contextos sintéticos dos três papéis e verifica landmarks, skip link,
+foco, estado ativo, hashes, destino único de certificado, visibilidade negativa e ausência de
+efeitos de rede/persistência. Não existe runner de browser ou navegador instalado neste checkout;
+Chrome, Firefox e Edge continuam sendo a matriz manual de validação para a homologação visual
+posterior, sem introduzir infraestrutura de teste nesta fatia.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes
