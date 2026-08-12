@@ -60,6 +60,16 @@ the same before starting web, worker and scheduler, verifies liveness/readiness 
 background processes start their durable loops. Set `TEST_RUN_ID` to run two suites in parallel
 with predictable distinct project/bucket names.
 
+## Entrega do build React no runtime
+
+`npm --prefix frontend run build` produz `frontend/dist`; a imagem `app` copia esse diretório
+para `/app/frontend/dist`. A rota `GET /` lê somente o `index.html` desse diretório fixo e
+retorna `503` quando o build não está presente. URLs publicadas sob `/assets/` são lidas do
+subdiretório de assets do mesmo build, com MIME derivado do arquivo; caminhos ausentes,
+malformados, traversal ou symlinks que escapem do build retornam `404`. Não há fallback SPA nem
+servidor de arquivos genérico. O `make smoke` compara o HTML e cada asset referenciado com os
+artefatos dentro do container e exercita os caminhos inválidos.
+
 ## Exportação ZIP P8-01
 
 `nfx.exports` owns the request, frozen P7 filter snapshot, document/artifact items, composition

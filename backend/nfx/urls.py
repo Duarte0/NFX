@@ -1,3 +1,6 @@
+from mimetypes import guess_type
+from pathlib import Path
+
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.urls import path
 
@@ -15,9 +18,89 @@ from nfx.jobs import views as job_views
 from nfx.operations.views import dashboard
 from nfx.retention import views as retention_views
 
+FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+
+
+def _fixed_distribution_root() -> Path | None:
+    try:
+        resolved = FRONTEND_DIST.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+    if resolved != FRONTEND_DIST or not resolved.is_dir():
+        return None
+    return resolved
+
+
+def _resolved_regular_file(root: Path, candidate: Path) -> Path | None:
+    try:
+        resolved = candidate.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+    if root not in resolved.parents or not resolved.is_file():
+        return None
+    return resolved
+
+
+def _read_file(root: Path, candidate: Path) -> tuple[Path, bytes] | None:
+    resolved = _resolved_regular_file(root, candidate)
+    if resolved is None:
+        return None
+    try:
+        return resolved, resolved.read_bytes()
+    except OSError:
+        return None
+
 
 def index(_: HttpRequest) -> HttpResponse:
-    return HttpResponse("NFX INOV foundation", content_type="text/plain; charset=utf-8")
+    distribution = _fixed_distribution_root()
+    build = _read_file(distribution, distribution / "index.html") if distribution else None
+
+    if build is None:
+        return HttpResponse(
+            "Frontend build não encontrado.",
+            status=503,
+            content_type="text/plain; charset=utf-8",
+        )
+
+    return HttpResponse(
+        build[1],
+        content_type="text/html; charset=utf-8",
+    )
+
+
+def frontend_asset(_request: HttpRequest, asset_path: str) -> HttpResponse:
+    path_parts = asset_path.split("/")
+    if (
+        not asset_path
+        or "\\" in asset_path
+        or "\x00" in asset_path
+        or any(part in {"", ".", ".."} for part in path_parts)
+        or path_parts[0] == "assets"
+    ):
+        return HttpResponse(status=404)
+
+    distribution = _fixed_distribution_root()
+    if distribution is None:
+        return HttpResponse(status=404)
+
+    assets_root = distribution / "assets"
+    try:
+        resolved_assets_root = assets_root.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return HttpResponse(status=404)
+    if resolved_assets_root != assets_root or not resolved_assets_root.is_dir():
+        return HttpResponse(status=404)
+
+    asset = _read_file(assets_root, assets_root / asset_path)
+    if asset is None:
+        return HttpResponse(status=404)
+
+    content_type, _ = guess_type(asset[0].name)
+
+    return HttpResponse(
+        asset[1],
+        content_type=content_type or "application/octet-stream",
+    )
 
 
 def live(_: HttpRequest) -> JsonResponse:
@@ -32,6 +115,7 @@ def ready(_: HttpRequest) -> JsonResponse:
 
 urlpatterns = [
     path("", index),
+    path("assets/<path:asset_path>", frontend_asset),
     path("health/live", live),
     path("health/ready", ready),
     path("health/operational", operational),

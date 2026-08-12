@@ -5,9 +5,9 @@
 | Campo | Valor |
 |---|---|
 | Produto | NFX INOV |
-| Atualizado em | 2026-08-11 |
+| Atualizado em | 2026-08-12 |
 | Fontes avaliadas | Código/migrações/configuração, testes, PRD, arquitetura, specs, issues e histórico Git |
-| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03/P9-04 concluídos; P8-02 tem slice inicial, integração Admin-only do status de backup e drill-downs de coleta, documentos, empresas, certificados e jobs concluídos nos issues 0018/0025–0030; fontes P5–P7, rendering, disco e P9-05 seguem pendentes. |
+| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03/P9-04 concluídos; o follow-up P0 de entrega da rota raiz React foi concluído e verificado no issue 0032; P8-02 tem slice inicial, integração Admin-only do status de backup e drill-downs de coleta, documentos, empresas, certificados e jobs concluídos nos issues 0018/0025–0030; fontes P5–P7, rendering, disco e P9-05 seguem pendentes. |
 
 Código e migrações definem a baseline; testes definem o comportamento verificado. PRD e arquitetura definem o comportamento pretendido. Esta atualização não altera a árvore de produto nem reabre entregas concluídas sem evidência de lacuna.
 
@@ -30,6 +30,7 @@ Código e migrações definem a baseline; testes definem o comportamento verific
 | P9-01/P9-02 | Compose runtime/proxy, `backup`, migração `0016`, comandos e runbooks | issues 0016/0017; testes de topology e backup/restore isolado. |
 | P9-03 — exclusão controlada | `DeletionOperation`/`DeletionItem`, migration `0020`, saga `retention.delete`, recovery, auditoria, métricas e UI Admin | issue 0024; unitários, integração PostgreSQL/MinIO isolada, migration check, lint/mypy/build. |
 | P9-04 — hardening integrado | `docs/P9_HARDENING.md`, matriz de ameaças/limites, falhas Architecture §40, canários redigidos, ensaio PostgreSQL de 200 empresas/400 fluxos/jobs e runbook efêmero | issue 0031; focused P9 test, ephemeral restart/fault exercise, full validation; backup físico permanece residual de P9-05. |
+| P0 follow-up — entrega do build React | `backend/nfx/urls.py` serve o artefato Vite fixo, confina assets resolvidos e preserva API/health/session; Docker `app` mantém `frontend/dist` no runtime | issue 0032; testes HTTP sintéticos, MIME/containment, leituras concorrentes, build Vite e smoke de imagem/runtime. |
 
 ### Implementado, porém parcial ou com documentação/teste a consolidar
 

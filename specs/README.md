@@ -2,7 +2,7 @@
 
 ## Autoridade, baseline e regra de uso
 
-Estas 25 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão concluídos; a higiene do template de ambiente foi verificada no issue 0007 e o contrato reproduzível de `make build` foi concluído no issue 0008. O issue 0011 concluiu a extração arquitetural transversal do frontend sem alterar o status ou o contrato de nenhuma spec P1–P4. O issue 0015 concluiu os slices P7-01/P7-02 de consulta e download individual; o issue 0019 concluiu P8-03 com cálculo-on-read e prévia administrativa; o issue 0023 concluiu P7-03 com renderer pinado, worker, artefatos derivados e UI; o issue 0024 concluiu P9-03 com saga de exclusão controlada e recovery; os issues 0026–0030 concluíram os slices de drill-down de coleta, documentos, empresas, certificados e jobs em P8-02.
+Estas 26 specs são o handoff de implementação do MVP. `PRD.md` é autoridade de produto; `ARCHITECTURE.md`, de decisões/invariantes; `IMPLEMENTATION_PLAN.md`, de backlog e sequência; o código existente, da baseline real. P0, P1 e P2 estão concluídos; a higiene do template de ambiente foi verificada no issue 0007 e o contrato reproduzível de `make build` foi concluído no issue 0008. O issue 0011 concluiu a extração arquitetural transversal do frontend sem alterar o status ou o contrato de nenhuma spec P1–P4. O issue 0015 concluiu os slices P7-01/P7-02 de consulta e download individual; o issue 0019 concluiu P8-03 com cálculo-on-read e prévia administrativa; o issue 0023 concluiu P7-03 com renderer pinado, worker, artefatos derivados e UI; o issue 0024 concluiu P9-03 com saga de exclusão controlada e recovery; os issues 0026–0030 concluíram os slices de drill-down de coleta, documentos, empresas, certificados e jobs em P8-02; o issue 0032 concluiu a entrega verificada do build React na rota raiz.
 
 Uma spec individual fica concluída somente quando seu próprio DoD tem evidência. Uma fase fica concluída somente quando todas as specs da fase estão concluídas; marcar uma spec não marca automaticamente a fase. O issue 0031 concluiu P9-04 com evidência integrada redigida, sem fechar as lacunas externas explicitamente atribuídas a P9-05.
 
@@ -12,6 +12,7 @@ Uma spec individual fica concluída somente quando seu próprio DoD tem evidênc
 |---:|:---:|---|---|---|---|
 | 1 | [x] | [p0-project-foundation.md](p0-project-foundation.md) | P0 | P0-01, P0-03, P0-05 | Nenhuma spec anterior; baseline implementada |
 | 2 | [x] | [p0-safe-configuration-and-test-isolation.md](p0-safe-configuration-and-test-isolation.md) | P0 | P0-02, P0-04 | P0-01 |
+| 2a | [x] | [p0-frontend-build-delivery.md](p0-frontend-build-delivery.md) | Follow-up P0 | Build React na rota raiz, MIME, containment, falhas seguras e smoke de imagem concluídos no issue 0032 | Fundação, shell P1 |
 | 3 | [x] | [p1-persistence-and-migrations.md](p1-persistence-and-migrations.md) | P1 | P1-01 | P0-03 |
 | 4 | [x] | [p1-object-storage-and-integrity.md](p1-object-storage-and-integrity.md) | P1 | P1-06 | P0-03, P1-01 |
 | 5 | [x] | [p1-authentication-sessions-and-rbac.md](p1-authentication-sessions-and-rbac.md) | P1 | P1-02, P1-03, P1-07 | P0-02, P1-01 |
