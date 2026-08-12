@@ -83,6 +83,22 @@ browser usa `docker compose -f docker-compose.test.yml run --rm --no-deps browse
 90 testes em Chrome, Firefox e Edge nas larguras 1024, 1280 e 1440 px, incluindo grupos, estados,
 período comparativo, deep links, teclado, overflow e redaction Admin-only.
 
+## Documentos P10-04
+
+`frontend/src/features/documents/DocumentsSection.tsx` mantém os filtros P7 e os parâmetros de
+deep link como estado de localização, exibe os totais, limite, truncamento, cursor opaco e
+fronteira `[from,to)` recebidos do servidor e conserva a última leitura segura durante loading ou
+erro. Rótulos allowlisted distinguem consulta vazia, cobertura, quarentena, conflito, falha,
+bloqueio e os estados de PDF sem renderizar códigos técnicos.
+
+O detalhe mantém a identidade do documento junto às ações XML/original e PDF. Downloads e
+regeneração usam somente URLs fornecidos pelo owner; a operação PDF é protegida contra duplo
+envio e recarrega o estado durável. O contrato `npm --prefix frontend run test:ui-contract` cobre
+cursor, deep links, estados, stale/error/retry, redaction e ações com fixtures sintéticas. A
+matriz Docker cobre 135 testes em Chrome, Firefox e Edge nas larguras 1024, 1280 e 1440 px para
+Administrador, Operador, Visualizador e sessões anônima/expirada. Não há endpoint, migration,
+dependência ou dado fiscal novo.
+
 ## Decisões Proposed adotadas
 
 - A árvore física é `backend/`, `frontend/`, `tests/`, `scripts/` e `docs/`. Os pacotes

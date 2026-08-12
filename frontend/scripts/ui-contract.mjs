@@ -5,6 +5,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import App, { AuthenticatedApp, navigationItemsForRole, navigationKeyFromHash } from "../src/App";
 import { DashboardPresentation } from "../src/features/dashboard/DashboardSection";
+import { DocumentsPresentation } from "../src/features/documents/DocumentsSection";
 import { Button, DataTable, Field, Panel, Badge } from "../src/shared/ui/primitives";
 import { Feedback, feedbackStates } from "../src/shared/ui/Feedback";
 
@@ -13,6 +14,7 @@ const primitiveSource = readFileSync(resolve(process.cwd(), "src/shared/ui/primi
 const feedbackSource = readFileSync(resolve(process.cwd(), "src/shared/ui/Feedback.ts"), "utf8");
 const appSource = readFileSync(resolve(process.cwd(), "src/App.tsx"), "utf8");
 const companiesSource = readFileSync(resolve(process.cwd(), "src/features/companies/CompaniesSection.tsx"), "utf8");
+const documentsSource = readFileSync(resolve(process.cwd(), "src/features/documents/DocumentsSection.tsx"), "utf8");
 
 function cssVariables(source) {
   return Object.fromEntries(
@@ -331,5 +333,155 @@ const viewerDashboardMarkup = renderToStaticMarkup(
 );
 assert.doesNotMatch(viewerDashboardMarkup, /dashboard-operational-health|Dependências|Processos|Backlog/);
 assert.match(viewerDashboardMarkup, /Somente Administrador/);
+
+const documentItem = {
+  id: "document-synthetic-1",
+  company_id: "company-synthetic-1",
+  company_name: "Empresa sintética",
+  family: "nfe",
+  role: "entrada",
+  category: "document",
+  source: "simulator",
+  flow: "distribution",
+  identity: "doc-synthetic-1",
+  identity_kind: "synthetic",
+  emitted_at: "2026-08-12T10:00:00+00:00",
+  authorized_at: "2026-08-12T10:01:00+00:00",
+  competence: "2026-08-01",
+  situation: "authorized",
+  outcome: "persisted",
+  evidence_available: true,
+  xml_available: true,
+  pdf_available: true,
+  pdf_state: "available",
+  pdf_error: null,
+  detail_url: "/api/documents/document-synthetic-1",
+  download_url: "/api/documents/document-synthetic-1/download",
+  reason_code: null,
+};
+
+const documentResponse = {
+  status: "available",
+  reason_code: "documents_available",
+  documents: [documentItem],
+  collection_states: [{ company_id: "company-synthetic-1", family: "nfe", flow: "distribution", status: "available", reason_code: "documents_available" }],
+  total: 3,
+  limit: 1,
+  truncated: true,
+  filter: { from: "2026-08-01", to: "2026-09-01", family: "nfe", direction: "entrada" },
+  boundary: "[from,to)",
+  next_cursor: "opaque.synthetic.cursor",
+};
+
+const documentDetail = {
+  id: "document-synthetic-1",
+  company: { id: "company-synthetic-1", name: "Empresa sintética" },
+  family: "nfe",
+  role: "entrada",
+  category: "document",
+  source: "simulator",
+  flow: "distribution",
+  identity: { kind: "synthetic", value: "doc-synthetic-1" },
+  dates: { emitted_at: "2026-08-12T10:00:00+00:00", authorized_at: "2026-08-12T10:01:00+00:00", competence: "2026-08-01" },
+  situation: "authorized",
+  state: "authorized",
+  collection: { origin_execution_ref: "execution-synthetic-1" },
+  parties: { issuer: null, recipient: null, provider: null },
+  value_total: null,
+  artifacts: [{ id: "artifact-synthetic-1", digest_prefix: "redacted", size_bytes: 12, content_type: "application/xml", availability: "available" }],
+  events: [{ id: "event-synthetic-1", family: "nfe", category: "substitution", source: "simulator", flow: "distribution", identity: "event-synthetic-1", occurred_at: "2026-08-12T11:00:00+00:00", situation: "cancelled", relationship_type: "substitution", state: "cancelled", artifacts: [] }],
+  availability: { xml: true, original: true, pdf: true },
+  pdf: { id: "render-synthetic-1", state: "available", safe_error: null, renderer_id: "redacted", renderer_version: "redacted", representation: "danfe", pdf_type: "danfe", digest_prefix: "redacted", size_bytes: 20, content_type: "application/pdf", request_url: "/api/documents/document-synthetic-1/pdf/render", download_url: "/api/documents/document-synthetic-1/pdf" },
+  download_url: "/api/documents/document-synthetic-1/download",
+};
+
+const documentPresentationProps = {
+  documents: documentResponse,
+  activeQuery: new globalThis.URLSearchParams("from=2026-08-01&to=2026-09-01&family=nfe&direction=entrada&cursor=opaque.synthetic.cursor"),
+  detail: documentDetail,
+  loading: false,
+  detailLoading: false,
+  stale: false,
+  error: "",
+  queryError: "",
+  detailError: "",
+  pdfActionError: "",
+  selectedDocumentId: documentDetail.id,
+  pdfBusyId: null,
+  onRetry: () => {},
+  onRetryDetail: () => {},
+  onNextPage: () => {},
+  onSelectDocument: () => {},
+  onDownload: () => {},
+  onRequestPdf: () => {},
+  onCloseDetail: () => {},
+};
+
+const documentMarkup = renderToStaticMarkup(
+  React.createElement(DocumentsPresentation, documentPresentationProps),
+);
+assert.match(documentMarkup, /Resultados dos documentos/);
+assert.match(documentMarkup, /total informado pelo servidor: 3/);
+assert.match(documentMarkup, /Próxima página/);
+assert.match(documentMarkup, /Baixar XML/);
+assert.match(documentMarkup, /Baixar PDF/);
+assert.match(documentMarkup, /Regenerar PDF/);
+assert.match(documentMarkup, /Substituição/);
+assert.match(documentMarkup, /Cancelado/);
+assert.doesNotMatch(documentMarkup, /documents_available|content_hash_mismatch|renderer_id|execution-synthetic-1|object_key/);
+assert.match(documentsSource, /listInFlight/);
+assert.match(documentsSource, /detailInFlight/);
+assert.match(documentsSource, /pdfBusyId/);
+assert.match(documentsSource, /document\.pdf\.request_url/);
+assert.doesNotMatch(documentsSource, /`\/api\/documents\/\$\{document\.id\}\/pdf`/);
+
+const expectedDocumentStatuses = {
+  available: "Documentos disponíveis",
+  valid_empty: "Consulta válida sem documentos",
+  unavailable: "Documentos indisponíveis",
+  no_coverage: "Sem cobertura",
+  unknown: "Estado não reconhecido",
+  partial: "Resultado parcial",
+  retry: "Nova tentativa pendente",
+  blocked: "Coleta bloqueada",
+};
+for (const [status, label] of Object.entries(expectedDocumentStatuses)) {
+  const stateMarkup = renderToStaticMarkup(
+    React.createElement(DocumentsPresentation, {
+      ...documentPresentationProps,
+      documents: { ...documentResponse, status, documents: [] },
+      detail: null,
+      selectedDocumentId: null,
+    }),
+  );
+  assert.match(stateMarkup, new RegExp(label));
+  assert.doesNotMatch(stateMarkup, /source_unavailable|collection_blocked|provider details/);
+}
+
+for (const pdfState of ["pending", "failed", "unsupported", "unavailable"]) {
+  const stateMarkup = renderToStaticMarkup(
+    React.createElement(DocumentsPresentation, {
+      ...documentPresentationProps,
+      detail: { ...documentDetail, pdf: { ...documentDetail.pdf, state: pdfState, download_url: null, safe_error: "renderer_unavailable" } },
+    }),
+  );
+  assert.match(stateMarkup, new RegExp(pdfState === "pending" ? "Em processamento" : pdfState === "failed" ? "Falha na geração" : pdfState === "unsupported" ? "Não suportado" : "Indisponível"));
+  assert.doesNotMatch(stateMarkup, /renderer_unavailable/);
+}
+
+const staleDocumentMarkup = renderToStaticMarkup(
+  React.createElement(DocumentsPresentation, {
+    ...documentPresentationProps,
+    loading: true,
+    stale: true,
+    error: "Não foi possível consultar os documentos.",
+    detail: null,
+    selectedDocumentId: null,
+    queryError: "degraded",
+  }),
+);
+assert.match(staleDocumentMarkup, /Leitura desatualizada/);
+assert.match(staleDocumentMarkup, /Tentar novamente/);
+assert.match(staleDocumentMarkup, /Empresa sintética/);
 
 console.log(`UI contract verified: ${feedbackStates.length} feedback states, ${contrastPairs.length} contrast pairs, shell landmarks, dashboard groups/states/RBAC, role navigation, anchors, active state, focus and blocked action behavior.`);

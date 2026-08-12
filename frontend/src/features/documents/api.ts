@@ -11,11 +11,11 @@ export function getDocument(id: string): Promise<DocumentDetail> {
 }
 
 export function requestPdf(
-  id: string,
+  requestUrl: string,
   regenerate = false,
 ): Promise<{ pdf: DocumentDetail["pdf"] }> {
   return post<{ pdf: DocumentDetail["pdf"] }>(
-    `/api/documents/${encodeURIComponent(id)}/pdf/render`,
+    requestUrl,
     { regenerate },
   );
 }
