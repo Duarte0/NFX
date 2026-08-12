@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from nfx.backup.models import BackupState, RestoreState
 from nfx.backup.services import backup_status
-from nfx.certificates.models import Certificate, CertificateState
+from nfx.certificates.services import certificate_inventory_queryset
 from nfx.collection.models import CollectionExecutionState
 from nfx.collection.services import (
     COLLECTION_DASHBOARD_STATE_FILTERS,
@@ -38,7 +38,6 @@ from nfx.jobs.observability import (
 
 MAX_PERIOD_DAYS = 366
 _ALLOWED_PERIOD_KEYS = frozenset(("from", "to"))
-_CERTIFICATE_WARNING_DAYS = 30
 _BACKUP_RETENTION_LIMITS = {"daily": 7, "weekly": 4, "monthly": 12}
 _BACKUP_STATUS_VALUES = frozenset(("success", "failure", "unavailable"))
 _BACKUP_SAFE_ERRORS = frozenset(
@@ -368,12 +367,9 @@ def _company_counts() -> dict[str, int]:
 
 
 def _certificate_counts(now: datetime) -> dict[str, int]:
-    current = Certificate.objects.filter(state=CertificateState.CURRENT)
-    warning = now + timedelta(days=_CERTIFICATE_WARNING_DAYS)
     return {
-        "current": current.count(),
-        "expired": current.filter(not_after__lt=now).count(),
-        "expiring": current.filter(not_after__gte=now, not_after__lte=warning).count(),
+        filter_name: certificate_inventory_queryset(filter_name, now).count()
+        for filter_name in ("current", "expired", "expiring")
     }
 
 
@@ -586,7 +582,8 @@ def build_dashboard(
                     label=label,
                     value=certificate_counts.get(key) if certificate_counts else None,
                     evaluated_at=evaluated_at,
-                    href="#empresas",
+                    href=f"?filter={key}#empresas",
+                    filters={"filter": key},
                 )
             )
 

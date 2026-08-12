@@ -161,6 +161,28 @@ UUID, com os metadados de empresa já redigidos; a página e o total usam a mesm
 A autorização continua em `Action.ADMINISTER_COMPANIES` no servidor. Falha de banco/fonte retorna
 `503` seguro, nunca zero; leituras repetidas não criam auditoria, mutação, job ou transição.
 
+## Drill-down de certificados do dashboard (P8-02)
+
+Os cards `certificates.current`, `certificates.expired` e `certificates.expiring` do
+`GET /api/dashboard` usam, para Administradores e Operadores, `?filter=current|expired|expiring#empresas`.
+Visualizadores não recebem esses cards nem o inventário protegido por
+`Action.ADMINISTER_CERTIFICATES`.
+
+`GET /api/certificates/inventory` exige exatamente um filtro allowlisted: `current` seleciona
+todos os registros `CertificateState.CURRENT`, `expired` seleciona os correntes com
+`not_after <= evaluated_at`, e `expiring` seleciona os correntes com
+`evaluated_at < not_after <= evaluated_at + 30 dias`. O total e a página limitada usam a mesma
+queryset canônica, ordenada por empresa/certificado UUID, com cursor composto estável. O servidor
+retorna o filtro normalizado, avaliação UTC, frescura e somente identidade segura da empresa,
+estado/status e validade; PFX, senha, chaves, referências de objeto, fingerprint e exceções não
+atravessam o contrato.
+
+Filtros repetidos, desconhecidos, ausentes ou cursores/limites inválidos retornam `400`; falha de
+fonte retorna `503` seguro e não vira zero. A seção `#empresas` hidrata o filtro da URL, mostra
+total reconciliado, avaliação, vazio válido, carregamento, indisponibilidade, degradação e erro
+de filtro sem autorizar ou recalcular no browser. Leituras repetidas não criam auditoria, job,
+mutação ou transição de certificado/empresa.
+
 ## Consulta e download individual (P7-01/P7-02)
 
 `GET /api/documents/<id>` fornece detalhe seguro, incluindo eventos/substituições e disponibilidade

@@ -4,7 +4,7 @@ import math
 import os
 import re
 import uuid
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -15,6 +15,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.serialization import pkcs12
 from django.db import IntegrityError, transaction
+from django.db.models import Q, QuerySet
 from django.utils import timezone
 
 from nfx.artifacts.storage import ArtifactStorageService, ObjectStore, object_store_from_environment
@@ -74,6 +75,121 @@ class CertificateAlreadyAssigned(CertificateError):
 
 class CertificateStorageFailure(CertificateError):
     pass
+
+
+class CertificateInventoryQueryError(ValueError):
+    """A certificate inventory query is outside its bounded read contract."""
+
+
+CERTIFICATE_INVENTORY_FILTERS = frozenset(("current", "expired", "expiring"))
+CERTIFICATE_INVENTORY_QUERY_KEYS = frozenset(("filter", "limit", "cursor"))
+MAX_CERTIFICATE_INVENTORY_ROWS = 100
+
+
+@dataclass(frozen=True)
+class CertificateInventoryCursor:
+    company_id: uuid.UUID
+    certificate_id: uuid.UUID
+
+    @property
+    def payload(self) -> str:
+        return f"{self.company_id}:{self.certificate_id}"
+
+
+@dataclass(frozen=True)
+class CertificateInventoryQuery:
+    filter_name: str
+    limit: int
+    cursor: CertificateInventoryCursor | None
+
+    @property
+    def filter_payload(self) -> dict[str, str]:
+        return {"filter": self.filter_name}
+
+    @property
+    def cursor_payload(self) -> str | None:
+        return self.cursor.payload if self.cursor else None
+
+
+def _inventory_query_values(query: Mapping[str, object], key: str) -> list[object]:
+    getlist = getattr(query, "getlist", None)
+    if callable(getlist):
+        return list(getlist(key))
+    get = getattr(query, "get", None)
+    value = get(key) if callable(get) else None
+    if isinstance(value, list | tuple):
+        return list(value)
+    return [] if value is None else [value]
+
+
+def _inventory_query_single(query: Mapping[str, object], key: str) -> object | None:
+    values = _inventory_query_values(query, key)
+    if len(values) > 1:
+        raise CertificateInventoryQueryError("certificate inventory parameter is repeated")
+    return values[0] if values else None
+
+
+def normalize_certificate_inventory_query(query: Mapping[str, object]) -> CertificateInventoryQuery:
+    """Normalize one explicit inventory filter and bounded cursor page."""
+    keys = set(getattr(query, "keys")())
+    if keys - CERTIFICATE_INVENTORY_QUERY_KEYS:
+        raise CertificateInventoryQueryError("unsupported certificate inventory parameter")
+
+    filter_value = _inventory_query_single(query, "filter")
+    if not isinstance(filter_value, str) or filter_value not in CERTIFICATE_INVENTORY_FILTERS:
+        raise CertificateInventoryQueryError("certificate inventory filter is invalid")
+
+    limit_value = _inventory_query_single(query, "limit")
+    try:
+        limit = int(str(limit_value)) if limit_value is not None else 50
+    except (TypeError, ValueError) as exc:
+        raise CertificateInventoryQueryError("certificate inventory limit is invalid") from exc
+    if limit < 1 or limit > MAX_CERTIFICATE_INVENTORY_ROWS:
+        raise CertificateInventoryQueryError("certificate inventory limit is invalid")
+
+    cursor_value = _inventory_query_single(query, "cursor")
+    cursor: CertificateInventoryCursor | None = None
+    if cursor_value not in (None, ""):
+        if not isinstance(cursor_value, str) or len(cursor_value) > 100:
+            raise CertificateInventoryQueryError("certificate inventory cursor is invalid")
+        parts = cursor_value.split(":")
+        if len(parts) != 2:
+            raise CertificateInventoryQueryError("certificate inventory cursor is invalid")
+        try:
+            cursor = CertificateInventoryCursor(uuid.UUID(parts[0]), uuid.UUID(parts[1]))
+        except ValueError as exc:
+            raise CertificateInventoryQueryError("certificate inventory cursor is invalid") from exc
+
+    return CertificateInventoryQuery(filter_value, limit, cursor)
+
+
+def certificate_inventory_queryset(
+    filter_name: str, evaluated_at: datetime
+) -> QuerySet[Certificate]:
+    """Return the canonical current/expired/expiring certificate selection."""
+    if filter_name not in CERTIFICATE_INVENTORY_FILTERS:
+        raise CertificateInventoryQueryError("certificate inventory filter is invalid")
+    current = Certificate.objects.select_related("company").filter(state=CertificateState.CURRENT)
+    evaluated_utc = _utc(evaluated_at)
+    if filter_name == "expired":
+        current = current.filter(not_after__lte=evaluated_utc)
+    elif filter_name == "expiring":
+        current = current.filter(
+            not_after__gt=evaluated_utc,
+            not_after__lte=evaluated_utc + timedelta(days=30),
+        )
+    return current.order_by("company_id", "id")
+
+
+def certificate_inventory_after_cursor(
+    queryset: QuerySet[Certificate], cursor: CertificateInventoryCursor | None
+) -> QuerySet[Certificate]:
+    if cursor is None:
+        return queryset
+    return queryset.filter(
+        Q(company_id__gt=cursor.company_id)
+        | Q(company_id=cursor.company_id, id__gt=cursor.certificate_id)
+    )
 
 
 @dataclass(frozen=True)
@@ -442,6 +558,25 @@ def certificate_payload(
         "key_version": certificate.key_version,
         "created_at": certificate.created_at.isoformat(),
         "activated_at": certificate.activated_at.isoformat() if certificate.activated_at else None,
+    }
+
+
+def certificate_inventory_row(
+    certificate: Certificate, *, now: datetime
+) -> dict[str, object]:
+    """Serialize only bounded company and certificate metadata for inventory reads."""
+    return {
+        "id": str(certificate.id),
+        "company": {
+            "id": str(certificate.company_id),
+            "cnpj": certificate.company.cnpj,
+            "legal_name": certificate.company.legal_name,
+        },
+        "state": certificate.state,
+        "status": certificate_status(certificate, now=now),
+        "not_before": certificate.not_before.isoformat(),
+        "not_after": certificate.not_after.isoformat(),
+        "days_until_expiry": days_until_expiry(certificate, now=now),
     }
 
 

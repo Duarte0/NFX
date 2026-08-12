@@ -81,6 +81,7 @@ urlpatterns = [
         collection_views.retry,
     ),
     path("api/companies/<uuid:company_id>/certificate", certificate_views.certificate_detail),
+    path("api/certificates/inventory", certificate_views.certificate_inventory),
     path(
         "api/companies/<uuid:company_id>/certificate/upload", certificate_views.certificate_upload
     ),

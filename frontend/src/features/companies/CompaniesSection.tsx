@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ApiError } from "../../shared/http";
 import { Feedback } from "../../shared/ui/Feedback";
+import { CertificateInventoryPanel } from "../certificates/CertificateInventoryPanel";
 import { CertificatePanel } from "../certificates/CertificatePanel";
 import {
   changeCompanyState,
@@ -149,6 +150,7 @@ export function CompaniesSection({ loadSignal, notify }: CompaniesSectionProps) 
   return (
     <section id="empresas">
       <h2>Empresas</h2>
+      <CertificateInventoryPanel loadSignal={loadSignal} />
       <button onClick={() => void loadCompanies()}>Atualizar empresas</button>
       {loading && <p role="status">Carregando empresas…</p>}
       <Feedback message={error} error />

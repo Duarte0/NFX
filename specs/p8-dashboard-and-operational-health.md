@@ -10,7 +10,8 @@
   disco continuam explicitamente indisponíveis para incrementos posteriores; o status seguro de
   backup P9-02 foi integrado no issue 0025; o drill-down de execuções de coleta foi concluído no
   issue 0026; o drill-down de documentos foi concluído no issue 0027; o drill-down de empresas foi
-  concluído no issue 0028. Os drill-downs de certificado e job continuam em slices próprios.
+  concluído no issue 0028; o drill-down de certificados foi concluído no issue 0029. O drill-down
+  de jobs continua em slice próprio.
 
 ## Propósito e resultado
 
@@ -67,7 +68,7 @@ persistido. A resposta limita a página a 50 linhas, ordena por timestamp/UUID, 
 somente metadados redigidos. Falha da fonte retorna indisponibilidade/degradação sem zero inventado.
 O slice é coberto por testes unitários de parsing e integração PostgreSQL/MinIO de reconciliação,
 limites, RBAC, redaction, erro e no-write, além do contrato TypeScript/ESLint/Vite. Os demais
-cards clicáveis permanecem pendentes nos issues 0028–0030.
+cards clicáveis permanecem pendentes no issue 0030.
 
 ### Evidência do slice de documentos — issue 0027
 
@@ -104,3 +105,26 @@ O incremento não cria migration, cache, snapshot, job, auditoria, mutação ou 
 Testes unitários e integração PostgreSQL/MinIO cobrem os três estados, reconciliação, zero,
 paginação, RBAC, sessão expirada, filtros inválidos, falha isolada, redaction e no-write; o
 contrato frontend é verificado por TypeScript/ESLint/Vite.
+
+### Evidência do slice de certificados — issue 0029
+
+Os cards `certificates.current`, `certificates.expired` e `certificates.expiring` compartilham
+com `GET /api/certificates/inventory` o owner `nfx.certificates` e o filtro allowlisted
+`filter=current|expired|expiring`. `current` seleciona exatamente registros com
+`CertificateState.CURRENT`; `expired` usa `not_after <= evaluated_at`; e `expiring` usa
+`evaluated_at < not_after <= evaluated_at + 30 dias`. Administradores e Operadores recebem links
+para `#empresas`; Visualizadores não recebem cards, links ou metadados de certificado.
+
+O inventário retorna `evaluated_at` UTC, frescura, total server-side e página bounded ordenada por
+empresa/certificado UUID, com cursor composto estável. Total e página usam a mesma queryset
+canônica e a resposta contém somente identidade segura da empresa, estado/status e validade;
+PFX, senha, chaves, referências de objeto, fingerprint e exceções são redigidos. Filtros ausentes,
+repetidos, desconhecidos ou parâmetros inválidos retornam `400`; falha da fonte retorna `503` sem
+zero inventado. A UI hidrata o filtro pela URL e exibe aplicado, total reconciliado, avaliação,
+vazio válido, carregamento, indisponibilidade, degradação e filtro inválido sem recalcular ou
+autorizar no browser.
+
+O incremento não cria migration, cache, snapshot, job, auditoria, mutação ou transição de
+certificado/empresa. Testes unitários e integração PostgreSQL/MinIO cobrem os três filtros,
+fronteiras de expiração/janela de 30 dias, histórico excluído, zero, paginação, RBAC, sessão
+expirada, redaction, falha isolada e no-write; TypeScript/ESLint/Vite verificam o contrato React.

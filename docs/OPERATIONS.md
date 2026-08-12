@@ -99,6 +99,19 @@ filtros lifecycle repetidos, conflitantes ou desconhecidos retornam `400`. Uma f
 retorna `503` e degrada somente a consulta de empresas; não é apresentada como zero e não gera
 escrita operacional.
 
+Os cards `certificates.current`, `certificates.expired` e `certificates.expiring` abrem, para
+Administradores e Operadores, `#empresas` com `filter=current|expired|expiring`. O inventário é
+servido por `GET /api/certificates/inventory` e exige `ADMINISTER_CERTIFICATES`; Visualizadores
+não recebem os cards nem os metadados de certificados.
+
+O endpoint aceita somente um filtro allowlisted e retorna total server-side, página limitada,
+cursor composto determinístico, `evaluated_at` UTC e frescura. `current` significa estado
+persistido `current`; `expired` usa `not_after <= evaluated_at`; `expiring` usa a janela aberta
+no início e inclusiva no fim de 30 dias. A lista e o total compartilham a seleção canônica e
+retornam somente empresa, estado/status e validade seguros. Repetições, filtros desconhecidos,
+parâmetros inválidos e fonte indisponível falham com `400`/`503` seguro; nenhuma leitura cria
+auditoria, job, mutação ou estado de certificado.
+
 Detalhes de dependências, processos e backlog operacional aparecem no dashboard somente para
 Administradores, reutilizando o contrato de `/health/operational`. Operadores e Visualizadores
 recebem apenas os cards fiscais/operacionais permitidos e nunca recebem os detalhes técnicos por
