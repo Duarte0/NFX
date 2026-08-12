@@ -135,6 +135,27 @@ idade medida do último sucesso, contagens concluídas limitadas a 7/4/12 e esta
 resposta. Falha na fonte degrada somente esse resumo. O endpoint não cria snapshots, jobs,
 auditoria adicional, cache ou migração.
 
+### Gate de contrato entre owners
+
+O gate sintético de P8-02 está em `tests/integration/test_dashboard_cross_owner_contract.py`.
+Ele verifica os 20 cards atualmente implementados contra seus owners canônicos: sete filtros de
+documentos, cinco de coletas, dois de ciclo de vida de empresas, três de inventário de certificados
+e três de jobs. Cada consulta usa o mesmo filtro allowlisted, total server-side, ordenação/página
+bounded e fronteira `[from,to)` do card; documentos, coletas e jobs também são comparados com o
+período predecessor de mesma duração. Certificados reconciliam com o `evaluated_at` UTC do
+inventário, sem inventar semântica de período para snapshots.
+
+O teste também cobre limites e parâmetros repetidos, zero válido versus indisponibilidade,
+isolamento de falha/frescura, redaction e a matriz de Administrador, Operador, Visualizador,
+sessão anônima, expirada e papel não autorizado. Leituras de dashboard, coletas, empresas,
+certificados e jobs não criam registros operacionais, snapshots, cache, jobs, leases, cursores ou
+mutações, inclusive em chamadas concorrentes. A consulta de documentos mantém somente a auditoria
+de leitura já pertencente ao contrato P7; isso não é persistência própria do dashboard.
+
+O gate não habilita fontes fiscais reais, capacidade de disco, nem a evidência externa do piloto
+P9-05. A agregação atual continua calculate-on-read; materialização/cache só pode ser adotada em
+uma decisão futura do owner P8-02 com origem, frescura e reconciliação explícitas.
+
 ## DANFE/DANFSe derivado (P7-03)
 
 `POST /api/documents/<id>/pdf/render` solicita ou regenera o PDF de uma NF-e/NFS-e com o mesmo

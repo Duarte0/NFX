@@ -10,8 +10,9 @@
   backup P9-02 foi integrado no issue 0025; o drill-down de execuções de coleta foi concluído no
   issue 0026; o drill-down de documentos foi concluído no issue 0027; o drill-down de empresas foi
   concluído no issue 0028; o drill-down de certificados foi concluído no issue 0029; o drill-down
-  de jobs foi concluído no issue 0030. Fontes P5–P7, rendering e disco continuam explicitamente
-  indisponíveis para incrementos posteriores.
+  de jobs foi concluído no issue 0030; o gate de contrato entre owners foi concluído no issue
+  0042. Fontes P5–P7 e disco continuam explicitamente indisponíveis para incrementos posteriores;
+  rendering segue condicionado à capacidade instalada.
 
 ## Propósito e resultado
 
@@ -37,9 +38,9 @@ Falha de uma fonte não derruba demais cards. Cache/snapshot antigo mostra idade
 
 ## Aceite e DoD
 
-- [ ] Atual/anterior têm duração igual, são consecutivos e não sobrepostos.
+- [x] Atual/anterior têm duração igual, são consecutivos e não sobrepostos.
 - [x] Todo card clicável abre lista com filtro equivalente e contagem reconciliada.
-- [ ] Ausência/frescura é explícita, não zero silencioso.
+- [x] Ausência/frescura é explícita, não zero silencioso.
 - [x] Saúde/backup técnico é Admin-only server-side.
 - [ ] Não há notificação ou relatório fora do MVP.
 
@@ -149,3 +150,25 @@ repetidas não criam job, lease, auditoria, migração, cache ou transição.
 Testes unitários e integração PostgreSQL/MinIO cobrem os três predicados, fronteiras, zero,
 página limitada e ordenação determinística, RBAC/sessão expirada, redaction, falha isolada,
 reconciliação e no-write; TypeScript/ESLint/Vite verificam o contrato React.
+
+### Evidência do gate cross-owner — issue 0042
+
+O teste `tests/integration/test_dashboard_cross_owner_contract.py` mantém um dataset sintético
+único para os 20 cards implementados: sete filtros de documentos, cinco filtros de coleta, duas
+visões de ciclo de vida de empresas, três filtros de inventário de certificados e três filtros de
+jobs. Para cada par, o total do card é comparado ao total server-side do owner, com fronteira
+`[from,to)`, predecessor de mesma duração, zero real, página limitada e resposta determinística.
+Os filtros usados pelo gate são os allowlists canônicos de `nfx.documents`, `nfx.collection`,
+`nfx.companies`, `nfx.certificates` e `nfx.jobs`, e não uma segunda definição no dashboard.
+
+O mesmo gate cobre limites de período, fronteiras de Brasília, estados de frescura/desconhecido,
+isolamento de falhas, redaction, Administrador/Operador/Visualizador, sessão anônima/expirada e
+papel não autorizado. Administradores recebem `operational_health` e o resumo seguro de backup;
+Operadores não recebem esses detalhes; Visualizadores continuam sem links ou inventário de
+certificados/empresas protegidos, mas preservam os agregados permitidos do dashboard.
+
+O dashboard, coleta, empresa, certificado e job permanecem calculate-on-read e não criam snapshot,
+cache, migration, job, lease, cursor ou mutação. A consulta de documentos preserva a auditoria de
+leitura já pertencente ao owner P7; essa evidência é explicitamente separada de persistência
+própria do dashboard. Nenhuma capacidade fiscal futura, disco, transportes reais ou prontidão do
+piloto P9-05 é inferida por este gate.
