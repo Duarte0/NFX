@@ -178,9 +178,16 @@ def _allowed_hosts(values: Mapping[str, str]) -> tuple[str, ...]:
     return hosts
 
 
-def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
+def load_settings(
+    environ: Mapping[str, str] | None = None,
+    *,
+    allow_bootstrap_admin: bool = False,
+) -> Settings:
     values = os.environ if environ is None else environ
-    unknown = sorted(key for key in values if key.startswith("NFX_") and key not in KNOWN_NFX_KEYS)
+    known_keys = KNOWN_NFX_KEYS | (
+        {"NFX_BOOTSTRAP_ADMIN_PASSWORD"} if allow_bootstrap_admin else set()
+    )
+    unknown = sorted(key for key in values if key.startswith("NFX_") and key not in known_keys)
     if unknown:
         raise _error("unknown NFX setting")
 

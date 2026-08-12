@@ -30,9 +30,13 @@ arquivos de segredo e TLS devem ser legíveis somente pelo runtime autorizado.
 docker compose -f docker-compose.runtime.yml config
 docker compose -f docker-compose.runtime.yml up -d postgres minio
 docker compose -f docker-compose.runtime.yml run --rm web python backend/manage.py nfx_migrate
+# Forneça NFX_BOOTSTRAP_ADMIN_PASSWORD somente pelo secret manager neste processo efêmero.
+docker compose -f docker-compose.runtime.yml run --rm -e NFX_BOOTSTRAP_ADMIN_PASSWORD web python backend/manage.py bootstrap_admin
 docker compose -f docker-compose.runtime.yml up -d
 docker compose -f docker-compose.runtime.yml ps
 ```
+
+`NFX_BOOTSTRAP_ADMIN_PASSWORD` não é uma variável de runtime do Compose: injete-a somente na execução efêmera do comando, sem registrá-la nos serviços, logs ou no repositório.
 
 Use `https://nfx.internal:8443` (ou o hostname local configurado). A porta HTTP 8080 do proxy
 responde somente com redirect 308 para HTTPS; PostgreSQL, MinIO, console, worker e scheduler

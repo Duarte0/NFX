@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError, connection, transaction
 from django.utils import timezone
 
 from nfx.audit.services import AuditService
@@ -20,6 +20,7 @@ from nfx.identity.models import IdentitySession, LoginThrottle, Role, User
 logger = logging.getLogger(__name__)
 SESSION_IDLE_TIMEOUT = timedelta(minutes=30)
 BOOTSTRAP_ADMIN_EMAIL = "guilherme.duarte@inovssc.com.br"
+BOOTSTRAP_ADVISORY_LOCK_KEY = 0x4E46585F424F4F54
 
 
 @dataclass(frozen=True)
@@ -107,21 +108,36 @@ def _event(
     )
 
 
+def _lock_bootstrap_attempt() -> None:
+    """Serialize the empty-table check because an empty table has no row to lock."""
+    if connection.vendor != "postgresql":
+        return
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_xact_lock(%s)", [BOOTSTRAP_ADVISORY_LOCK_KEY])
+
+
 def bootstrap_first_administrator(password: str) -> tuple[User, bool]:
     """Create exactly the installation account, only while the user table is empty."""
-    with transaction.atomic():
-        if User.objects.exists():
-            existing = User.objects.filter(email=BOOTSTRAP_ADMIN_EMAIL).first()
-            if existing is None:
-                raise RuntimeError("Bootstrap is only permitted on an empty user base")
+    try:
+        with transaction.atomic():
+            _lock_bootstrap_attempt()
+            if User.objects.exists():
+                existing = User.objects.filter(email=BOOTSTRAP_ADMIN_EMAIL).first()
+                if existing is None:
+                    raise RuntimeError("Bootstrap is only permitted on an empty user base")
+                return existing, False
+            user = User.objects.create(
+                email=BOOTSTRAP_ADMIN_EMAIL,
+                name="Guilherme Duarte",
+                role=Role.ADMINISTRATOR,
+                password_hash=make_password(password),
+            )
+            return user, True
+    except IntegrityError as exc:
+        existing = User.objects.filter(email=BOOTSTRAP_ADMIN_EMAIL).first()
+        if existing is not None:
             return existing, False
-        user = User.objects.create(
-            email=BOOTSTRAP_ADMIN_EMAIL,
-            name="Guilherme Duarte",
-            role=Role.ADMINISTRATOR,
-            password_hash=make_password(password),
-        )
-        return user, True
+        raise RuntimeError("Bootstrap could not be completed safely") from exc
 
 
 def authenticate(

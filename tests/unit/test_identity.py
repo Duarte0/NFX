@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from threading import Barrier
 
 import pytest
 from django.contrib.auth.hashers import check_password, make_password
 from django.core.management import call_command
+from django.db import close_old_connections
 from django.test import Client
 from django.utils import timezone
 from nfx.identity.models import IdentitySession, LoginThrottle, Role, User
@@ -42,6 +45,27 @@ def test_bootstrap_refuses_to_add_itself_to_an_existing_user_base() -> None:
     )
     with pytest.raises(RuntimeError):
         bootstrap_first_administrator("synthetic-bootstrap-password")
+
+
+@pytest.mark.django_db(transaction=True)
+def test_concurrent_first_bootstrap_attempts_create_at_most_one_account() -> None:
+    barrier = Barrier(2)
+
+    def invoke(password: str) -> tuple[User, bool]:
+        close_old_connections()
+        try:
+            barrier.wait(timeout=10)
+            return bootstrap_first_administrator(password)
+        finally:
+            close_old_connections()
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(
+            executor.map(invoke, ("synthetic-bootstrap-a", "synthetic-bootstrap-b"))
+        )
+
+    assert sorted(created for _, created in results) == [False, True]
+    assert User.objects.filter(email=BOOTSTRAP_ADMIN_EMAIL).count() == 1
 
 
 @pytest.mark.django_db

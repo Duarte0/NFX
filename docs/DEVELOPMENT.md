@@ -318,6 +318,18 @@ corresponding mounted `*_FILE` variables, exactly one source per secret. Do not 
 secrets from prior local copies; if a value was used outside disposable testing, rotate it through
 the external secret-management process.
 
+### Provisionamento único do administrador inicial
+
+O comando `python backend/manage.py bootstrap_admin` aceita `NFX_BOOTSTRAP_ADMIN_PASSWORD`
+somente no processo explícito de bootstrap. Forneça-o por um secret manager ou pelo ambiente
+temporário desse comando; não o adicione ao `.env`, a configurações de web/worker/scheduler ou a
+qualquer processo normal. A variável não pertence a `Settings`, não é aceita como arquivo e uma
+variável `NFX_*` desconhecida continua fazendo o boot falhar fechado.
+
+Depois de aplicar as migrations, execute o comando uma vez com o valor externo e remova a variável
+do ambiente do shell. O comando é idempotente: uma repetição preserva a conta e a senha existentes;
+uma base com outro usuário é recusada sem mutação.
+
 ## Simuladores fiscais sintéticos (P3-03)
 
 `nfx.adapters.simulation` é a porta interna usada pelos testes antes dos adaptadores oficiais.

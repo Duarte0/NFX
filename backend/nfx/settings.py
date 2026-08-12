@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import os
+import sys
 from urllib.parse import urlparse
 
 from nfx.infrastructure.configuration import load_settings
 
-NFX_SETTINGS = load_settings()
+NFX_SETTINGS = load_settings(allow_bootstrap_admin=sys.argv[1:2] == ["bootstrap_admin"])
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = NFX_SETTINGS.secrets.django_secret_key

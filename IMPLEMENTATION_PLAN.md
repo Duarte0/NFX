@@ -7,7 +7,7 @@
 | Produto | NFX INOV |
 | Atualizado em | 2026-08-12 |
 | Fontes avaliadas | Código/migrações/configuração, testes, PRD, arquitetura, specs, issues e histórico Git |
-| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03/P9-04 concluídos; o follow-up P0 de entrega da rota raiz React foi concluído e verificado no issue 0032; P8-02 tem slice inicial, integração Admin-only do status de backup e drill-downs de coleta, documentos, empresas, certificados e jobs concluídos nos issues 0018/0025–0030; fontes P5–P7, rendering, disco e P9-05 seguem pendentes. |
+| Estado geral | P0–P6, P7-01/P7-02/P7-03, P8-01/P8-03, P9-01/P9-02/P9-03/P9-04 concluídos; os follow-ups P0 de entrega da rota raiz React e provisionamento seguro do administrador foram concluídos e verificados nos issues 0032 e 0033; P8-02 tem slice inicial, integração Admin-only do status de backup e drill-downs de coleta, documentos, empresas, certificados e jobs concluídos nos issues 0018/0025–0030; fontes P5–P7, rendering, disco e P9-05 seguem pendentes. |
 
 Código e migrações definem a baseline; testes definem o comportamento verificado. PRD e arquitetura definem o comportamento pretendido. Esta atualização não altera a árvore de produto nem reabre entregas concluídas sem evidência de lacuna.
 
@@ -31,6 +31,7 @@ Código e migrações definem a baseline; testes definem o comportamento verific
 | P9-03 — exclusão controlada | `DeletionOperation`/`DeletionItem`, migration `0020`, saga `retention.delete`, recovery, auditoria, métricas e UI Admin | issue 0024; unitários, integração PostgreSQL/MinIO isolada, migration check, lint/mypy/build. |
 | P9-04 — hardening integrado | `docs/P9_HARDENING.md`, matriz de ameaças/limites, falhas Architecture §40, canários redigidos, ensaio PostgreSQL de 200 empresas/400 fluxos/jobs e runbook efêmero | issue 0031; focused P9 test, ephemeral restart/fault exercise, full validation; backup físico permanece residual de P9-05. |
 | P0 follow-up — entrega do build React | `backend/nfx/urls.py` serve o artefato Vite fixo, confina assets resolvidos e preserva API/health/session; Docker `app` mantém `frontend/dist` no runtime | issue 0032; testes HTTP sintéticos, MIME/containment, leituras concorrentes, build Vite e smoke de imagem/runtime. |
+| P0 follow-up — provisionamento seguro do administrador | `load_settings()` permite a senha somente no boundary explícito de `bootstrap_admin`; comando valida entrada, serviço serializa a primeira execução e mantém Argon2id/idempotência sem migration | issue 0033; testes em processo novo, matriz web/worker/scheduler, redaction, rerun, base não vazia e concorrência PostgreSQL. |
 
 ### Implementado, porém parcial ou com documentação/teste a consolidar
 
@@ -68,11 +69,12 @@ P7-03, P9-03 e P9-04 estão concluídos; P9-05 permanece bloqueado pelas decisõ
 
 | Tema | Registro e impacto |
 |---|---|
-| Mapa de specs | Todas as 25 specs têm backlog proprietário. O índice marca 23 concluídas, uma parcialmente entregue (P8-02) e uma pendente (P9-05); esse estado corresponde ao código, salvo as caixas históricas de P1/P7 e o DoD ainda aberto de P8-02. |
+| Mapa de specs | Todas as 27 specs têm backlog proprietário. O índice marca 25 concluídas, uma parcialmente entregue (P8-02) e uma pendente (P9-05); esse estado corresponde ao código, salvo as caixas históricas de P1/P7 e o DoD ainda aberto de P8-02. |
 | Renderização | P7-03 usa `BrazilFiscalReport[danfse]==1.0.1`, API Python em processo, `DocumentRender`, migração `0019`, job durável, rotas/UI, métricas e fixtures sintéticas; o XML original permanece owner do acervo. A inconsistência de classificação de licença upstream é observação não bloqueante registrada na spec. |
 | Exclusão | P9-03 está implementado no owner `retention`, com rota Admin, job durável `retention.delete`, checkpoints de bytes/relações, recovery manual e referências protegidas resolvidas sem apagar backups/auditoria. Não há exclusão automática. |
 | Runtime/backup | Runtime HTTPS, backup verificável e validação isolada são implementados. Recuperação completa continua manual e documentada. O backup no mesmo host é uma divergência conhecida do PRD: não satisfaz OPS-BKP-002/006 nem AC-016 para produção; não bloqueia P9-03, mas bloqueia a evidência correspondente de P9-05 até haver cópia fisicamente separada. CA confiável permanece limitação arquitetural separada. |
 | Testes/migrações | Migrações chegam a `0020`; P7-03 e P9-03 têm suites unitárias/integração, migration check e validação de lint/mypy/build. A integração P9-03 usa PostgreSQL/MinIO efêmeros e fixtures sintéticas; nenhum teste está marcado skip/xfail/flaky. |
+| Bootstrap de Administrador | Issue 0033 concluiu a fronteira command-only de `NFX_BOOTSTRAP_ADMIN_PASSWORD`: a allowlist global permanece fail-closed, a senha não entra em settings/processos regulares e o serviço preserva bootstrap Argon2id, idempotência e concorrência sem migration. [Spec de provisionamento](specs/p0-bootstrap-admin-provisioning.md) registra o DoD. |
 
 ## Decisões necessárias e riscos
 

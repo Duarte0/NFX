@@ -222,3 +222,13 @@ def test_runtime_requires_an_explicit_transport_and_destination() -> None:
     values.pop("NFX_FISCAL_TRANSPORT")
     with pytest.raises(ConfigurationError):
         load_settings(values)
+
+
+def test_bootstrap_secret_is_only_allowlisted_for_the_explicit_command_boundary() -> None:
+    values = environment(NFX_BOOTSTRAP_ADMIN_PASSWORD="synthetic-bootstrap-secret")
+    with pytest.raises(ConfigurationError):
+        load_settings(values)
+
+    settings = load_settings(values, allow_bootstrap_admin=True)
+    assert not hasattr(settings.public, "bootstrap_admin_password")
+    assert not hasattr(settings.secrets, "bootstrap_admin_password")
